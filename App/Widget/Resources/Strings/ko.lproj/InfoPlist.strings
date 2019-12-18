@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  App
+
+  Created by Ryne Cheow on 7/4/17.
+  Copyright © 2017 Pointwelve. All rights reserved.
+*/
+
+"CFBundleDisplayName" = "비트파루";

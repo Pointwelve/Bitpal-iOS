@@ -1,0 +1,20 @@
+os: osx
+language: objective-c
+osx_image: xcode11.2
+cache:
+  directories:
+  - Carthage
+before_install:
+- brew bundle
+- brew outdated carthage || brew upgrade carthage
+- carthage bootstrap --platform iOS --cache-builds
+install:
+- bundle install
+script:
+- sh build.sh
+branches:
+  only:
+  - master
+notifications:
+  slack:
+    secure: Jowxv9BgIoRguxZsYEP/l3C2hcyVLQdlOROzlaKEiOIf18Xx7PoT7LVuq7NhpQ383nlUxpZ4BmIOxFPlZ/RqwkQyBRl1i10M9R9hxnk7GgsaDIMdETRh4nGcpme5j1tav+0ECGmqxMOstuW9CmczFYedp9x2KCU5UFfCNjHOiM8qzlCLQZZEEtVpy5Lhg/m/5kF/UHEmTWW1fi/IGTe61XLl25CUZTAIqf/vtSofobG6GlM9fQx6kjd7LO6T1cRtOmb9gZgtGwWGhyMRm8zp6hJYdjcC2u2sYlrQkjm7sxsaiSaFRR36kmczwa5JUrq4s/0sTFBAIuI7+0hgsL3MJmTUlhlym3N9CCJFtyXrjNnTwB5KyHZZ5XgVG4ZAQ3iI4/ZOOM4bsMlLxMKT1VbV5ZcGNxOL0sjkEHRYQfiHQWDmssuObxfit2Lk8sKVEIPhP/nC915EWHoMSuKG3E0OtiF/4Q03Y1hurcKs5e+3ntljubf23ZmyrsWC2VZQFd3YDXOy1j0M5rWe7JqSS5r1jMHFxGofH1b4WdRBcKOh95DbvqAffVztAum1HIycsrapaYTJyEkPR+ViBpK64F9qJiGiH4lI0aORz5j3/7BWkzsJy2YT8wJ4bIiopTCJjp+s7ZXAs+yBGxw9B5HtFbI5fCqDaIfFhk7cCEzPYvb8qcM=

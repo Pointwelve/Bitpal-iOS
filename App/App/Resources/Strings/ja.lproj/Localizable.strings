@@ -1,0 +1,159 @@
+"Canadian Dollar" = "カナダドル";
+
+"Euro" = "ユーロ";
+
+"Japanese Yen" = "円";
+
+"Korean Won" = "大韓民国ウォン";
+
+"Pound sterling" = "スターリング・ポンド";
+
+"Renminbi" = "人民元";
+
+"US Dollar" = "アメリカ合衆国ドル";
+
+"Bitcoin" = "ビットコイン";
+
+"Bitshares" = "Bitshares";
+
+"Bitthumb" = "Bitthumb";
+
+"Coinone" = "Coinone";
+
+"Ethereum" = "イーサリアム";
+
+"Ethereum Classic" = "Ethereum Classic";
+
+"Jubi" = "Jubi";
+
+"Korbit" = "Korbit";
+
+"Litecoin" = "ライトコイン";
+
+"OKCoin" = "OKCoin";
+
+"Ripple" = "Ripple";
+
+"alerts.title" = "アラート";
+
+"color.candlestick.negative" = "#01b17b";
+
+"color.candlestick.positive" = "#cb4646";
+
+"color.percentage.negative" = "#49c530";
+
+"color.percentage.positive" = "#ef4242";
+
+"cryptocurrency.text" = "暗号通貨";
+
+"currency.detail.fifteenMinutes" = "15分";
+
+"currency.detail.fiveMinute" = "5分";
+
+"currency.detail.fourHours" = "4時間";
+
+"currency.detail.inADay" = "一日に";
+
+"currency.detail.lowHigh24h" = "24時間最安値/最高値";
+
+"currency.detail.marketCap" = "時価総額";
+
+"currency.detail.oneDay" = "1日";
+
+"currency.detail.oneHour" = "1時間";
+
+"currency.detail.oneMinute" = "1分";
+
+"currency.detail.open24h" = "24時間開始値";
+
+"currency.detail.volume24h" = "24時間取引量";
+
+"currency.detail.open" = "開始値";
+
+"currency.detail.close" = "終値";
+
+"currency.detail.high" = "最高値";
+
+"currency.detail.low" = "最安値";
+
+"empty.alerts.message" = "アラートを持っていません";
+
+"empty.alerts.title" = "アラートが空です";
+
+"empty.view.message" = "検索キーワードを変更してください";
+
+"empty.view.title" = "検索結果なし";
+
+"empty.watchlist.message" = "通貨をリストに追加するには、右上の「+」をクリックしてください。";
+
+"empty.watchlist.title" = "ウォッチリストが空です";
+
+"error.sorry.message" = "何かが間違っている、後でやり直してください";
+
+"error.sorry.title" = "御免なさい！";
+
+"language.current" = "日本語";
+
+"language.dateFormat.current" = "dd/MM/yyyy hh:mmaa";
+
+"loading.message" = "最新のデータをロードしています。";
+
+"loading.title" = "お待ちください";
+
+"notification.noPermission.action.title" = "設定に移動";
+
+"notification.noPermission.message" = "価格アラートを受け取るには、プッシュ通知アクセスを許可してください。";
+
+"notification.noPermission.title" = "アクセス拒否";
+
+"offline.view.message" = "ネットワークが接続されるとサービスが再開されます";
+
+"offline.view.title" = "オフラインです。";
+
+"popup.migration.cancel" = "マージしない";
+
+"popup.migration.message" = "お使いの端末のシステムに別のアカウントがあることが判明しました。\\n\nシステムはこれら2つのアカウントをマージしますが、続行しますか？\n\nこの質問は一度しか表示されません。";
+
+"popup.migration.message.boldFactor" = "この質問は一度しか表示されません。";
+
+"popup.migration.ok" = "アカウントをマージ";
+
+"popup.migration.title" = "お帰りなさい";
+
+"portfolio.title" = "ポートフォリオ";
+
+"priceAlert.alertMessage.greaterThanOrEqual" = "価格が %@を超える場合は、私に知らせてください。";
+
+"priceAlert.alertMessage.lessThanOrEqual" = "価格が %@ 以下の場合は、私に知らせてください。";
+
+"priceAlert.button.create" = "アラートを作成する";
+
+"priceAlert.button.greaterThanOrEqual" = "≥";
+
+"priceAlert.button.lessThanOrEqual" = "≤";
+
+"priceAlert.button.update" = "アラートを更新する";
+
+"settings.language.title" = "言語設定";
+
+"settings.nightMode.title" = "ナイトモード";
+
+"settings.rate.title" = "フィードバックと評価";
+
+"settings.termsAndPrivacy.title" = "利用規約とプライバシー";
+
+"settings.title" = "設定";
+
+"watchlist.addcoin.search" = "捜索";
+
+"watchlist.addcoin.type" = "入力";
+
+"watchlist.addcoin.selectAnExchange" = "取引所を選択する";
+
+"watchlist.graphLoading" = "価格を取得中...";
+
+"watchlist.title" = "ウォッチリスト";
+
+"credits.content" = "市場データを提供してくれたCryptoCompareに感謝します。";
+
+"cryptoCompare" = "CryptoCompare";
