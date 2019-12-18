@@ -84,9 +84,9 @@ platform :ios do
       clean: true,
       export_options: {
         provisioningProfiles: { 
-          "com.pointwelve.app.bitpal" => "743ef56e-ff1d-49bb-baa4-557ff5baee67",
-          "com.pointwelve.app.bitpal.today" => "eca869fb-6abe-4660-8dc1-c7e0a42d1295",
-          "com.pointwelve.app.bitpal.Notification-Service-Extension" => "8212b66f-7027-4473-a8af-8db8a69faab8"
+          "com.pointwelve.app.bitpal" => "match AppStore com.pointwelve.app.bitpal",
+          "com.pointwelve.app.bitpal.today" => "match AppStore com.pointwelve.app.bitpal.today",
+          "com.pointwelve.app.bitpal.Notification-Service-Extension" => "match AppStore com.pointwelve.app.bitpal.Notification-Service-Extension"
          }
      }
     )

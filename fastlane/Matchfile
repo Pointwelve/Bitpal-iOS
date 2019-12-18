@@ -1,4 +1,4 @@
-google_cloud_bucket_name("bitpal-fastlane-match")
+google_cloud_bucket_name("pointwelve-fastlane-match")
 
 storage_mode("google_cloud")
 
