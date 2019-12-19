@@ -79,6 +79,7 @@
 		6D320E751EB8B17900F7C874 /* LoadStateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D320E741EB8B17900F7C874 /* LoadStateViewModel.swift */; };
 		6D320E791EB8B2D700F7C874 /* BoundOnAppearViewType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D320E781EB8B2D700F7C874 /* BoundOnAppearViewType.swift */; };
 		6D416F8B1EA46E7F005D9B0B /* Configuration in Resources */ = {isa = PBXBuildFile; fileRef = 6D416F8A1EA46E7F005D9B0B /* Configuration */; };
+		6D51B08F23AB4CC1004900E4 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D51B08E23AB4CC1004900E4 /* NotificationCenter.framework */; };
 		6D5D5DEA1F4DA73100DEA43C /* String+Attributed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D5D5DE81F4DA72F00DEA43C /* String+Attributed.swift */; };
 		6D65205E224CEBDB00EAC537 /* RxKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D65205D224CEBDB00EAC537 /* RxKeyboard.swift */; };
 		6D652098224CF5D000EAC537 /* Domain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6D7993F71ED3C7F300FED910 /* Domain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -425,6 +426,7 @@
 		6D320E741EB8B17900F7C874 /* LoadStateViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadStateViewModel.swift; sourceTree = "<group>"; };
 		6D320E781EB8B2D700F7C874 /* BoundOnAppearViewType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoundOnAppearViewType.swift; sourceTree = "<group>"; };
 		6D416F8A1EA46E7F005D9B0B /* Configuration */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Configuration; sourceTree = "<group>"; };
+		6D51B08E23AB4CC1004900E4 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		6D5D5DE81F4DA72F00DEA43C /* String+Attributed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Attributed.swift"; sourceTree = "<group>"; };
 		6D65205D224CEBDB00EAC537 /* RxKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RxKeyboard.swift; sourceTree = "<group>"; };
 		6D65570E1F89BCEE00BB67EE /* UpdateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateProvider.swift; sourceTree = "<group>"; };
@@ -684,6 +686,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D51B08F23AB4CC1004900E4 /* NotificationCenter.framework in Frameworks */,
 				F60FD7F21F5A9BF800752743 /* Data.framework in Frameworks */,
 				F607B6C31F559F43008D7055 /* Domain.framework in Frameworks */,
 			);
@@ -702,6 +705,7 @@
 		14FC2627B6F5154DCA1ED5DA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6D51B08E23AB4CC1004900E4 /* NotificationCenter.framework */,
 				6DEB4E06232A49CA0028F237 /* Alamofire.framework */,
 				6DEB4DFE232A49CA0028F237 /* Charts.framework */,
 				6DEB4E07232A49CA0028F237 /* Crashlytics.framework */,
@@ -1466,6 +1470,7 @@
 				F607B6AB1F559EDF008D7055 /* Sources */,
 				F607B6AC1F559EDF008D7055 /* Frameworks */,
 				F607B6AD1F559EDF008D7055 /* Resources */,
+				6D51B08D23AB4BED004900E4 /* Carthage */,
 			);
 			buildRules = (
 			);
@@ -1672,6 +1677,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cp \"${PROJECT_DIR}/Configuration/Configuration.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Configuration.plist\"\ncp \"${PROJECT_DIR}/Firebase/Firebase.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n";
+		};
+		6D51B08D23AB4BED004900E4 /* Carthage */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(PROJECT_DIR)/../Carthage/Build/iOS/Alamofire.framework",
+			);
+			name = Carthage;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "`which carthage` copy-frameworks\n";
 		};
 		6D9EAEFF224B877600A4D11D /* Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
