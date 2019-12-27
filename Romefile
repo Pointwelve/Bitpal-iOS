@@ -1,0 +1,115 @@
+cache: # required
+  local: ~/Library/Caches/Rome
+  s3Bucket: pointwelve-ci-artefacts/iOS/com.pointwelve.app.bitpal
+repositoryMap: 
+- Alamofire: 
+  - name: Alamofire 
+    platforms: [iOS]
+- Charts: 
+  - name: Charts 
+    platforms: [iOS]
+- Crashlytics: 
+  - name: Crashlytics 
+    platforms: [iOS]
+- Fabric: 
+  - name: Fabric 
+    platforms: [iOS]
+- FirebaseAnalyticsBinary: 
+  - name: Firebase 
+    platforms: [iOS]
+  - name: FirebaseAnalytics 
+    platforms: [iOS]
+  - name: GoogleDataTransportCCTSupport 
+    platforms: [iOS]
+  - name: GoogleDataTransport 
+    platforms: [iOS]
+  - name: nanopb 
+    platforms: [iOS]
+  - name: FirebaseCore 
+    platforms: [iOS]
+  - name: FIRAnalyticsConnector 
+    platforms: [iOS]
+  - name: GoogleUtilities 
+    platforms: [iOS]
+  - name: FirebaseCoreDiagnostics 
+    platforms: [iOS]
+  - name: FirebaseInstanceID 
+    platforms: [iOS]
+  - name: GoogleAppMeasurement 
+    platforms: [iOS]
+- FirebaseAuthBinary: 
+  - name: GTMSessionFetcher 
+    platforms: [iOS]
+  - name: FirebaseAuth 
+    platforms: [iOS]
+- FirebaseMessagingBinary: 
+  - name: FirebaseMessaging 
+    platforms: [iOS]
+  - name: Protobuf 
+    platforms: [iOS]
+- FirebasePerformanceBinary: 
+  - name: GoogleToolboxForMac 
+    platforms: [iOS]
+  - name: FirebaseABTesting 
+    platforms: [iOS]
+  - name: FirebaseRemoteConfig 
+    platforms: [iOS]
+  - name: GTMSessionFetcher 
+    platforms: [iOS]
+  - name: Protobuf 
+    platforms: [iOS]
+  - name: FirebasePerformance 
+    platforms: [iOS]
+- NVActivityIndicatorView: 
+  - name: NVActivityIndicatorView 
+    platforms: [iOS]
+  - name: NVActivityIndicatorViewAppExtension 
+    platforms: [iOS]
+- Presentr: 
+  - name: Presentr 
+    platforms: [iOS]
+- realm-cocoa: 
+  - name: Realm 
+    platforms: [iOS, Mac, watchOS, tvOS]
+  - name: RealmSwift
+    platforms: [iOS, Mac, watchOS, tvOS]
+- RxDataSources: 
+  - name: RxDataSources 
+    platforms: [iOS]
+  - name: Differentiator 
+    platforms: [iOS]
+- RxGesture: 
+  - name: RxGesture 
+    platforms: [iOS]
+- RxOptional: 
+  - name: RxOptional 
+    platforms: [iOS]
+- RxSwift: 
+  - name: RxSwift 
+    platforms: [iOS]
+  - name: RxCocoa
+    platforms: [iOS]
+  - name: RxTest 
+    platforms: [iOS]
+  - name: RxBlocking 
+    platforms: [iOS]
+  - name: RxRelay
+    platforms: [iOS]
+- Siren: 
+  - name: Siren 
+    platforms: [iOS]
+- socket.io-client-swift: 
+  - name: SocketIO 
+    platforms: [iOS]
+- Starscream: 
+  - name: Starscream 
+    platforms: [iOS]
+- SwiftKeychainWrapper: 
+  - name: SwiftKeychainWrapper 
+    platforms: [iOS]
+- SwiftReorder:
+  - name: SwiftReorder 
+    platforms: [iOS]
+- SwipeCellKit:
+  - name: SwipeCellKit 
+    platforms: [iOS]

@@ -4,7 +4,7 @@ github "RxSwiftCommunity/RxDataSources" ~> 4.0
 github "RxSwiftCommunity/RxGesture" ~> 3.0
 github "RxSwiftCommunity/RxAlamofire" ~> 5.1
 github "socketio/socket.io-client-swift" ~> 15.2
-github "realm/realm-cocoa" ~> 4.1
+github "realm/realm-cocoa" ~> 4.3
 github "jrendel/SwiftKeychainWrapper" ~> 3.4
 github "danielgindi/Charts" ~> 3.3
 github "IcaliaLabs/Presentr" ~> 1.9
