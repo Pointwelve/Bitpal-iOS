@@ -72,7 +72,9 @@ platform :ios do
 
   desc "⚙️ release"
   lane :release do
-    if !analyze_commits(match: '*') 
+    isReleasable = analyze_commits(match: '*')
+    
+    if !isReleasable 
       UI.message("Release not required.")
       return
     else

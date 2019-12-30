@@ -1470,7 +1470,6 @@
 				F607B6AB1F559EDF008D7055 /* Sources */,
 				F607B6AC1F559EDF008D7055 /* Frameworks */,
 				F607B6AD1F559EDF008D7055 /* Resources */,
-				6D51B08D23AB4BED004900E4 /* Carthage */,
 			);
 			buildRules = (
 			);
@@ -1677,25 +1676,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cp \"${PROJECT_DIR}/Configuration/Configuration.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Configuration.plist\"\ncp \"${PROJECT_DIR}/Firebase/Firebase.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n";
-		};
-		6D51B08D23AB4BED004900E4 /* Carthage */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(PROJECT_DIR)/../Carthage/Build/iOS/Alamofire.framework",
-			);
-			name = Carthage;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "`which carthage` copy-frameworks\n";
 		};
 		6D9EAEFF224B877600A4D11D /* Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
