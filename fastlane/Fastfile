@@ -73,10 +73,10 @@ platform :ios do
   desc "⚙️ release"
   lane :release do
     isReleasable = analyze_commits(match: '*')
-    
+
     if !isReleasable 
       UI.message("Release not required.")
-      return
+      next
     else
       decrypt_configurations
       carthage_bootstrap
