@@ -166,10 +166,6 @@ platform :ios do
   end
 
   def carthage_bootstrap
-    rome(
-      command: "download",
-      platform: "iOS",
-    )
     carthage(
       command: "bootstrap",
       use_ssh: false,

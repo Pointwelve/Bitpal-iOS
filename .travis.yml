@@ -6,10 +6,8 @@ cache:
   - Carthage
 before_install:
 - brew bundle
-- brew outdated carthage || brew upgrade carthage
-- carthage bootstrap --platform iOS --cache-builds
-install:
-- bundle install
+- bundle
+- rome download --platform iOS
 script:
 - sh build.sh
 branches:
