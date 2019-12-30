@@ -1,5 +1,4 @@
 cache: # required
-  local: ~/Library/Caches/Rome
   s3Bucket: pointwelve-ci-artefacts/iOS/com.pointwelve.app.bitpal
 repositoryMap: 
 - Alamofire: 

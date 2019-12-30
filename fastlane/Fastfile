@@ -50,14 +50,18 @@ platform :ios do
   desc "⚙️ build and test"
   lane :build do
     decrypt_configurations
-    matchCerts
     carthage_bootstrap
+    matchCerts
     
     scan(
       project: "App/App.xcodeproj",
       scheme: "App",
       clean: true,
       devices: ["iPhone 11 Pro"]
+    )
+    rome(
+      command: "upload",
+      platform: "iOS",
     )
   end
 
@@ -93,9 +97,24 @@ platform :ios do
        }
       )
       upload_to_testflight(skip_waiting_for_build_processing: true)
+
+      tag_master(version)
+
+      rome(
+        command: "upload",
+        platform: "iOS",
+      )
     end
   end
 
+  def tag_master(version)
+    reset_git_repo(force: true)
+    add_git_tag(tag: "#{version}")
+    push_to_git_remote(
+      remote_branch: "master",
+      tags: true
+    )
+  end
   def encrypt_configurations
     if is_ci?
       UI.message("Getting encryption paraphrase from environment variable:..")
@@ -147,6 +166,10 @@ platform :ios do
   end
 
   def carthage_bootstrap
+    rome(
+      command: "download",
+      platform: "iOS",
+    )
     carthage(
       command: "bootstrap",
       use_ssh: false,
