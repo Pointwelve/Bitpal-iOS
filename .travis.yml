@@ -5,6 +5,7 @@ cache:
   directories:
   - Carthage
 before_install:
+- brew update
 - brew bundle
 - bundle
 - rome download --platform iOS
