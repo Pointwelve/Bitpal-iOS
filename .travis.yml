@@ -1,19 +1,30 @@
 os: osx
 language: objective-c
 osx_image: xcode11.3
+addons:
+  homebrew:
+    packages:
+      - carthage
+      - swiftformat
+      - swiftlint
+      - xcodegen
+      - gpg
+      - sourcery
+      - blender/tap/rome
+    taps:
+      - blender/tap
+    update: true
 cache:
   directories:
-  - Carthage
+    - Carthage
 before_install:
-- brew update
-- brew bundle
-- bundle
-- rome download --platform iOS
+  - bundle
+  - rome download --platform iOS
 script:
-- sh build.sh
+  - sh build.sh
 branches:
   only:
-  - master
+    - master
 notifications:
   slack:
     secure: h6qtOATxsl7Lv4KsNbdPDRW6xvAxzCpY+xU/lRV0levkIv2g9LEez1btu7ujwd79Dl3xNgeY0In8Rf5qKLokAnb2VSsBMck/utN1aS3p/LGcme+BZHf0Bk9WkFUyM0O4urI/C1cIi7PT1Va0MDjLt0y2iIVgIsFe641krsSJDfKQrj+eXRA+WDsQlKopsaSqALlUPs87oRjj376Xwmhjsw+qOoPfqzPX18AcI5N15/JI+o2XrAis5gfj0kheH1PkJAuAH3UfPUxckB/WEKDrIvB9gSN+Umre3GO1WbNwQEFTXvbaMSjZ/XB7IgtOq9VGvTb+qtG7kEz4lGxxvXwVfqx6iH/JhA4IBlYloN89zbqchDplTk4ea7R3F0yB26Y+q0nh3PjEidF/JEsMGInCJMZAPCwMyq9xPfY12mLM4VJWUUkVoZHtprj/N3IuqPMRqADam/dvIUjlm9EXI7gqE8WQQN19rpiN8oP5aDO6t/W1M0n+kU+OvwC3IAsIJBbolTH5kTUdj3tksPz21ZiaQI2nVQdXuQQXvKZY52DDMqxxucnkOhWy2AB4D7yHMl4g7gfk+UpuxbjJ/tWy0bKEM8V7l6mVcPeNofuXtZDsccBU2OG8sjBz+FK5d0NzyPJ+AGc0pP+hyhq2wXEwOM5AvJFgWdG8VJrkPc9rFclSaWg=
