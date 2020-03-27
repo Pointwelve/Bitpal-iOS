@@ -19,7 +19,7 @@ final class CreditsViewModel: TransformableViewModelType, Navigable {
 
    var navigator: CreditsNavigatorType!
 
-   init(navigator: Navigator) {
+   init(navigator: CreditsNavigatorType) {
       self.navigator = navigator
    }
 
