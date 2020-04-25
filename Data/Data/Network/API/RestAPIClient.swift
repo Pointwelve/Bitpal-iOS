@@ -21,12 +21,12 @@ final class RestAPIClient: APIClient {
    typealias GetAction = (Router) -> Observable<(String, Language, (() -> Observable<String>)?)>
    typealias ReadAction = () -> Observable<Language?>
 
-   private let apiSessionManager: Alamofire.SessionManager
-   private let getConfigurationAction: GetAction
+   private let apiSessionManager: Alamofire.Session
    private let readPreferencesAction: ReadAction
+   private let getConfigurationAction: GetAction
 
    init(getConfigurationAction: @escaping GetAction, readPreferencesAction: @escaping ReadAction) {
-      apiSessionManager = Alamofire.SessionManager(configuration: .makeSessionConfigurationIgnoringHttpCache())
+      apiSessionManager = Alamofire.Session(configuration: .makeSessionConfigurationIgnoringHttpCache())
       self.getConfigurationAction = getConfigurationAction
       self.readPreferencesAction = readPreferencesAction
    }
@@ -116,7 +116,7 @@ extension Request {
    func validate<S: Sequence>(statusCode acceptableStatusCodes: S, response: HTTPURLResponse, data: Data?)
       -> ValidationResult where S.Iterator.Element == Int {
       if acceptableStatusCodes.contains(response.statusCode) {
-         return .success
+         return .success(())
       }
 
       guard let data = data,
@@ -126,6 +126,6 @@ extension Request {
          return .failure(AFError.responseValidationFailed(reason: reason))
       }
 
-      return .success
+      return .success(())
    }
 }

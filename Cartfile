@@ -2,21 +2,20 @@ github "ReactiveX/RxSwift" ~> 5.1
 github "RxSwiftCommunity/RxOptional" ~> 4.0
 github "RxSwiftCommunity/RxDataSources" ~> 4.0
 github "RxSwiftCommunity/RxGesture" ~> 3.0
-github "RxSwiftCommunity/RxAlamofire" ~> 5.1
+github "RxSwiftCommunity/RxAlamofire" ~> 5.5
 github "socketio/socket.io-client-swift" ~> 15.2
-github "realm/realm-cocoa" ~> 4.4
+github "realm/realm-cocoa" ~> 5.1
 github "jrendel/SwiftKeychainWrapper" ~> 3.4
-github "danielgindi/Charts" ~> 3.3
+github "danielgindi/Charts" ~> 3.5
 github "IcaliaLabs/Presentr" ~> 1.9
 github "SwipeCellKit/SwipeCellKit" ~> 2.6
 github "ninjaprox/NVActivityIndicatorView" ~> 4.7
 github "adamshin/SwiftReorder" ~> 7.2
 github "ArtSabintsev/Siren" ~> 5.4
 
-binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseAuthBinary.json" ~> 6.21
-binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseMessagingBinary.json" ~> 6.21
-binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseAnalyticsBinary.json" ~> 6.21
-binary "https://dl.google.com/dl/firebase/ios/carthage/FirebasePerformanceBinary.json" ~> 6.21
-
-binary "https://building42.github.io/Specs/Carthage/iOS/Crashlytics.json" ~> 3.13
-binary "https://building42.github.io/Specs/Carthage/iOS/Fabric.json" ~> 1.10
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseAuthBinary.json" ~> 6.27
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseMessagingBinary.json" ~> 6.27
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseAnalyticsBinary.json" ~> 6.27
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebasePerformanceBinary.json" ~> 6.27
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseCrashlyticsBinary.json" ~> 6.27
+binary "https://dl.google.com/dl/firebase/ios/carthage/FirebaseProtobufBinary.json" ~> 6.27

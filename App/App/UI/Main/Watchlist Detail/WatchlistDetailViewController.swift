@@ -7,7 +7,7 @@
 //
 
 import Charts
-import Crashlytics
+import FirebaseCrashlytics
 import Domain
 import RxCocoa
 import RxGesture

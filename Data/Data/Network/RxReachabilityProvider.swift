@@ -74,11 +74,11 @@ final class RxReachabilityProvider: ReachabilityProvider {
          .subscribe(onNext: { manager in
             if let manager = manager {
                self._isReachable.on(.next(manager.isReachable))
-               manager.listener = {
+               let listener: NetworkReachabilityManager.Listener = {
                   reachability in
                   self._isReachable.on(.next(reachability.isReachable))
                }
-               manager.startListening()
+               manager.startListening(onUpdatePerforming: listener)
             }
          })
          .disposed(by: disposeBag)

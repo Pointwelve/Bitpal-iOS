@@ -6,10 +6,9 @@
 //  Copyright © 2017 Pointwelve. All rights reserved.
 //
 
-import Crashlytics
+import FirebaseCrashlytics
 import Data
 import Domain
-import Fabric
 import Firebase
 import FirebaseMessaging
 import RxCocoa
@@ -30,7 +29,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
       FirebaseApp.configure()
 
-      Fabric.with([Crashlytics.self])
       // Apply styling
       Style.applyProxy()
       updateProvider.performCheck()

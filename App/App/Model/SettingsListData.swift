@@ -6,7 +6,7 @@
 //  Copyright © 2017 Pointwelve. All rights reserved.
 //
 
-import Crashlytics
+import FirebaseCrashlytics
 import Domain
 
 enum SettingListData {

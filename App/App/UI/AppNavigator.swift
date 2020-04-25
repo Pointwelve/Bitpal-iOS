@@ -7,7 +7,7 @@
 //
 
 import CloudKit
-import Crashlytics
+import FirebaseCrashlytics
 import Domain
 import Firebase
 import FirebaseAuth
