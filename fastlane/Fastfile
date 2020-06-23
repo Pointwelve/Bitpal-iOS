@@ -36,7 +36,7 @@ platform :ios do
     decrypt_configurations
   end
 
-  desc '⚙️ Bootstrap and download Carthage dependencies from Rome Cache. This will download depedencies following the Cartfile.lock.'\
+  desc '⚙️ Bootstrap and download Carthage dependencies . This will download depedencies following the Cartfile.lock.'\
        '**Note: This will not update the dependencies.**'
   lane :carthage_bootstrap do
     carthage_bootstrap
@@ -58,10 +58,6 @@ platform :ios do
       scheme: "App",
       clean: true,
       devices: ["iPhone 11 Pro"]
-    )
-    rome(
-      command: "upload",
-      platform: "iOS",
     )
   end
 
@@ -101,11 +97,6 @@ platform :ios do
       upload_to_testflight(skip_submission: true, skip_waiting_for_build_processing: true, verbose: true)
 
       tag_master(version)
-
-      rome(
-        command: "upload",
-        platform: "iOS",
-      )
     end
   end
 

@@ -30,7 +30,7 @@ fastlane ios decrypt_configs
 ```
 fastlane ios carthage_bootstrap
 ```
-⚙️ Bootstrap and download Carthage dependencies from Rome Cache. This will download depedencies following the Cartfile.lock.**Note: This will not update the dependencies.**
+⚙️ Bootstrap and download Carthage dependencies . This will download depedencies following the Cartfile.lock.**Note: This will not update the dependencies.**
 ### ios setup
 ```
 fastlane ios setup
