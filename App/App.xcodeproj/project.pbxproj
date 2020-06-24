@@ -151,6 +151,7 @@
 		6DB5F99F24A2F0A50017D395 /* RxGesture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D4A27BB24A1AD9D00E78749 /* RxGesture.framework */; };
 		6DB5F9A024A2F0A50017D395 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D4A27C224A1AD9E00E78749 /* RxSwift.framework */; };
 		6DB5F9AA24A2F28E0017D395 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */; };
+		6DB5F9AC24A30D0B0017D395 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB5F9AB24A30D0B0017D395 /* UserNotifications.framework */; };
 		6DB7B1921EF2C22C00B7BEB2 /* LoadStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1911EF2C22C00B7BEB2 /* LoadStateView.swift */; };
 		6DB7B1A71EF2C90D00B7BEB2 /* WatchlistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1A21EF2C90D00B7BEB2 /* WatchlistViewModel.swift */; };
 		6DB7B1A81EF2C90D00B7BEB2 /* WatchlistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1A31EF2C90D00B7BEB2 /* WatchlistViewController.swift */; };
@@ -505,6 +506,7 @@
 		6DABDDAE1EA4B8FF001D2D5A /* TestableUseCaseProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestableUseCaseProvider.swift; sourceTree = "<group>"; };
 		6DB1FD6B1F6509C700429168 /* Firebase */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Firebase; sourceTree = "<group>"; };
 		6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
+		6DB5F9AB24A30D0B0017D395 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		6DB7B1911EF2C22C00B7BEB2 /* LoadStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadStateView.swift; sourceTree = "<group>"; };
 		6DB7B1A21EF2C90D00B7BEB2 /* WatchlistViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchlistViewModel.swift; sourceTree = "<group>"; };
 		6DB7B1A31EF2C90D00B7BEB2 /* WatchlistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchlistViewController.swift; sourceTree = "<group>"; };
@@ -700,6 +702,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DB5F9AC24A30D0B0017D395 /* UserNotifications.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -709,6 +712,7 @@
 		14FC2627B6F5154DCA1ED5DA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6DB5F9AB24A30D0B0017D395 /* UserNotifications.framework */,
 				6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */,
 				6D4A27C924A1ADA000E78749 /* Alamofire.framework */,
 				6D4A27A824A1AD9C00E78749 /* Charts.framework */,

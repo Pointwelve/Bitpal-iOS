@@ -101,7 +101,7 @@ platform :ios do
   end
 
   def tag_master(version)
-    reset_git_repo(force: true)
+    reset_git_repo(force: true, skip_clean: true)
     add_git_tag(tag: "#{version}")
     push_to_git_remote(
       remote_branch: "master",
