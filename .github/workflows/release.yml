@@ -25,6 +25,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-carthage-
 
+      - name: Resolving Carthage dependencies and build framework
+        run: |
+          carthage bootstrap --cache-builds --new-resolver --configuration Release --platform iOS
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release iOS App
         run: |
           set -eo pipefail

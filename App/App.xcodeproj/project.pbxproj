@@ -147,6 +147,10 @@
 		6DABDDAB1EA4B8EB001D2D5A /* TestableLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DABDDAA1EA4B8EB001D2D5A /* TestableLocationProvider.swift */; };
 		6DABDDAD1EA4B8F6001D2D5A /* TestableServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DABDDAC1EA4B8F6001D2D5A /* TestableServiceProvider.swift */; };
 		6DABDDAF1EA4B900001D2D5A /* TestableUseCaseProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DABDDAE1EA4B8FF001D2D5A /* TestableUseCaseProvider.swift */; };
+		6DB5F99E24A2F0A50017D395 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D4A27B324A1AD9D00E78749 /* RxCocoa.framework */; };
+		6DB5F99F24A2F0A50017D395 /* RxGesture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D4A27BB24A1AD9D00E78749 /* RxGesture.framework */; };
+		6DB5F9A024A2F0A50017D395 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D4A27C224A1AD9E00E78749 /* RxSwift.framework */; };
+		6DB5F9AA24A2F28E0017D395 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */; };
 		6DB7B1921EF2C22C00B7BEB2 /* LoadStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1911EF2C22C00B7BEB2 /* LoadStateView.swift */; };
 		6DB7B1A71EF2C90D00B7BEB2 /* WatchlistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1A21EF2C90D00B7BEB2 /* WatchlistViewModel.swift */; };
 		6DB7B1A81EF2C90D00B7BEB2 /* WatchlistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7B1A31EF2C90D00B7BEB2 /* WatchlistViewController.swift */; };
@@ -500,6 +504,7 @@
 		6DABDDAC1EA4B8F6001D2D5A /* TestableServiceProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = TestableServiceProvider.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		6DABDDAE1EA4B8FF001D2D5A /* TestableUseCaseProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestableUseCaseProvider.swift; sourceTree = "<group>"; };
 		6DB1FD6B1F6509C700429168 /* Firebase */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Firebase; sourceTree = "<group>"; };
+		6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		6DB7B1911EF2C22C00B7BEB2 /* LoadStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadStateView.swift; sourceTree = "<group>"; };
 		6DB7B1A21EF2C90D00B7BEB2 /* WatchlistViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchlistViewModel.swift; sourceTree = "<group>"; };
 		6DB7B1A31EF2C90D00B7BEB2 /* WatchlistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchlistViewController.swift; sourceTree = "<group>"; };
@@ -682,6 +687,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DB5F9AA24A2F28E0017D395 /* NotificationCenter.framework in Frameworks */,
+				6DB5F99E24A2F0A50017D395 /* RxCocoa.framework in Frameworks */,
+				6DB5F99F24A2F0A50017D395 /* RxGesture.framework in Frameworks */,
+				6DB5F9A024A2F0A50017D395 /* RxSwift.framework in Frameworks */,
 				F60FD7F21F5A9BF800752743 /* Data.framework in Frameworks */,
 				F607B6C31F559F43008D7055 /* Domain.framework in Frameworks */,
 			);
@@ -700,7 +709,7 @@
 		14FC2627B6F5154DCA1ED5DA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6DBAF40824A1B6E50048E549 /* Protobuf.framework */,
+				6DB5F9A924A2F28E0017D395 /* NotificationCenter.framework */,
 				6D4A27C924A1ADA000E78749 /* Alamofire.framework */,
 				6D4A27A824A1AD9C00E78749 /* Charts.framework */,
 				6D4A27CC24A1ADA100E78749 /* Differentiator.framework */,
@@ -727,6 +736,7 @@
 				6D4A27CA24A1ADA000E78749 /* NVActivityIndicatorViewAppExtension.framework */,
 				6D4A27A524A1AD9C00E78749 /* Presentr.framework */,
 				6DBAF3EC24A1B4BB0048E549 /* PromisesObjC.framework */,
+				6DBAF40824A1B6E50048E549 /* Protobuf.framework */,
 				6D4A27BA24A1AD9D00E78749 /* Realm.framework */,
 				6D4A27BC24A1AD9D00E78749 /* RealmSwift.framework */,
 				6D4A27B424A1AD9D00E78749 /* RxAlamofire.framework */,
@@ -2216,7 +2226,7 @@
 					"@executable_path/Frameworks",
 					"$(PROJECT_DIR)/../Carthage/Build/iOS",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				OTHER_LDFLAGS = (
 					"$(OTHER_LDFLAGS)",
 					"-ObjC",
@@ -2253,7 +2263,7 @@
 					"@executable_path/Frameworks",
 					"$(PROJECT_DIR)/../Carthage/Build/iOS",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				OTHER_LDFLAGS = (
 					"$(OTHER_LDFLAGS)",
 					"-ObjC",
@@ -2352,7 +2362,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pointwelve.app.bitpal.today;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -2381,7 +2391,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pointwelve.app.bitpal.today;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.pointwelve.app.bitpal.today";
@@ -2407,7 +2417,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.app.bitpal.Notification-Service-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.pointwelve.app.bitpal.Notification-Service-Extension";
@@ -2433,7 +2443,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.app.bitpal.Notification-Service-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.pointwelve.app.bitpal.Notification-Service-Extension";
