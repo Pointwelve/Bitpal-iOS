@@ -32,7 +32,7 @@ public extension String {
    func toLengthOf(length: Int) -> String {
       if length <= 0 {
          return self
-      } else if let to = self.index(self.startIndex, offsetBy: length, limitedBy: self.endIndex) {
+      } else if let to = index(startIndex, offsetBy: length, limitedBy: endIndex) {
          return String(self[to...])
 
       } else {

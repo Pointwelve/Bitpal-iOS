@@ -18,6 +18,7 @@ extension Configuration: DataConvertible {
                    socketHost: socketHost,
                    sslCertificateData: sslCertificateData,
                    companyName: companyName,
+                   apiKey: apiKey,
                    termsAndConditions: termsAndConditions)
    }
 }

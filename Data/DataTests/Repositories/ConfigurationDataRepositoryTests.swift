@@ -19,6 +19,7 @@ private class TestableConfigurationLocalDataStorage: ConfigurationStorage {
                                                sslCertificateData: Data(),
                                                
                                                companyName: "testName",
+                                               apiKey: "apiKey",
                                                termsAndConditions: "foobar"))
    }
 }

@@ -24,6 +24,9 @@ public struct Configuration: Equatable, DomainType {
    /// Company name
    public let companyName: String
 
+   /// API Key
+   public let apiKey: String
+
    /// Terms and Conditions
    public let termsAndConditions: String
 
@@ -40,11 +43,13 @@ public struct Configuration: Equatable, DomainType {
                socketHost: String,
                sslCertificateData: Data? = nil,
                companyName: String,
+               apiKey: String,
                termsAndConditions: String) {
       self.apiHost = apiHost
       self.functionsHost = functionsHost
       self.socketHost = socketHost
       self.sslCertificateData = sslCertificateData
+      self.apiKey = apiKey
       self.companyName = companyName
       self.termsAndConditions = termsAndConditions
    }

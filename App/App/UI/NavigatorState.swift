@@ -120,7 +120,7 @@ extension NavigationState {
          return self
       }
 
-      if let parentState = self.parent?.state {
+      if let parentState = parent?.state {
          return parentState.rootState()
       }
 

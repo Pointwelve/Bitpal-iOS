@@ -50,8 +50,8 @@ public final class WidgetSessionManager: SessionManagerType {
          .map { $0.language }
    }
 
-   internal func getApiRequest(for router: Router) -> Observable<(String, Language, (() -> Observable<String>)?)> {
-      return configuration.map { ($0.apiHost, Language.default, nil) }
+   internal func getApiRequest(for router: Router) -> Observable<(String, Language, String, (() -> Observable<String>)?)> {
+      return configuration.map { ($0.apiHost, Language.default, $0.apiKey, nil) }
    }
 
    public func refresh(with databaseName: String?) {

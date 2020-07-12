@@ -20,7 +20,7 @@ class ConfigurationStorage: FailingCache<String, ConfigurationData> {
       super.init()
    }
 
-   open override func set(_ value: ConfigurationData, for key: String) -> Observable<Void> {
+   override open func set(_ value: ConfigurationData, for key: String) -> Observable<Void> {
       return .empty()
    }
 }

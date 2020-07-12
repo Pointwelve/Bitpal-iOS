@@ -260,7 +260,7 @@ private class FailingGetTestCache: FailingCache<String, ModifiableItem> {
       return Observable.error(error)
    }
 
-   fileprivate override func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
       return Observable.just(())
    }
 }
@@ -272,7 +272,7 @@ private class SucceedingGetTestCache: FailingCache<String, ModifiableItem> {
       return Observable.just(ModifiableItem())
    }
 
-   fileprivate override func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
       return Observable.just(())
    }
 }
@@ -280,7 +280,7 @@ private class SucceedingGetTestCache: FailingCache<String, ModifiableItem> {
 private class SucceedingSetTestCache: FailingCache<String, ModifiableItem> {
    var value = ModifiableItem()
 
-   fileprivate override func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: ModifiableItem, for key: String) -> Observable<Void> {
       self.value = value
       return Observable.just(())
    }
@@ -289,7 +289,7 @@ private class SucceedingSetTestCache: FailingCache<String, ModifiableItem> {
 private class SucceedingDeleteTestCache: FailingCache<String, ModifiableItem> {
    var deleted = false
 
-   fileprivate override func delete(_ key: String) -> Observable<Void> {
+   override fileprivate func delete(_ key: String) -> Observable<Void> {
       deleted = true
       return Observable.just(())
    }
@@ -298,7 +298,7 @@ private class SucceedingDeleteTestCache: FailingCache<String, ModifiableItem> {
 private class SucceedingKeyValuesTestCache: FailingCache<String, ModifiableItem> {
    var key: String = "key"
 
-   fileprivate override func keyValues() -> Observable<[(String, ModifiableItem)]> {
+   override fileprivate func keyValues() -> Observable<[(String, ModifiableItem)]> {
       return Observable.just([(key, ModifiableItem())])
    }
 }

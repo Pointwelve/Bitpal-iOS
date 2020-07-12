@@ -51,13 +51,13 @@ final class WidgetLoadStateView: UIView {
       [titleLable, messageLabel].forEach(addSubview)
 
       NSLayoutConstraint.activate([
-         titleLable.topAnchor.constraint(equalTo: self.topAnchor, constant: Metric.titleLabelTop),
-         titleLable.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-         titleLable.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+         titleLable.topAnchor.constraint(equalTo: topAnchor, constant: Metric.titleLabelTop),
+         titleLable.leadingAnchor.constraint(equalTo: leadingAnchor),
+         titleLable.trailingAnchor.constraint(equalTo: trailingAnchor),
 
          messageLabel.topAnchor.constraint(equalTo: titleLable.bottomAnchor, constant: Metric.messageLabelTop),
-         messageLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-         messageLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+         messageLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+         messageLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
       ])
    }
 

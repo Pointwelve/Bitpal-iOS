@@ -230,7 +230,7 @@ private class FailingGetTestCache: FailingCache<String, String> {
       return Observable.error(error)
    }
 
-   fileprivate override func set(_ value: String, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: String, for key: String) -> Observable<Void> {
       return Observable.just(())
    }
 }
@@ -242,7 +242,7 @@ private class SucceedingGetTestCache: FailingCache<String, String> {
       return Observable.just(value)
    }
 
-   fileprivate override func set(_ value: String, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: String, for key: String) -> Observable<Void> {
       return Observable.just(())
    }
 }
@@ -250,7 +250,7 @@ private class SucceedingGetTestCache: FailingCache<String, String> {
 private class SucceedingSetTestCache: FailingCache<String, String> {
    var value: String = ""
 
-   fileprivate override func set(_ value: String, for key: String) -> Observable<Void> {
+   override fileprivate func set(_ value: String, for key: String) -> Observable<Void> {
       self.value = value
       return Observable.just(())
    }
@@ -259,7 +259,7 @@ private class SucceedingSetTestCache: FailingCache<String, String> {
 private class SucceedingDeleteTestCache: FailingCache<String, String> {
    var deleted = false
 
-   fileprivate override func delete(_ key: String) -> Observable<Void> {
+   override fileprivate func delete(_ key: String) -> Observable<Void> {
       deleted = true
       return Observable.just(())
    }
@@ -268,7 +268,7 @@ private class SucceedingDeleteTestCache: FailingCache<String, String> {
 private class SucceedingKeyValuesTestCache: FailingCache<String, String> {
    var key: String = "key"
 
-   fileprivate override func keyValues() -> Observable<[(String, String)]> {
+   override fileprivate func keyValues() -> Observable<[(String, String)]> {
       return Observable.just([(key, "test")])
    }
 }

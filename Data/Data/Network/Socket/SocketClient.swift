@@ -45,7 +45,7 @@ class SocketClient: APIClientType {
    }
 
    private func url() -> URL {
-      return URL(string: "wss://\(baseUrl.value)")!
+      return URL(string: baseUrl.value)!
    }
 
    private func client(for route: Router) -> SocketManager {

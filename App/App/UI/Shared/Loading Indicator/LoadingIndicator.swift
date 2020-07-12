@@ -108,10 +108,10 @@ final class LoadingIndicator: UIView, IOBindable {
       keyWindow.addSubview(self)
 
       NSLayoutConstraint.activate([
-         self.topAnchor.constraint(equalTo: keyWindow.topAnchor),
-         self.leadingAnchor.constraint(equalTo: keyWindow.leadingAnchor),
-         self.trailingAnchor.constraint(equalTo: keyWindow.trailingAnchor),
-         self.bottomAnchor.constraint(equalTo: keyWindow.bottomAnchor)
+         topAnchor.constraint(equalTo: keyWindow.topAnchor),
+         leadingAnchor.constraint(equalTo: keyWindow.leadingAnchor),
+         trailingAnchor.constraint(equalTo: keyWindow.trailingAnchor),
+         bottomAnchor.constraint(equalTo: keyWindow.bottomAnchor)
       ])
 
       UIView.animate(withDuration: 0.3) { [weak self] in

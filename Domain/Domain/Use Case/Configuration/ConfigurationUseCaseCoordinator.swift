@@ -32,6 +32,10 @@ public struct ConfigurationUseCaseCoordinator: UseCaseCoordinatorType {
       return configuration?.companyName ?? ""
    }
 
+   public var apiKey: String {
+      return configuration?.apiKey ?? ""
+   }
+
    public var termsAndConditions: String {
       return configuration?.termsAndConditions ?? ""
    }

@@ -19,6 +19,7 @@ class ConfigurationTranformTests: XCTestCase {
                                                     socketHost: "sockethost",
                                                     sslCertificateData: Data(),
                                                     companyName: "testName",
+                                                    apiKey: "apiKey",
                                                     termsAndConditions: "foobar")
 
       let actualServerURL = configurationDataType.asDomain().apiHost
@@ -32,6 +33,7 @@ class ConfigurationTranformTests: XCTestCase {
                                         socketHost: "sockethost",
                                         sslCertificateData: Data(),
                                         companyName: "testName",
+                                        apiKey: "apiKey",
                                         termsAndConditions: "foobar")
       let actualServerURL = configuration.asData().apiHost
       XCTAssertEqual(expectedServerURL, actualServerURL)

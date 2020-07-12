@@ -18,7 +18,7 @@ private enum HTTPHeaderField: String {
 }
 
 final class RestAPIClient: APIClient {
-   typealias GetAction = (Router) -> Observable<(String, Language, (() -> Observable<String>)?)>
+   typealias GetAction = (Router) -> Observable<(String, Language, String, (() -> Observable<String>)?)>
    typealias ReadAction = () -> Observable<Language?>
 
    private let apiSessionManager: Alamofire.Session
@@ -31,7 +31,7 @@ final class RestAPIClient: APIClient {
       self.readPreferencesAction = readPreferencesAction
    }
 
-   private func makeRequest(router: APIRouter, apiHost: String, language: Language, token: String?) -> URLRequest {
+   private func makeRequest(router: APIRouter, apiHost: String, language: Language, token: String?, apiKey: String = "") -> URLRequest {
       var request = UrlRequestType.api(authorizationHeader: nil, router: router)
          .request(for: apiHost, language: language)
       if let formParameter = router.parameters,
@@ -52,7 +52,7 @@ final class RestAPIClient: APIClient {
             guard let `self` = self else {
                return .empty()
             }
-            return self.getConfigurationAction(router).flatMap { (apiHost, preferredLanguage, authTokenGeneratorOptional) -> Observable<Any> in
+            return self.getConfigurationAction(router).flatMap { (apiHost, preferredLanguage, apiKey, authTokenGeneratorOptional) -> Observable<Any> in
                guard let authTokenGenerator = authTokenGeneratorOptional, let apiRouter = router as? APIRouter, apiRouter.authenticatable else {
                   // swiftlint:disable force_cast
                   let request = self.makeRequest(router: router as! APIRouter,
@@ -68,7 +68,8 @@ final class RestAPIClient: APIClient {
                   let request = self.makeRequest(router: apiRouter,
                                                  apiHost: apiHost,
                                                  language: language ?? preferredLanguage,
-                                                 token: token)
+                                                 token: token,
+                                                 apiKey: apiKey)
                   return self.apiSessionManager.rx
                      .request(urlRequest: request)
                      .json

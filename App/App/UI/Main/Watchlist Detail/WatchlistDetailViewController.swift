@@ -7,8 +7,8 @@
 //
 
 import Charts
-import FirebaseCrashlytics
 import Domain
+import FirebaseCrashlytics
 import RxCocoa
 import RxGesture
 import RxSwift

@@ -26,24 +26,24 @@ enum DomainTransformer {
                                              U: DataConvertible & DomainType>
    (customDomainInitializer: @escaping (T) -> U, customDataInitializer: @escaping (U) -> T)
       -> DomainTransformerType<T, U> where T.DomainType == U, U.DataType == T {
-         return BidirectionalValueTransformerBox({ data in
-            Observable.just(customDomainInitializer(data))
-         }, { domain in
-            Observable.just(customDataInitializer(domain))
-         })
-      }
+      return BidirectionalValueTransformerBox({ data in
+         Observable.just(customDomainInitializer(data))
+      }, { domain in
+         Observable.just(customDataInitializer(domain))
+      })
+   }
 
    private static func makeDomainTransformer<T: DomainConvertible & DataType,
                                              U: DataConvertible & DomainType>
    (customObservableDomainInitializer: @escaping (T) -> (Observable<U>),
     customObservableDataInitializer: @escaping (U) -> (Observable<T>))
       -> DomainTransformerType<T, U> where T.DomainType == U, U.DataType == T {
-         return BidirectionalValueTransformerBox({ data in
-            customObservableDomainInitializer(data)
-         }, { domain in
-            customObservableDataInitializer(domain)
-         })
-      }
+      return BidirectionalValueTransformerBox({ data in
+         customObservableDomainInitializer(data)
+      }, { domain in
+         customObservableDataInitializer(domain)
+      })
+   }
 
    static func configuration() -> DomainTransformerType<ConfigurationData, Configuration> {
       return makeDomainTransformer()

@@ -680,12 +680,12 @@ enum Style {
             .font: UIFont.systemFont(ofSize: 10),
             .foregroundColor: Color.warmGrey
          ],
-         for: .normal)
+                                           for: .normal)
          appearance.setTitleTextAttributes([
             .font: UIFont.systemFont(ofSize: 10),
             .foregroundColor: Color.tealish
          ],
-         for: .selected)
+                                           for: .selected)
       }
    }
 

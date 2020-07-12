@@ -20,6 +20,7 @@ final class ConfigurationUseCaseCoordinatorTests: RxTestCase {
                                         socketHost: "www.socket.com",
                                         sslCertificateData: nil,
                                         companyName: "testName",
+                                        apiKey: "apiKey",
                                         termsAndConditions: "foobar")
 
       let coordinator = ConfigurationUseCaseCoordinator(readAction: { .just(configuration) })
@@ -56,6 +57,7 @@ final class ConfigurationUseCaseCoordinatorTests: RxTestCase {
                                         socketHost: "www.socket.com",
                                         sslCertificateData: nil,
                                         companyName: "testName",
+                                        apiKey: "apiKey",
                                         termsAndConditions: "foobar")
 
       let coordinator = ConfigurationUseCaseCoordinator(readAction: { .just(configuration) })
@@ -93,6 +95,7 @@ final class ConfigurationUseCaseCoordinatorTests: RxTestCase {
                                         socketHost: "www.socket.com",
                                         sslCertificateData: nil,
                                         companyName: "testName",
+                                        apiKey: "apiKey",
                                         termsAndConditions: "foobar")
 
       let coordinator = ConfigurationUseCaseCoordinator(readAction: { .just(configuration) })

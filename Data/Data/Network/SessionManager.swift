@@ -25,7 +25,7 @@ protocol SessionManagerType {
 
    func getLanguage() -> Observable<Language?>
 
-   func getApiRequest(for router: Router) -> Observable<(String, Language, (() -> Observable<String>)?)>
+   func getApiRequest(for router: Router) -> Observable<(String, Language, String, (() -> Observable<String>)?)>
 }
 
 public final class SessionManager: SessionManagerType {
@@ -98,21 +98,23 @@ public final class SessionManager: SessionManagerType {
    }
 
    func getApiRequest(for router: Router)
-      -> Observable<(String, Language, (() -> Observable<String>)?)> {
+      -> Observable<(String, Language, String, (() -> Observable<String>)?)> {
       return configuration.map { ($0.apiHost,
                                   self.getPreferredLanguage(),
+                                  $0.apiKey,
                                   nil) }
    }
 
    private func getFunctionsRequest(for router: Router)
-      -> Observable<(String, Language, (() -> Observable<String>)?)> {
+      -> Observable<(String, Language, String, (() -> Observable<String>)?)> {
       return configuration.map { ($0.functionsHost,
                                   self.getPreferredLanguage(),
+                                  $0.apiKey,
                                   self.firebaseAuthenticationProvider.authenticationToken) }
    }
 
    private func getSocketRequest() -> Observable<String> {
-      return configuration.map { $0.socketHost }
+      return configuration.map { "wss://\($0.socketHost)/v2?api_key=\($0.apiKey)" }
    }
 
    public var isUsingTemporaryPreferences: Bool {

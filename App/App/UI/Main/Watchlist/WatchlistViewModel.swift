@@ -6,8 +6,8 @@
 //  Copyright © 2017 Pointwelve. All rights reserved.
 //
 
-import FirebaseCrashlytics
 import Domain
+import FirebaseCrashlytics
 import RxCocoa
 import RxDataSources
 import RxSwift

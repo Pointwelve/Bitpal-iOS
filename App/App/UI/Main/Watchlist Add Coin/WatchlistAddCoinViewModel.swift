@@ -6,8 +6,8 @@
 //  Copyright © 2017 Pointwelve. All rights reserved.
 //
 
-import FirebaseCrashlytics
 import Domain
+import FirebaseCrashlytics
 import RxCocoa
 import RxDataSources
 import RxSwift
@@ -97,11 +97,11 @@ final class WatchlistAddCoinViewModel: TransformableViewModelType, Navigable {
 
       let prepareSelectExchange =
          input.tableViewItemObservable
-         .do(onNext: { [weak self] currencyPairGroup in
-            self?.navigator.showSelectExchange(with: currencyPairGroup)
-         })
-         .void()
-         .asDriver()
+            .do(onNext: { [weak self] currencyPairGroup in
+               self?.navigator.showSelectExchange(with: currencyPairGroup)
+            })
+            .void()
+            .asDriver()
 
       let tapClearButtonDriver = input.tapClearButtonObservable
          .asDriver()

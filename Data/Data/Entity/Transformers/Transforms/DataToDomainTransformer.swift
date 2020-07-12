@@ -18,6 +18,7 @@ extension ConfigurationData: DomainConvertible {
                    socketHost: socketHost,
                    sslCertificateData: sslCertificateData,
                    companyName: companyName,
+                   apiKey: apiKey,
                    termsAndConditions: termsAndConditions)
    }
 }

@@ -50,33 +50,33 @@ final class WatchlistSelectExchangeViewModel: TransformableViewModelType, Naviga
 
       let prepareAddCoinApi =
          input.tableViewItemSelected
-         .withLatestFrom(watchlistObservable) { ($0, $1) }
-         .flatMapLatest { [weak self] selectedExchange, watchlist
-            -> Driver<(Result<SetWatchlistUseCaseCoordinator>, CurrencyPair)?> in
-            guard let currencyPairGroup = self?.navigator.currencyPairGroup else {
-               return .just(nil)
+            .withLatestFrom(watchlistObservable) { ($0, $1) }
+            .flatMapLatest { [weak self] selectedExchange, watchlist
+               -> Driver<(Result<SetWatchlistUseCaseCoordinator>, CurrencyPair)?> in
+               guard let currencyPairGroup = self?.navigator.currencyPairGroup else {
+                  return .just(nil)
+               }
+
+               let newCurrencyPair = CurrencyPair(baseCurrency: currencyPairGroup.baseCurrency,
+                                                  quoteCurrency: currencyPairGroup.quoteCurrency,
+                                                  exchange: selectedExchange,
+                                                  price: 0.0)
+               var newCurrencyPairs = watchlist.currencyPairs
+
+               for (index, currencyPair) in newCurrencyPairs.enumerated()
+                  where currencyPair == newCurrencyPair {
+                  newCurrencyPairs.remove(at: index)
+               }
+
+               newCurrencyPairs.append(newCurrencyPair)
+
+               let request = SetWatchlistRequest(currencyPairs: newCurrencyPairs)
+
+               return setWatchlist(request)
+                  .asDriver(onErrorJustReturn: .failure(.error(UseCaseError.executionFailed)))
+                  .map { ($0, newCurrencyPair) }
             }
-
-            let newCurrencyPair = CurrencyPair(baseCurrency: currencyPairGroup.baseCurrency,
-                                               quoteCurrency: currencyPairGroup.quoteCurrency,
-                                               exchange: selectedExchange,
-                                               price: 0.0)
-            var newCurrencyPairs = watchlist.currencyPairs
-
-            for (index, currencyPair) in newCurrencyPairs.enumerated()
-               where currencyPair == newCurrencyPair {
-               newCurrencyPairs.remove(at: index)
-            }
-
-            newCurrencyPairs.append(newCurrencyPair)
-
-            let request = SetWatchlistRequest(currencyPairs: newCurrencyPairs)
-
-            return setWatchlist(request)
-               .asDriver(onErrorJustReturn: .failure(.error(UseCaseError.executionFailed)))
-               .map { ($0, newCurrencyPair) }
-         }
-         .filterNil()
+            .filterNil()
 
       let tableViewItemSelected = prepareAddCoinApi
          .filter { $0.0.hasContent }

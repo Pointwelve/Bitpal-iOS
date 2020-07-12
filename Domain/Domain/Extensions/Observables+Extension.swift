@@ -43,11 +43,11 @@ extension ObservableType {
    public func retryOnError(every timeIntervalInSeconds: Int) -> Observable<Element> {
       return retryWhen { (attempts: Observable<Error>) -> Observable<Int> in
          Observable.zip(attempts, Observable.just(timeIntervalInSeconds)) {
-            return $1
+            $1
          }
          .flatMap {
-            return Observable.timer(.seconds($0), period: .seconds($0),
-                                    scheduler: MainScheduler.instance)
+            Observable.timer(.seconds($0), period: .seconds($0),
+                             scheduler: MainScheduler.instance)
          }
       }
    }

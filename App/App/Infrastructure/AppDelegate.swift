@@ -6,10 +6,10 @@
 //  Copyright © 2017 Pointwelve. All rights reserved.
 //
 
-import FirebaseCrashlytics
 import Data
 import Domain
 import Firebase
+import FirebaseCrashlytics
 import FirebaseMessaging
 import RxCocoa
 import RxSwift

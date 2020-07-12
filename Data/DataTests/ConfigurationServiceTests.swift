@@ -26,6 +26,7 @@ private class ReadConfigurationTestSuccessRepository: Readable {
                                            sslCertificateData: Data(),
                                            
                                            companyName: "testName",
+                                           apiKey: "apiKey",
                                            termsAndConditions: "foobar"))
    }
 }

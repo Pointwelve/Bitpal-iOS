@@ -25,6 +25,9 @@ struct ConfigurationData: DataType {
    /// Company name
    let companyName: String
 
+   /// Company name
+   let apiKey: String
+
    /// Terms and Conditions
    let termsAndConditions: String
 }

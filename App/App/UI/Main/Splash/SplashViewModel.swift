@@ -170,10 +170,10 @@ final class SplashViewModel: TransformableViewModelType, Navigable {
 
       let authenticationSuccessful =
          Observable.amb(authenticationSequence).void().asDriver()
-         .flatMapLatest { _ in syncWatchlist().asDriver() }
-         .do(onNext: { [weak self] _ in
-            self?.navigator.state.preferences.serviceProvider.appState.accept(.authenticated)
-         })
+            .flatMapLatest { _ in syncWatchlist().asDriver() }
+            .do(onNext: { [weak self] _ in
+               self?.navigator.state.preferences.serviceProvider.appState.accept(.authenticated)
+            })
 
       return .init(peekDeviceFingerprint: deviceFingerprint,
                    promptOverrideMigration: promptOverrideMigration,

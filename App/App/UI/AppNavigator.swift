@@ -7,10 +7,10 @@
 //
 
 import CloudKit
-import FirebaseCrashlytics
 import Domain
 import Firebase
 import FirebaseAuth
+import FirebaseCrashlytics
 import Foundation
 import RxCocoa
 import RxSwift

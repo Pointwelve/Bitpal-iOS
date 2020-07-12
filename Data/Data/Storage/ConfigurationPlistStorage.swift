@@ -36,6 +36,9 @@ enum ConfigurationKey: String {
    /// Company Name
    case companyName
 
+   /// API Key
+   case apiKey
+
    /// Terms and Conditions
    case termsAndConditions
 }
@@ -97,6 +100,11 @@ class ConfigurationPlistStorage: ConfigurationStorage {
          throw FileError.missing
       }
 
+      let apiKey: String = try configuration.value(for: .apiKey)
+      guard !apiKey.isEmpty else {
+         throw FileError.missing
+      }
+
       let termsAndConditions: String = try configuration.value(for: .termsAndConditions)
       guard !termsAndConditions.isEmpty else {
          throw FileError.missing
@@ -107,6 +115,7 @@ class ConfigurationPlistStorage: ConfigurationStorage {
                                socketHost: socketHost,
                                sslCertificateData: certificateData,
                                companyName: companyName,
+                               apiKey: apiKey,
                                termsAndConditions: termsAndConditions)
    }
 
