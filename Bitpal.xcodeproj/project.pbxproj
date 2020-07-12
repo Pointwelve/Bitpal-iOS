@@ -3364,7 +3364,6 @@
 			buildConfigurationList = C4BB0995B5AB8B8866FAFF4F /* Build configuration list for PBXNativeTarget "Bitpal" */;
 			buildPhases = (
 				D47DA12FD40836345D2D4C45 /* Copy Configuration */,
-				404E11CAB726CD6099BE8567 /* Autocorrect lint issues & Lint */,
 				2C2E17400B50DC4B8891A2EB /* Crashlytics */,
 				8E029EDEFED2F2F00B4BFA01 /* Sources */,
 				648742D775D846709E2AF97F /* Resources */,
@@ -3545,24 +3544,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# \"${PROJECT_DIR}/../Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics\"\n";
-		};
-		404E11CAB726CD6099BE8567 /* Autocorrect lint issues & Lint */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Autocorrect lint issues & Lint";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  `which swiftlint` autocorrect\n  `which swiftlint`\nelse\n  echo \"error: SwiftLint not installed, do `sh setup.sh` to install SwiftLint.\"\n  exit 1\nfi\n";
 		};
 		C618BECAD497762F0587BA86 /* Copy Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4389,7 +4370,7 @@
 				PRODUCT_NAME = Bitpal;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.pointwelve.app.bitpal";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -4499,7 +4480,7 @@
 				PRODUCT_NAME = Bitpal;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.pointwelve.app.bitpal";
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};

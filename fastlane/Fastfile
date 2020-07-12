@@ -96,7 +96,7 @@ platform :ios do
            }
        }
       )
-      # upload_to_testflight(skip_submission: true, skip_waiting_for_build_processing: true, verbose: true)
+      upload_to_testflight(skip_submission: true, skip_waiting_for_build_processing: true, verbose: true)
 
       tag_master(version)
     end
@@ -124,7 +124,7 @@ platform :ios do
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"gc_keys.gpg\" -c \"gc_keys.json\"", log: false)
     end
 
-    Dir.chdir("../App") do
+    Dir.chdir("..") do
       # Encrypt Auth0 configs
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"Firebase/unicorn.gpg\" -c \"Firebase/Firebase.plist\"", log: false)
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"Configuration/unicorn.gpg\" -c \"Configuration/Configuration.plist\"", log: false)
@@ -146,7 +146,7 @@ platform :ios do
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"gc_keys.json\" --decrypt \"gc_keys.gpg\"", log: false)
     end
 
-    Dir.chdir("../App") do
+    Dir.chdir("..") do
       # Decrypt Auth0 configs
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"Firebase/Firebase.plist\" --decrypt \"Firebase/unicorn.gpg\"", log: false)
       sh("gpg --batch --yes --passphrase #{passphrase} --output \"Configuration/Configuration.plist\" --decrypt \"Configuration/unicorn.gpg\"", log: false)
