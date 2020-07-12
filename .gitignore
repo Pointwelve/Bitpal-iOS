@@ -90,6 +90,7 @@ fastlane/test_output
 iOSInjectionProject/
 
 .DS_Store
-/App/Firebase/Firebase.plist
-/App/Configuration/Configuration.plist
-/gc_keys.json
+Firebase/Firebase.plist
+Configuration/Configuration.plist
+gc_keys.json
+.configuration
