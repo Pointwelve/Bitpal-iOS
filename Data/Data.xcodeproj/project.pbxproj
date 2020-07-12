@@ -128,6 +128,14 @@
 		6DB6E5991F627CDB0039C9E4 /* AuthenticationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB6E5981F627CDB0039C9E4 /* AuthenticationRepository.swift */; };
 		6DC772691F6806B800B6A4E8 /* CurrencyPairRealm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC772681F6806B800B6A4E8 /* CurrencyPairRealm.swift */; };
 		6DC7726B1F6806F900B6A4E8 /* CurrencyPairGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC7726A1F6806F900B6A4E8 /* CurrencyPairGroupData.swift */; };
+		6DD6BE1524BB436F0047742F /* RxAlamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1224BB436F0047742F /* RxAlamofire.framework */; };
+		6DD6BE1624BB436F0047742F /* RxAlamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1224BB436F0047742F /* RxAlamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6DD6BE1A24BB43740047742F /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1824BB43740047742F /* SocketIO.framework */; };
+		6DD6BE1B24BB43740047742F /* SocketIO.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1824BB43740047742F /* SocketIO.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6DD6BE1C24BB43740047742F /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1924BB43740047742F /* Starscream.framework */; };
+		6DD6BE1D24BB43740047742F /* Starscream.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1924BB43740047742F /* Starscream.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6DD6BE1F24BB43770047742F /* SwiftKeychainWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1E24BB43770047742F /* SwiftKeychainWrapper.framework */; };
+		6DD6BE2024BB43770047742F /* SwiftKeychainWrapper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6DD6BE1E24BB43770047742F /* SwiftKeychainWrapper.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6DEAA37C1EF7AAA8003DC969 /* IdentifieriCloudStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA37B1EF7AAA8003DC969 /* IdentifieriCloudStorage.swift */; };
 		6DEAA37E1EF7AAB6003DC969 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DEAA37D1EF7AAB6003DC969 /* CloudKit.framework */; };
 		6DEAA3841EF7AEC7003DC969 /* IdentifierRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA3831EF7AEC7003DC969 /* IdentifierRepository.swift */; };
@@ -196,6 +204,23 @@
 			remoteInfo = Data;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6DD6BE1724BB43700047742F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6DD6BE2024BB43770047742F /* SwiftKeychainWrapper.framework in Embed Frameworks */,
+				6DD6BE1624BB436F0047742F /* RxAlamofire.framework in Embed Frameworks */,
+				6DD6BE1D24BB43740047742F /* Starscream.framework in Embed Frameworks */,
+				6DD6BE1B24BB43740047742F /* SocketIO.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1B10F36F1F41E7EC00F6286E /* CurrencyDetailData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrencyDetailData.swift; sourceTree = "<group>"; };
@@ -325,6 +350,10 @@
 		6DB6E5981F627CDB0039C9E4 /* AuthenticationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationRepository.swift; sourceTree = "<group>"; };
 		6DC772681F6806B800B6A4E8 /* CurrencyPairRealm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyPairRealm.swift; sourceTree = "<group>"; };
 		6DC7726A1F6806F900B6A4E8 /* CurrencyPairGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyPairGroupData.swift; sourceTree = "<group>"; };
+		6DD6BE1224BB436F0047742F /* RxAlamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxAlamofire.framework; path = ../Carthage/Build/iOS/RxAlamofire.framework; sourceTree = "<group>"; };
+		6DD6BE1824BB43740047742F /* SocketIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SocketIO.framework; path = ../Carthage/Build/iOS/SocketIO.framework; sourceTree = "<group>"; };
+		6DD6BE1924BB43740047742F /* Starscream.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Starscream.framework; path = ../Carthage/Build/iOS/Starscream.framework; sourceTree = "<group>"; };
+		6DD6BE1E24BB43770047742F /* SwiftKeychainWrapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftKeychainWrapper.framework; path = ../Carthage/Build/iOS/SwiftKeychainWrapper.framework; sourceTree = "<group>"; };
 		6DEAA37B1EF7AAA8003DC969 /* IdentifieriCloudStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifieriCloudStorage.swift; sourceTree = "<group>"; };
 		6DEAA37D1EF7AAB6003DC969 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		6DEAA3831EF7AEC7003DC969 /* IdentifierRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierRepository.swift; sourceTree = "<group>"; };
@@ -373,9 +402,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DD6BE1F24BB43770047742F /* SwiftKeychainWrapper.framework in Frameworks */,
 				6D0C7EDA224A679700BCBCEF /* Domain.framework in Frameworks */,
+				6DD6BE1C24BB43740047742F /* Starscream.framework in Frameworks */,
+				6DD6BE1524BB436F0047742F /* RxAlamofire.framework in Frameworks */,
 				6DEAA37E1EF7AAB6003DC969 /* CloudKit.framework in Frameworks */,
 				6D0C7EE2224A67AE00BCBCEF /* RxOptional.framework in Frameworks */,
+				6DD6BE1A24BB43740047742F /* SocketIO.framework in Frameworks */,
 				6D0C7EDF224A67AE00BCBCEF /* Alamofire.framework in Frameworks */,
 				6D0C7EF8224A6C7200BCBCEF /* RealmSwift.framework in Frameworks */,
 				6D0C7EF9224A6C7200BCBCEF /* Realm.framework in Frameworks */,
@@ -625,6 +658,10 @@
 		6D7994CE1ED3CC9900FED910 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6DD6BE1E24BB43770047742F /* SwiftKeychainWrapper.framework */,
+				6DD6BE1824BB43740047742F /* SocketIO.framework */,
+				6DD6BE1924BB43740047742F /* Starscream.framework */,
+				6DD6BE1224BB436F0047742F /* RxAlamofire.framework */,
 				6DEB4E53232A4A4D0028F237 /* RxRelay.framework */,
 				6D0C7EFA224A6C7500BCBCEF /* RxAtomic.framework */,
 				6D0C7EF7224A6C7200BCBCEF /* Realm.framework */,
@@ -885,6 +922,7 @@
 				6D7994A71ED3CC4D00FED910 /* Frameworks */,
 				6D7994A81ED3CC4D00FED910 /* Headers */,
 				6D7994A91ED3CC4D00FED910 /* Resources */,
+				6DD6BE1724BB43700047742F /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
