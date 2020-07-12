@@ -85,6 +85,8 @@ platform :ios do
       build_app(
         project: "App/App.xcodeproj",
         scheme: "App",
+        include_bitcode: true,
+        include_symbols: true,
         clean: true,
         export_options: {
           provisioningProfiles: { 
