@@ -16,17 +16,10 @@ opt_in_rules: # some rules are only opt-in
   # swiftlint rules
 
 included:
-  - App/
-  - ../Data/
-  - ../Domain/
+  - Sources
 
 excluded: # paths to ignore during linting. Takes precedence over `included`.
-  - ../Pods
-  - ../Data/Data/Storage/Keychain/Keychain.swift
-  - ../Data/Data/Network/PKCS12.swift
-  - ../Domain/DomainTests
-  - ../Data/DataTests
-  - AppTests
+  - Tests
 
 # excluded: # paths to ignore during linting. Takes precedence over `included`.
 

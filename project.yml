@@ -194,17 +194,8 @@ targets:
           cp "${PROJECT_DIR}/Configuration/Configuration.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Configuration.plist"
           cp "${PROJECT_DIR}/Firebase/Firebase.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist"
         name: Copy Configuration
-      # - script: |
-      #     if which swiftlint >/dev/null; then
-      #       `which swiftlint` autocorrect
-      #       `which swiftlint`
-      #     else
-      #       echo "error: SwiftLint not installed, do `sh setup.sh` to install SwiftLint."
-      #       exit 1
-      #     fi
-      #   name: Autocorrect lint issues & Lint
       - script: |
-          # "${PROJECT_DIR}/../Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics"
+          # "${PROJECT_DIR}/Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics"
         name: Crashlytics
     sources:
       - Sources/Bitpal

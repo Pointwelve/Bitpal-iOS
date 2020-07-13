@@ -3543,7 +3543,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# \"${PROJECT_DIR}/../Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics\"\n";
+			shellScript = "# \"${PROJECT_DIR}/Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics\"\n";
 		};
 		C618BECAD497762F0587BA86 /* Copy Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
