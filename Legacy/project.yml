@@ -1,0 +1,299 @@
+name: Bitpal
+options:
+  minimumXcodeGenVersion: "2.15.1"
+  developmentLanguage: en
+  usesTabs: false
+  indentWidth: 2
+  tabWidth: 2
+  xcodeVersion: "1150"
+  deploymentTarget:
+    iOS: "12.0"
+  carthageExecutablePath: "`which carthage`"
+  defaultConfig: "Release"
+configs:
+  Debug: debug
+  Release: release
+attributes:
+  ORGANIZATIONNAME: Pointwelve Pte. Ltd
+schemes:
+  Domain:
+    scheme: {}
+    build:
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+      targets:
+        Domain: all
+        DomainTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - DomainTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+  Data:
+    scheme: {}
+    build:
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+      targets:
+        Data: all
+        DataTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - DataTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+  Bitpal:
+    scheme: {}
+    build:
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+      targets:
+        Bitpal: all
+        BitpalTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - BitpalTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+targets:
+  Domain:
+    settings:
+      PRODUCT_NAME: Domain
+      PRODUCT_BUNDLE_IDENTIFIER: com.pointwelve.app.bitpal.domain
+      INFOPLIST_FILE: Sources/Data/Info.plist
+      SUPPORTS_MACCATALYST: NO
+    platform: iOS
+    type: framework
+    sources:
+      - Sources/Domain
+    dependencies:
+      - carthage: RxSwift
+  DomainTests:
+    platform: iOS
+    type: bundle.unit-test
+    sources:
+      - path: Tests/DomainTests
+    settings:
+      TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Bitpal.app/Bitpal"
+    dependencies:
+      - target: Domain
+  Data:
+    settings:
+      PRODUCT_NAME: Data
+      PRODUCT_BUNDLE_IDENTIFIER: com.pointwelve.app.bitpal.data
+      INFOPLIST_FILE: Sources/Data/Info.plist
+      SUPPORTS_MACCATALYST: NO
+    platform: iOS
+    type: framework
+    sources:
+      - Sources/Data
+    dependencies:
+      - target: Domain
+      - carthage: Alamofire
+      - carthage: RxCocoa
+      - carthage: RxSwift
+      - carthage: RxRelay
+      - carthage: RxOptional
+      - carthage: RxAlamofire
+      - carthage: Realm
+      - carthage: RealmSwift
+      - carthage: SocketIO
+      - carthage: RealmSwift
+      - carthage: Starscream
+      - carthage: SwiftKeychainWrapper
+      - sdk: CloudKit.framework
+  DataTests:
+    platform: iOS
+    type: bundle.unit-test
+    sources:
+      - path: Tests/DataTests
+    settings:
+      TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Bitpal.app/Bitpal"
+    dependencies:
+      - target: Domain
+      - target: Data
+  Widget:
+    settings:
+      PRODUCT_NAME: Bitpal Widget
+      PRODUCT_BUNDLE_IDENTIFIER: com.pointwelve.app.bitpal.today
+      INFOPLIST_FILE: Sources/Widget/Resources/Info.plist
+      CODE_SIGN_ENTITLEMENTS: $(PROJECT_DIR)/Sources/Widget/Resources/Widget.entitlements
+      MARKETING_VERSION: 1.0
+      CURRENT_PROJECT_VERSION: 1
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: iPhone Developer
+      PROVISIONING_PROFILE_SPECIFIER: match Development com.pointwelve.app.bitpal.today
+      DEVELOPMENT_TEAM: Z2Q7ZE2E5A
+    attributes:
+      DevelopmentTeam: Z2Q7ZE2E5A
+    platform: iOS
+    preBuildScripts:
+      - script: |
+          cp "${PROJECT_DIR}/Configuration/Configuration.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.appex/Configuration.plist"
+        name: Copy Configuration
+    type: app-extension
+    sources:
+      - Sources/Widget
+      - Sources/Shared
+    dependencies:
+      - target: Domain
+      - target: Data
+      - sdk: NotificationCenter.framework
+  Notification Service Extension:
+    settings:
+      INFOPLIST_FILE: Sources/Notification Service Extension/Resources/Info.plist
+      PRODUCT_NAME: Notification Service Extension
+      PRODUCT_BUNDLE_IDENTIFIER: com.pointwelve.app.bitpal.Notification-Service-Extension
+      MARKETING_VERSION: 1.0
+      CURRENT_PROJECT_VERSION: 1
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: iPhone Developer
+      PROVISIONING_PROFILE_SPECIFIER: match Development com.pointwelve.app.bitpal.Notification-Service-Extension
+      DEVELOPMENT_TEAM: Z2Q7ZE2E5A
+    attributes:
+      DevelopmentTeam: Z2Q7ZE2E5A
+    platform: iOS
+    type: app-extension
+    sources:
+      - Sources/Notification Service Extension
+    dependencies:
+      - sdk: UserNotifications.framework
+  Bitpal:
+    type: application
+    platform: iOS
+    deploymentTarget: "12.0"
+    preBuildScripts:
+      - script: |
+          cp "${PROJECT_DIR}/Configuration/Configuration.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Configuration.plist"
+          cp "${PROJECT_DIR}/Firebase/Firebase.plist" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist"
+        name: Copy Configuration
+      - script: |
+          # "${PROJECT_DIR}/Carthage/Build/iOS/FirebaseCrashlytics.framework/FirebaseCrashlytics"
+        name: Crashlytics
+    sources:
+      - Sources/Bitpal
+      - Sources/Shared
+    settings:
+      INFOPLIST_FILE: Sources/Bitpal/Resources/Info.plist
+      PRODUCT_NAME: Bitpal
+      OTHER_LDFLAGS: -ObjC
+      PRODUCT_BUNDLE_IDENTIFIER: com.pointwelve.app.bitpal
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+      MARKETING_VERSION: 1.0
+      CURRENT_PROJECT_VERSION: 1
+      CODE_SIGN_ENTITLEMENTS: $(PROJECT_DIR)/Sources/Bitpal/Resources/Bitpal.entitlements
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: iPhone Developer
+      PROVISIONING_PROFILE_SPECIFIER: match Development com.pointwelve.app.bitpal
+      DEVELOPMENT_TEAM: Z2Q7ZE2E5A
+      TARGETED_DEVICE_FAMILY: 1
+    attributes:
+      DevelopmentTeam: Z2Q7ZE2E5A
+    dependencies:
+      - target: Domain
+      - target: Data
+      - target: Widget
+      - target: Notification Service Extension
+      - sdk: UserNotifications.framework
+      - sdk: NotificationCenter.framework
+      - sdk: CloudKit.framework
+      - carthage: Alamofire
+      - carthage: Charts
+      - carthage: Differentiator
+      - carthage: FirebaseABTesting
+        embed: false
+      - carthage: FIRAnalyticsConnector
+        embed: false
+      - carthage: FirebaseAnalytics
+        embed: false
+      - carthage: FirebaseAuth
+        embed: false
+      - carthage: FirebaseCore
+        embed: false
+      - carthage: FirebaseCoreDiagnostics
+        embed: false
+      - carthage: FirebaseCrashlytics
+        embed: false
+      - carthage: FirebaseInstallations
+        embed: false
+      - carthage: FirebaseInstanceID
+        embed: false
+      - carthage: FirebaseMessaging
+        embed: false
+      - carthage: FirebasePerformance
+        embed: false
+      - carthage: FirebaseRemoteConfig
+        embed: false
+      - carthage: GoogleAppMeasurement
+        embed: false
+      - carthage: GoogleDataTransport
+        embed: false
+      - carthage: GoogleDataTransportCCTSupport
+        embed: false
+      - carthage: GoogleToolboxForMac
+        embed: false
+      - carthage: GoogleUtilities
+        embed: false
+      - carthage: GTMSessionFetcher
+        embed: false
+      - carthage: nanopb
+        embed: false
+      - carthage: NVActivityIndicatorView
+      - carthage: Presentr
+      - carthage: PromisesObjC
+        embed: false
+      - carthage: Protobuf
+        embed: false
+      - carthage: Realm
+      - carthage: RealmSwift
+      - carthage: RxAlamofire
+      - carthage: RxCocoa
+      - carthage: RxDataSources
+      - carthage: RxGesture
+      - carthage: RxOptional
+      - carthage: RxRelay
+      - carthage: RxSwift
+      - carthage: Siren
+      - carthage: RxSwift
+      - carthage: SocketIO
+      - carthage: Starscream
+      - carthage: SwiftReorder
+      - carthage: SwiftKeychainWrapper
+      - carthage: SwipeCellKit
+  BitpalTests:
+    platform: iOS
+    type: bundle.unit-test
+    sources:
+      - path: Tests/BitpalTests
+    settings:
+      TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Bitpal.app/Bitpal"
+    dependencies:
+      - target: Bitpal

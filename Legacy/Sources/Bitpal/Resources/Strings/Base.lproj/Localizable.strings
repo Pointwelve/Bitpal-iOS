@@ -1,0 +1,159 @@
+"Canadian Dollar" = "Canadian Dollar";
+
+"Euro" = "Euro";
+
+"Japanese Yen" = "Japanese Yen";
+
+"Korean Won" = "Korean Won";
+
+"Pound sterling" = "Pound sterling";
+
+"Renminbi" = "Renminbi";
+
+"US Dollar" = "US Dollar";
+
+"Bitcoin" = "Bitcoin";
+
+"Bitshares" = "Bitshares";
+
+"Bitthumb" = "Bitthumb";
+
+"Coinone" = "Coinone";
+
+"Ethereum" = "Ethereum";
+
+"Ethereum Classic" = "Ethereum Classic";
+
+"Jubi" = "Jubi";
+
+"Korbit" = "Korbit";
+
+"Litecoin" = "Litecoin";
+
+"OKCoin" = "OKCoin";
+
+"Ripple" = "Ripple";
+
+"alerts.title" = "Alerts";
+
+"color.candlestick.negative" = "#cb4646";
+
+"color.candlestick.positive" = "#01b17b";
+
+"color.percentage.negative" = "#ef4242";
+
+"color.percentage.positive" = "#49c530";
+
+"cryptocurrency.text" = "Cryptocurrency";
+
+"currency.detail.fifteenMinutes" = "15m";
+
+"currency.detail.fiveMinute" = "5m";
+
+"currency.detail.fourHours" = "4H";
+
+"currency.detail.inADay" = "IN A DAY";
+
+"currency.detail.lowHigh24h" = "LOW/HIGH 24H";
+
+"currency.detail.marketCap" = "MARKET CAP";
+
+"currency.detail.oneDay" = "1D";
+
+"currency.detail.oneHour" = "1H";
+
+"currency.detail.oneMinute" = "1m";
+
+"currency.detail.open24h" = "OPEN 24H";
+
+"currency.detail.volume24h" = "VOLUME 24H";
+
+"currency.detail.open" = "OPEN";
+
+"currency.detail.close" = "CLOSE";
+
+"currency.detail.high" = "HIGH";
+
+"currency.detail.low" = "LOW";
+
+"empty.alerts.message" = "You do not currently have any alerts.";
+
+"empty.alerts.title" = "NO ALERTS";
+
+"empty.view.message" = "Change the search parameters, perhaps?";
+
+"empty.view.title" = "NO RESULTS";
+
+"empty.watchlist.message" = "Tap '+' to add cryptocurrency pairs to your watchlist.";
+
+"empty.watchlist.title" = "WATCHLIST IS EMPTY";
+
+"error.sorry.message" = "Something has went wrong, please try again.";
+
+"error.sorry.title" = "WE'RE SORRY!";
+
+"language.current" = "English";
+
+"language.dateFormat.current" = "dd MMMM yyyy hh:mmaa";
+
+"loading.message" = "Please be patient when we are trying to get you the latest data.";
+
+"loading.title" = "PLEASE WAIT";
+
+"notification.noPermission.action.title" = "GO TO SETTINGS";
+
+"notification.noPermission.message" = "You seemed to have push notifications disabled. Please turn on notifications in order to manage your alerts.";
+
+"notification.noPermission.title" = "OOPS!";
+
+"offline.view.message" = "You appear to be offline. Service will resume once network connection is back.";
+
+"offline.view.title" = "OH NO!";
+
+"popup.migration.cancel" = "DO NOTHING";
+
+"popup.migration.message" = "We’ve found that you have an account associated to the Apple ID logged in on your device.\\n\nDo you wish to merge the record with the existing account (recommended) or do nothing?\n\nWe will not ask this again.";
+
+"popup.migration.message.boldFactor" = "We will not ask this again.";
+
+"popup.migration.ok" = "MERGE ACCOUNTS";
+
+"popup.migration.title" = "WELCOME BACK!";
+
+"portfolio.title" = "Portfolio";
+
+"priceAlert.alertMessage.greaterThanOrEqual" = "\"Alert me if the price is greater than or equal to %@.\"";
+
+"priceAlert.alertMessage.lessThanOrEqual" = "\"Alert me if the price is less than or equal to %@.\"";
+
+"priceAlert.button.create" = "CREATE ALERT";
+
+"priceAlert.button.greaterThanOrEqual" = "≥";
+
+"priceAlert.button.lessThanOrEqual" = "≤";
+
+"priceAlert.button.update" = "UPDATE ALERT";
+
+"settings.language.title" = "Language";
+
+"settings.nightMode.title" = "Night Mode";
+
+"settings.rate.title" = "Rate our App";
+
+"settings.termsAndPrivacy.title" = "Terms of Use and Privacy";
+
+"settings.title" = "Settings";
+
+"watchlist.addcoin.search" = "Search";
+
+"watchlist.addcoin.type" = "Type";
+
+"watchlist.addcoin.selectAnExchange" = "Select an exchange";
+
+"watchlist.graphLoading" = "Retrieving prices...";
+
+"watchlist.title" = "Watchlist";
+
+"credits.content" = "We thank CryptoCompare for providing the market data.";
+
+"cryptoCompare" = "CryptoCompare";
