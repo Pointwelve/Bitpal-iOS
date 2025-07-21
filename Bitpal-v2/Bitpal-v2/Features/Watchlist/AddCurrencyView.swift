@@ -68,6 +68,7 @@ struct AddCurrencyView: View {
             }
             .task {
                 viewModel.setModelContext(modelContext)
+                viewModel.clearDuplicatesAndResetDatabase() // Clean up any duplicates on startup
                 await searchService.loadInitialData()
             }
         }

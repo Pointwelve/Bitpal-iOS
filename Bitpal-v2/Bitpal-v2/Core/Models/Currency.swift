@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Currency: Codable {
+final class Currency {
     @Attribute(.unique) var id: String
     var name: String
     var symbol: String
@@ -25,16 +25,33 @@ final class Currency: Codable {
     var quotePairs: [CurrencyPair] = []
     
     init(id: String, name: String, symbol: String, displaySymbol: String? = nil) {
-        self.id = id
+        self.id = id.lowercased()
         self.name = name
-        self.symbol = symbol
-        self.displaySymbol = displaySymbol ?? symbol
-        self.createdAt = Date()
-        self.lastModified = Date()
+        self.symbol = symbol.uppercased()
+        self.displaySymbol = displaySymbol ?? symbol.uppercased()
+        let now = Date()
+        self.createdAt = now
+        self.lastModified = now
         self.isDeleted = false
     }
     
-    // Convenience initializer for common crypto currencies
+    func markAsDeleted() {
+        isDeleted = true
+        lastModified = Date()
+    }
+    
+    func restore() {
+        isDeleted = false
+        lastModified = Date()
+    }
+    
+    func updateLastModified() {
+        lastModified = Date()
+    }
+}
+
+// MARK: - Factory Methods
+extension Currency {
     static func bitcoin() -> Currency {
         Currency(id: "btc", name: "Bitcoin", symbol: "BTC", displaySymbol: "₿")
     }
@@ -47,17 +64,54 @@ final class Currency: Codable {
         Currency(id: "usd", name: "US Dollar", symbol: "USD", displaySymbol: "$")
     }
     
-    init(from decoder: Decoder) throws {
+    static func eur() -> Currency {
+        Currency(id: "eur", name: "Euro", symbol: "EUR", displaySymbol: "€")
+    }
+    
+    static func gbp() -> Currency {
+        Currency(id: "gbp", name: "British Pound", symbol: "GBP", displaySymbol: "£")
+    }
+}
+
+// MARK: - Computed Properties
+extension Currency {
+    var allPairs: [CurrencyPair] {
+        basePairs + quotePairs
+    }
+    
+    var isActive: Bool {
+        !isDeleted
+    }
+    
+    var displayName: String {
+        "\(name) (\(symbol))"
+    }
+}
+
+// MARK: - Codable
+extension Currency: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, symbol, displaySymbol, createdAt, lastModified, isDeleted
+    }
+    
+    convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.symbol = try container.decode(String.self, forKey: .symbol)
-        self.displaySymbol = try container.decode(String.self, forKey: .displaySymbol)
-        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
-        self.lastModified = try container.decode(Date.self, forKey: .lastModified)
-        self.isDeleted = try container.decode(Bool.self, forKey: .isDeleted)
-        self.basePairs = []
-        self.quotePairs = []
+        let id = try container.decode(String.self, forKey: .id)
+        let name = try container.decode(String.self, forKey: .name)
+        let symbol = try container.decode(String.self, forKey: .symbol)
+        let displaySymbol = try container.decode(String.self, forKey: .displaySymbol)
+        
+        self.init(id: id, name: name, symbol: symbol, displaySymbol: displaySymbol)
+        
+        if let createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) {
+            self.createdAt = createdAt
+        }
+        if let lastModified = try container.decodeIfPresent(Date.self, forKey: .lastModified) {
+            self.lastModified = lastModified
+        }
+        if let isDeleted = try container.decodeIfPresent(Bool.self, forKey: .isDeleted) {
+            self.isDeleted = isDeleted
+        }
     }
     
     func encode(to encoder: Encoder) throws {
@@ -70,13 +124,9 @@ final class Currency: Codable {
         try container.encode(lastModified, forKey: .lastModified)
         try container.encode(isDeleted, forKey: .isDeleted)
     }
-    
-    private enum CodingKeys: String, CodingKey {
-        case id, name, symbol, displaySymbol, createdAt, lastModified, isDeleted
-    }
-    
 }
 
+// MARK: - Hashable & Equatable
 extension Currency: Hashable {
     static func == (lhs: Currency, rhs: Currency) -> Bool {
         lhs.id == rhs.id

@@ -23,6 +23,37 @@ final class AddCurrencyViewModel {
         modelContext = context
     }
     
+    func clearDuplicatesAndResetDatabase() {
+        guard let context = modelContext else { return }
+        
+        do {
+            // Get all currency pairs
+            let allPairs = try context.fetch(FetchDescriptor<CurrencyPair>())
+            var seenIds: Set<String> = []
+            var duplicatesToDelete: [CurrencyPair] = []
+            
+            // Find duplicates
+            for pair in allPairs {
+                if seenIds.contains(pair.id) {
+                    duplicatesToDelete.append(pair)
+                } else {
+                    seenIds.insert(pair.id)
+                }
+            }
+            
+            // Delete duplicates
+            for duplicate in duplicatesToDelete {
+                context.delete(duplicate)
+            }
+            
+            try context.save()
+            print("🧹 Cleaned up \(duplicatesToDelete.count) duplicate currency pairs")
+            
+        } catch {
+            print("❌ Error cleaning duplicates: \(error)")
+        }
+    }
+    
     func loadAvailableCurrencies() async {
         isLoading = true
         errorMessage = nil
@@ -50,8 +81,13 @@ final class AddCurrencyViewModel {
         isLoading = false
     }
     
-    func addCurrencyPair(_ availableCurrency: AvailableCurrency, exchange: Exchange? = nil) {
-        guard let context = modelContext else { return }
+    func addCurrencyPair(_ availableCurrency: AvailableCurrency, exchange: Exchange) {
+        guard let context = modelContext else { 
+            print("❌ AddCurrencyViewModel: No model context available")
+            return 
+        }
+        
+        print("🔄 Adding currency pair: \(availableCurrency.symbol) on \(exchange.name)")
         
         do {
             // Check if currency already exists
@@ -66,7 +102,7 @@ final class AddCurrencyViewModel {
                     id: availableCurrency.id,
                     name: availableCurrency.name,
                     symbol: availableCurrency.symbol,
-                    displaySymbol: availableCurrency.displaySymbol
+                    displaySymbol: availableCurrency.displaySymbol ?? availableCurrency.symbol
                 )
                 context.insert(baseCurrency)
             }
@@ -79,49 +115,48 @@ final class AddCurrencyViewModel {
             if let existingUSD = usdCurrencies.first {
                 quoteCurrency = existingUSD
             } else {
-                quoteCurrency = Currency.usd()
+                // Create a new USD Currency object to avoid context conflicts
+                quoteCurrency = Currency(
+                    id: "usd",
+                    name: "US Dollar",
+                    symbol: "USD",
+                    displaySymbol: "$"
+                )
                 context.insert(quoteCurrency)
             }
             
-            // Get or create exchange
+            // Get or create exchange (always create new to avoid context conflicts)
+            let allExchanges = try context.fetch(FetchDescriptor<Exchange>())
+            let existingExchanges = allExchanges.filter { $0.id == exchange.id }
+            
             let targetExchange: Exchange
-            if let providedExchange = exchange {
-                // Check if exchange already exists
-                let allExchanges = try context.fetch(FetchDescriptor<Exchange>())
-                let existingExchanges = allExchanges.filter { $0.id == providedExchange.id }
-                
-                if let existing = existingExchanges.first {
-                    targetExchange = existing
-                } else {
-                    targetExchange = Exchange(
-                        id: providedExchange.id,
-                        name: providedExchange.name,
-                        displayName: providedExchange.displayName
-                    )
-                    context.insert(targetExchange)
-                }
+            if let existing = existingExchanges.first {
+                targetExchange = existing
             } else {
-                // Default to CoinDesk
-                let allExchanges = try context.fetch(FetchDescriptor<Exchange>())
-                let exchanges = allExchanges.filter { $0.id == "COINDESK" }
-                
-                if let existingExchange = exchanges.first {
-                    targetExchange = existingExchange
-                } else {
-                    targetExchange = Exchange(id: "COINDESK", name: "CoinDesk", displayName: "CoinDesk")
-                    context.insert(targetExchange)
-                }
+                // Create a new Exchange object to avoid context conflicts
+                targetExchange = Exchange(
+                    id: exchange.id,
+                    name: exchange.name,
+                    displayName: exchange.displayName,
+                    website: exchange.website,
+                    logoURL: exchange.logoURL,
+                    country: exchange.country
+                )
+                context.insert(targetExchange)
             }
             
-            // Check if pair already exists
-            let allPairs = try context.fetch(FetchDescriptor<CurrencyPair>())
-            let existingPairs = allPairs.filter { pair in
-                pair.baseCurrency?.symbol == availableCurrency.symbol &&
-                pair.quoteCurrency?.symbol == "USD" &&
-                pair.exchange?.id == targetExchange.id
-            }
+            // Check if pair already exists using the generated ID
+            let expectedPairId = "\(availableCurrency.symbol.uppercased())-USD-\(targetExchange.id.lowercased())"
+            let pairDescriptor = FetchDescriptor<CurrencyPair>(
+                predicate: #Predicate { $0.id == expectedPairId }
+            )
+            let existingPairs = try context.fetch(pairDescriptor)
+            
+            print("🔍 Looking for existing pair with ID: \(expectedPairId)")
+            print("🔍 Found \(existingPairs.count) existing pairs")
             
             if existingPairs.isEmpty {
+                print("✅ Creating new currency pair...")
                 // Get current max sort order
                 let allPairsDescriptor = FetchDescriptor<CurrencyPair>(
                     sortBy: [SortDescriptor(\.sortOrder, order: .reverse)]
@@ -129,6 +164,7 @@ final class AddCurrencyViewModel {
                 let allPairs = try context.fetch(allPairsDescriptor)
                 let nextSortOrder = (allPairs.first?.sortOrder ?? -1) + 1
                 
+                // Create the currency pair
                 let currencyPair = CurrencyPair(
                     baseCurrency: baseCurrency,
                     quoteCurrency: quoteCurrency,
@@ -136,13 +172,30 @@ final class AddCurrencyViewModel {
                     sortOrder: nextSortOrder
                 )
                 
-                context.insert(currencyPair)
+                print("✅ Created currency pair with ID: \(currencyPair.id)")
+                
+                // Double-check no duplicate exists before insertion
+                let finalCheckDescriptor = FetchDescriptor<CurrencyPair>(
+                    predicate: #Predicate { $0.id == currencyPair.id }
+                )
+                let duplicateCheck = try context.fetch(finalCheckDescriptor)
+                
+                if duplicateCheck.isEmpty {
+                    context.insert(currencyPair)
+                    print("✅ Currency pair inserted with sort order: \(nextSortOrder)")
+                } else {
+                    print("⚠️ Duplicate currency pair detected during insertion, skipping")
+                }
+            } else {
+                print("⚠️ Currency pair already exists, skipping")
             }
             
             try context.save()
+            print("✅ Context saved successfully")
             
         } catch {
             errorMessage = "Failed to add currency: \(error.localizedDescription)"
+            print("❌ AddCurrencyViewModel Error: \(error)")
         }
     }
 }

@@ -214,6 +214,10 @@ extension AlertComparison {
             return "arrow.up.circle"
         case .below:
             return "arrow.down.circle"
+        case .exactMatch:
+            return "equal.circle"
+        case .percentageChange:
+            return "percent"
         }
     }
 }

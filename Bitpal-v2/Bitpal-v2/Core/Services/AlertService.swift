@@ -209,6 +209,12 @@ final class AlertService {
             return currentPrice >= alert.targetPrice
         case .below:
             return currentPrice <= alert.targetPrice
+        case .exactMatch:
+            let tolerance = alert.targetPrice * 0.001 // 0.1% tolerance
+            return abs(currentPrice - alert.targetPrice) <= tolerance
+        case .percentageChange:
+            guard let pair = alert.currencyPair else { return false }
+            return abs(pair.priceChangePercent24h) >= alert.targetPrice
         }
     }
     
@@ -259,7 +265,7 @@ final class AlertService {
                 currencyPairId: currencyPair.id,
                 comparison: alert.comparison.rawValue,
                 targetPrice: alert.targetPrice,
-                message: alert.message,
+                message: alert.customMessage,
                 isEnabled: alert.isEnabled
             )))
             
@@ -271,7 +277,7 @@ final class AlertService {
             let _: UpdateAlertResponse = try await apiClient.request(CryptoAPIEndpoint.updateAlert(alert.id, APIUpdateAlertRequest(
                 comparison: alert.comparison.rawValue,
                 targetPrice: alert.targetPrice,
-                message: alert.message,
+                message: alert.customMessage,
                 isEnabled: alert.isEnabled
             )))
             

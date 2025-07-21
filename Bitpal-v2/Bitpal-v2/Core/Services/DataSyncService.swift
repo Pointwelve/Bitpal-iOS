@@ -454,7 +454,7 @@ extension Alert: SyncableEntity {
         self.comparison = other.comparison
         self.targetPrice = other.targetPrice
         self.isEnabled = other.isEnabled
-        self.message = other.message
+        self.customMessage = other.customMessage
         self.lastModified = other.lastModified
     }
 }
