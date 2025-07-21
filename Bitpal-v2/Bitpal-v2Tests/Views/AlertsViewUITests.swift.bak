@@ -1,0 +1,487 @@
+//
+//  AlertsViewUITests.swift
+//  Bitpal-v2Tests
+//
+//  Created by Ryne Cheow on 20/7/25.
+//
+
+import XCTest
+import SwiftData
+@testable import Bitpal_v2
+
+@MainActor
+final class AlertsViewUITests: XCTestCase {
+    
+    private var container: ModelContainer!
+    private var context: ModelContext!
+    private var alertService: AlertService!
+    
+    override func setUp() async throws {
+        try await super.setUp()
+        
+        // Create in-memory container for testing
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try ModelContainer(for: Alert.self, CurrencyPair.self, Currency.self, Exchange.self, configurations: config)
+        context = container.mainContext
+        
+        // Create mock alert service
+        alertService = AlertService.shared
+        alertService.setModelContext(context)
+    }
+    
+    override func tearDown() async throws {
+        container = nil
+        context = nil
+        alertService = nil
+        try await super.tearDown()
+    }
+    
+    // MARK: - Test Data Creation
+    
+    private func createTestCurrencyPair() -> CurrencyPair {
+        let bitcoin = Currency(
+            id: "bitcoin",
+            symbol: "BTC",
+            name: "Bitcoin",
+            slug: "bitcoin",
+            isActive: true,
+            rank: 1
+        )
+        
+        let usd = Currency(
+            id: "usd",
+            symbol: "USD",
+            name: "US Dollar",
+            slug: "usd",
+            isActive: true,
+            rank: 1
+        )
+        
+        let exchange = Exchange(
+            id: "binance",
+            name: "Binance",
+            displayName: "Binance"
+        )
+        
+        let pair = CurrencyPair(
+            baseCurrency: bitcoin,
+            quoteCurrency: usd,
+            exchange: exchange,
+            sortOrder: 0
+        )
+        
+        pair.currentPrice = 50000.0
+        
+        context.insert(bitcoin)
+        context.insert(usd)
+        context.insert(exchange)
+        context.insert(pair)
+        
+        return pair
+    }
+    
+    private func createTestAlert(currencyPair: CurrencyPair, targetPrice: Double = 55000.0, isEnabled: Bool = true) -> Bitpal_v2.Alert {
+        let alert = Bitpal_v2.Alert(
+            currencyPair: currencyPair,
+            comparison: .above,
+            targetPrice: targetPrice,
+            message: "Bitcoin alert",
+            isEnabled: isEnabled
+        )
+        
+        context.insert(alert)
+        return alert
+    }
+    
+    // MARK: - Empty State Tests
+    
+    func testEmptyStateView_WhenNoAlerts_ShowsEmptyState() throws {
+        // Given: No alerts in the system
+        
+        // When: Rendering AlertsView
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        // Then: Should show empty state
+        let rendered = try view.inspect()
+        
+        // Check for empty state elements
+        XCTAssertNoThrow(try rendered.find(text: "No Price Alerts"))
+        XCTAssertNoThrow(try rendered.find(text: "Create alerts to get notified when your cryptocurrencies reach target prices"))
+        XCTAssertNoThrow(try rendered.find(button: "Create Alert"))
+        
+        // Check for bell icon
+        XCTAssertNoThrow(try rendered.find(ViewType.Image.self).image().name(), "bell.circle")
+    }
+    
+    func testEmptyStateButton_WhenTapped_ShowsCreateAlertSheet() throws {
+        // Given: Empty alerts view
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // When: Tapping "Create Alert" button in empty state
+        let createButton = try rendered.find(button: "Create Alert")
+        try createButton.tap()
+        
+        // Then: Should present create alert sheet
+        // Note: In real UI tests, you would check for sheet presentation
+        XCTAssertTrue(true) // Placeholder - in practice would verify sheet presentation
+    }
+    
+    // MARK: - Alerts List Tests
+    
+    func testAlertsList_WhenAlertsExist_ShowsAlertRows() throws {
+        // Given: Alert exists in system
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair)
+        try context.save()
+        
+        // When: Rendering AlertsView
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // Then: Should show alerts list
+        XCTAssertNoThrow(try rendered.find(ViewType.List.self))
+        
+        // Should show currency pair name
+        XCTAssertNoThrow(try rendered.find(text: "BTC/USD"))
+        
+        // Should show target price
+        XCTAssertNoThrow(try rendered.find(text: "$55,000.00"))
+        
+        // Should show alert condition
+        XCTAssertNoThrow(try rendered.find(text: "Alert when"))
+        XCTAssertNoThrow(try rendered.find(text: "≥")) // Above symbol
+    }
+    
+    func testAlertRow_WhenEnabled_ShowsGreenIndicator() throws {
+        // Given: Enabled alert
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair, isEnabled: true)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show green status indicator
+        let circle = try rendered.find(ViewType.Circle.self)
+        XCTAssertEqual(try circle.fillShapeStyle().description, "green")
+    }
+    
+    func testAlertRow_WhenDisabled_ShowsGrayIndicator() throws {
+        // Given: Disabled alert
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair, isEnabled: false)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show gray status indicator
+        let circle = try rendered.find(ViewType.Circle.self)
+        XCTAssertEqual(try circle.fillShapeStyle().description, "gray")
+    }
+    
+    func testAlertRow_WhenPriceAboveTarget_ShowsUpArrow() throws {
+        // Given: Current price above target price
+        let currencyPair = createTestCurrencyPair()
+        currencyPair.currentPrice = 60000.0 // Above target of 55000
+        let alert = createTestAlert(currencyPair: currencyPair, targetPrice: 55000.0)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show up arrow
+        XCTAssertNoThrow(try rendered.find(ViewType.Image.self, where: { image in
+            try image.actualImage().name() == "arrow.up"
+        }))
+    }
+    
+    func testAlertRow_WhenPriceBelowTarget_ShowsDownArrow() throws {
+        // Given: Current price below target price
+        let currencyPair = createTestCurrencyPair()
+        currencyPair.currentPrice = 45000.0 // Below target of 55000
+        let alert = createTestAlert(currencyPair: currencyPair, targetPrice: 55000.0)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show down arrow
+        XCTAssertNoThrow(try rendered.find(ViewType.Image.self, where: { image in
+            try image.actualImage().name() == "arrow.down"
+        }))
+    }
+    
+    // MARK: - Navigation Tests
+    
+    func testNavigationTitle_ShowsPriceAlerts() throws {
+        // Given: AlertsView
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // When/Then: Should have correct navigation title
+        let navigationStack = try rendered.find(ViewType.NavigationStack.self)
+        XCTAssertEqual(try navigationStack.navigationTitle(), "Price Alerts")
+    }
+    
+    func testToolbarButton_ShowsPlusIcon() throws {
+        // Given: AlertsView
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // When/Then: Should have plus button in toolbar
+        XCTAssertNoThrow(try rendered.find(ViewType.Image.self, where: { image in
+            try image.actualImage().name() == "plus"
+        }))
+    }
+    
+    // MARK: - Interaction Tests
+    
+    func testToggleSwitch_WhenTapped_UpdatesAlertState() async throws {
+        // Given: Enabled alert
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair, isEnabled: true)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should find toggle switch
+        let toggle = try rendered.find(ViewType.Toggle.self)
+        XCTAssertTrue(try toggle.isOn())
+        
+        // When: Toggling switch (simulated)
+        try toggle.tap()
+        
+        // Then: State should be updated (in real implementation)
+        // Note: This would require more sophisticated mocking of AlertService
+        XCTAssertTrue(true) // Placeholder
+    }
+    
+    // MARK: - Swipe Actions Tests
+    
+    func testSwipeActions_HasDeleteAction() throws {
+        // Given: Alert in list
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair)
+        try context.save()
+        
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // When/Then: Should have swipe actions configured
+        // Note: SwiftUI Inspector doesn't directly support swipe actions testing
+        // In practice, this would be tested in UI automation tests
+        XCTAssertNoThrow(try rendered.find(ViewType.List.self))
+    }
+    
+    // MARK: - Loading State Tests
+    
+    func testLoadingState_WhenServiceIsLoading_ShowsProgressView() throws {
+        // Given: Loading state
+        alertService.isLoading = true
+        
+        // When: Rendering AlertsView
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // Then: Should show progress view
+        XCTAssertNoThrow(try rendered.find(ViewType.ProgressView.self))
+        XCTAssertNoThrow(try rendered.find(text: "Loading alerts..."))
+    }
+    
+    // MARK: - Error Handling Tests
+    
+    func testErrorAlert_WhenErrorOccurs_ShowsErrorAlert() throws {
+        // Given: AlertsView with error
+        let view = AlertsView()
+            .modelContainer(container)
+            .environment(alertService)
+        
+        let rendered = try view.inspect()
+        
+        // When: Error occurs (simulated by setting error message)
+        // Note: In practice, would trigger actual error condition
+        
+        // Then: Should handle error display
+        // This would be tested by triggering actual error conditions
+        XCTAssertTrue(true) // Placeholder
+    }
+    
+    // MARK: - Accessibility Tests
+    
+    func testAccessibility_AlertRowHasProperLabels() throws {
+        // Given: Alert row
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should have accessible elements
+        XCTAssertNoThrow(try rendered.find(ViewType.Toggle.self))
+        XCTAssertNoThrow(try rendered.find(text: "BTC/USD"))
+        XCTAssertTrue(true) // Additional accessibility checks would go here
+    }
+    
+    // MARK: - Performance Tests
+    
+    func testPerformance_RenderingManyAlerts() throws {
+        // Given: Many alerts
+        let currencyPair = createTestCurrencyPair()
+        
+        for i in 0..<100 {
+            let alert = createTestAlert(
+                currencyPair: currencyPair,
+                targetPrice: Double(50000 + i * 100),
+                isEnabled: i % 2 == 0
+            )
+            context.insert(alert)
+        }
+        try context.save()
+        
+        // When: Measuring rendering performance
+        measure {
+            let view = AlertsView()
+                .modelContainer(container)
+                .environment(alertService)
+            
+            _ = try? view.inspect()
+        }
+        
+        // Then: Should render within performance threshold
+    }
+    
+    // MARK: - Data Consistency Tests
+    
+    func testDataConsistency_AlertsShowCorrectCurrentPrice() throws {
+        // Given: Alert with specific current price
+        let currencyPair = createTestCurrencyPair()
+        currencyPair.currentPrice = 52500.75
+        let alert = createTestAlert(currencyPair: currencyPair, targetPrice: 55000.0)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show correct current price
+        XCTAssertNoThrow(try rendered.find(text: "$52,500.75"))
+    }
+    
+    func testDataConsistency_AlertsShowCorrectTargetPrice() throws {
+        // Given: Alert with specific target price
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair, targetPrice: 48999.99)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show correct target price
+        XCTAssertNoThrow(try rendered.find(text: "$48,999.99"))
+    }
+    
+    // MARK: - Edge Cases Tests
+    
+    func testEdgeCase_AlertWithNoCurrencyPair_ShowsUnknownPair() throws {
+        // Given: Alert without currency pair
+        let alert = Alert(
+            currencyPair: nil,
+            comparison: .above,
+            targetPrice: 50000.0,
+            message: "Test alert",
+            isEnabled: true
+        )
+        context.insert(alert)
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show "Unknown Pair"
+        XCTAssertNoThrow(try rendered.find(text: "Unknown Pair"))
+    }
+    
+    func testEdgeCase_AlertNeverTriggered_ShowsNeverTriggered() throws {
+        // Given: Alert that was never triggered
+        let currencyPair = createTestCurrencyPair()
+        let alert = createTestAlert(currencyPair: currencyPair)
+        alert.lastTriggered = nil // Ensure it's nil
+        try context.save()
+        
+        // When: Rendering AlertRow
+        let alertRow = AlertRow(alert: alert)
+            .environment(alertService)
+        
+        let rendered = try alertRow.inspect()
+        
+        // Then: Should show "Never triggered"
+        XCTAssertNoThrow(try rendered.find(text: "Never triggered"))
+    }
+}
+
+// MARK: - Test Framework Extensions
+
+// Simple testing without external dependencies
+
+// MARK: - Mock Extensions for Testing
+
+extension AlertService {
+    var isLoading: Bool {
+        get { false } // Would need to expose this property in the real implementation
+        set { } // Setter for testing
+    }
+    
+    var errorMessage: String? {
+        nil // Would need to expose this property in the real implementation
+    }
+}

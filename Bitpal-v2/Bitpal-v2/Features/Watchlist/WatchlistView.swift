@@ -1,0 +1,251 @@
+//
+//  WatchlistView.swift
+//  Bitpal-v2
+//
+//  Created by Ryne Cheow on 20/7/25.
+//
+
+import SwiftUI
+import SwiftData
+
+struct WatchlistView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \CurrencyPair.sortOrder) private var currencyPairs: [CurrencyPair]
+    @State private var watchlistViewModel = WatchlistViewModel()
+    @State private var showingAddCurrency = false
+    @State private var isRefreshing = false
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                if currencyPairs.isEmpty {
+                    EmptyWatchlistView {
+                        showingAddCurrency = true
+                    }
+                } else {
+                    watchlistContent
+                }
+            }
+            .navigationTitle("Watchlist")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingAddCurrency = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddCurrency) {
+                AddCurrencyView()
+            }
+            .task {
+                watchlistViewModel.setModelContext(modelContext)
+                // Only start price streaming if not already started by AppCoordinator
+                await watchlistViewModel.startPriceStreamingIfNeeded(for: currencyPairs)
+            }
+            .refreshable {
+                await refreshPrices()
+            }
+        }
+    }
+    
+    private var watchlistContent: some View {
+        List {
+            ForEach(currencyPairs) { pair in
+                NavigationLink(destination: CurrencyDetailView(currencyPair: pair)) {
+                    WatchlistRowView(currencyPair: pair)
+                }
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        deletePair(pair)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+            .onMove(perform: movePairs)
+        }
+        .listStyle(.plain)
+    }
+    
+    private func refreshPrices() async {
+        isRefreshing = true
+        await watchlistViewModel.refreshPrices(for: currencyPairs)
+        isRefreshing = false
+    }
+    
+    private func deletePair(_ pair: CurrencyPair) {
+        withAnimation {
+            modelContext.delete(pair)
+            try? modelContext.save()
+        }
+    }
+    
+    private func movePairs(from source: IndexSet, to destination: Int) {
+        var pairs = currencyPairs
+        pairs.move(fromOffsets: source, toOffset: destination)
+        
+        for (index, pair) in pairs.enumerated() {
+            pair.sortOrder = index
+        }
+        
+        try? modelContext.save()
+    }
+}
+
+struct WatchlistRowView: View {
+    let currencyPair: CurrencyPair
+    @State private var priceStreamService = PriceStreamService.shared
+    @State private var animatePrice = false
+    
+    private var streamPrice: StreamPrice? {
+        priceStreamService.prices[currencyPair.primaryKey]
+    }
+    
+    private var currentPrice: Double {
+        streamPrice?.price ?? currencyPair.currentPrice
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Currency Icon
+            CurrencyIconView(symbol: currencyPair.baseCurrency?.symbol ?? "")
+                .frame(width: 40, height: 40)
+            
+            // Currency Info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(currencyPair.displayName)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Text(currencyPair.exchangeName)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            // Price Info
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(formatPrice(currentPrice))
+                    .font(.system(.body, design: .monospaced))
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .scaleEffect(animatePrice ? 1.05 : 1.0)
+                    .animation(.easeInOut(duration: 0.3), value: animatePrice)
+                
+                PriceChangeView(
+                    change: currencyPair.priceChange24h,
+                    changePercent: currencyPair.priceChangePercent24h
+                )
+            }
+        }
+        .padding(.vertical, 4)
+        .onChange(of: streamPrice?.price) { oldValue, newValue in
+            if oldValue != newValue {
+                withAnimation {
+                    animatePrice = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    animatePrice = false
+                }
+            }
+        }
+    }
+    
+    private func formatPrice(_ price: Double) -> String {
+        if price >= 1000 {
+            return String(format: "$%.0f", price)
+        } else if price >= 1 {
+            return String(format: "$%.2f", price)
+        } else {
+            return String(format: "$%.4f", price)
+        }
+    }
+}
+
+struct PriceChangeView: View {
+    let change: Double
+    let changePercent: Double
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: isPositive ? "arrow.up" : "arrow.down")
+                .font(.caption2)
+            
+            Text("\(changePercent >= 0 ? "+" : "")\(String(format: "%.2f", changePercent))%")
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .foregroundColor(isPositive ? .green : .red)
+    }
+    
+    private var isPositive: Bool {
+        change >= 0
+    }
+}
+
+struct CurrencyIconView: View {
+    let symbol: String
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(backgroundColorForSymbol(symbol))
+            
+            Text(symbol.prefix(2))
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+        }
+    }
+    
+    private func backgroundColorForSymbol(_ symbol: String) -> Color {
+        switch symbol.uppercased() {
+        case "BTC":
+            return .orange
+        case "ETH":
+            return .blue
+        case "ADA":
+            return .indigo
+        case "DOT":
+            return .pink
+        case "LTC":
+            return .gray
+        default:
+            return .accentColor
+        }
+    }
+}
+
+struct EmptyWatchlistView: View {
+    let onAddCurrency: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .font(.system(size: 60))
+                .foregroundColor(.secondary)
+            
+            VStack(spacing: 8) {
+                Text("No Currencies")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Text("Add cryptocurrencies to start tracking prices")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            
+            Button("Add Currency") {
+                onAddCurrency()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+        }
+        .padding()
+    }
+}

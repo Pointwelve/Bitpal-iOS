@@ -1,0 +1,465 @@
+//
+//  SettingsViewUITests.swift
+//  Bitpal-v2Tests
+//
+//  Created by Ryne Cheow on 20/7/25.
+//
+
+import XCTest
+import SwiftData
+@testable import Bitpal_v2
+
+@MainActor
+final class SettingsViewUITests: XCTestCase {
+    
+    private var container: ModelContainer!
+    private var context: ModelContext!
+    
+    override func setUp() async throws {
+        try await super.setUp()
+        
+        // Create in-memory container for testing
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try ModelContainer(
+            for: Configuration.self, UserPreferences.self,
+            configurations: config
+        )
+        context = container.mainContext
+    }
+    
+    override func tearDown() async throws {
+        container = nil
+        context = nil
+        try await super.tearDown()
+    }
+    
+    // MARK: - Test Data Creation
+    
+    private func createTestConfiguration() -> Configuration {
+        let config = Configuration()
+        config.apiHost = "api.test.com"
+        config.socketHost = "ws.test.com"
+        config.companyName = "Test Company"
+        config.version = "1.0.0"
+        config.apiKey = "test-api-key"
+        context.insert(config)
+        return config
+    }
+    
+    private func createTestUserPreferences() -> UserPreferences {
+        let preferences = UserPreferences(
+            currency: "USD",
+            theme: "system",
+            notificationsEnabled: true,
+            priceAlertsEnabled: true,
+            newsAlertsEnabled: false,
+            biometricAuthEnabled: false
+        )
+        context.insert(preferences)
+        return preferences
+    }
+    
+    // MARK: - Configuration Model Tests
+    
+    func testConfiguration_Creation() throws {
+        // Given: Configuration data
+        let config = createTestConfiguration()
+        try context.save()
+        
+        // When/Then: Configuration should be created with correct values
+        XCTAssertEqual(config.apiHost, "api.test.com")
+        XCTAssertEqual(config.socketHost, "ws.test.com")
+        XCTAssertEqual(config.companyName, "Test Company")
+        XCTAssertEqual(config.version, "1.0.0")
+        XCTAssertEqual(config.apiKey, "test-api-key")
+    }
+    
+    func testConfiguration_APIKeyUpdate() throws {
+        // Given: Configuration
+        let config = createTestConfiguration()
+        try context.save()
+        
+        // When: Updating API key
+        config.apiKey = "new-api-key"
+        try context.save()
+        
+        // Then: Configuration should be updated
+        XCTAssertEqual(config.apiKey, "new-api-key")
+    }
+    
+    func testConfiguration_Persistence() throws {
+        // Given: Configuration
+        let config = createTestConfiguration()
+        try context.save()
+        let configId = config.id
+        
+        // When: Fetching configuration from context
+        let descriptor = FetchDescriptor<Configuration>()
+        let configurations = try context.fetch(descriptor)
+        
+        // Then: Configuration should persist
+        XCTAssertEqual(configurations.count, 1)
+        XCTAssertEqual(configurations.first?.id, configId)
+    }
+    
+    // MARK: - User Preferences Model Tests
+    
+    func testUserPreferences_Creation() throws {
+        // Given: User preferences data
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When/Then: Preferences should be created with correct values
+        XCTAssertEqual(preferences.currency, "USD")
+        XCTAssertEqual(preferences.theme, "system")
+        XCTAssertTrue(preferences.notificationsEnabled)
+        XCTAssertTrue(preferences.priceAlertsEnabled)
+        XCTAssertFalse(preferences.newsAlertsEnabled)
+        XCTAssertFalse(preferences.biometricAuthEnabled)
+    }
+    
+    func testUserPreferences_ThemeUpdate() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Updating theme
+        preferences.theme = "dark"
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertEqual(preferences.theme, "dark")
+    }
+    
+    func testUserPreferences_CurrencyUpdate() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Updating currency
+        preferences.currency = "EUR"
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertEqual(preferences.currency, "EUR")
+    }
+    
+    func testUserPreferences_NotificationToggle() throws {
+        // Given: User preferences with notifications enabled
+        let preferences = createTestUserPreferences()
+        XCTAssertTrue(preferences.notificationsEnabled)
+        try context.save()
+        
+        // When: Disabling notifications
+        preferences.notificationsEnabled = false
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertFalse(preferences.notificationsEnabled)
+    }
+    
+    // MARK: - Notification Settings Tests
+    
+    func testUserPreferences_PriceAlertsToggle() throws {
+        // Given: User preferences with price alerts enabled
+        let preferences = createTestUserPreferences()
+        XCTAssertTrue(preferences.priceAlertsEnabled)
+        try context.save()
+        
+        // When: Disabling price alerts
+        preferences.priceAlertsEnabled = false
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertFalse(preferences.priceAlertsEnabled)
+    }
+    
+    func testUserPreferences_NewsAlertsToggle() throws {
+        // Given: User preferences with news alerts disabled
+        let preferences = createTestUserPreferences()
+        XCTAssertFalse(preferences.newsAlertsEnabled)
+        try context.save()
+        
+        // When: Enabling news alerts
+        preferences.newsAlertsEnabled = true
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertTrue(preferences.newsAlertsEnabled)
+    }
+    
+    func testUserPreferences_BiometricAuthToggle() throws {
+        // Given: User preferences with biometric auth disabled
+        let preferences = createTestUserPreferences()
+        XCTAssertFalse(preferences.biometricAuthEnabled)
+        try context.save()
+        
+        // When: Enabling biometric auth
+        preferences.biometricAuthEnabled = true
+        try context.save()
+        
+        // Then: Preferences should be updated
+        XCTAssertTrue(preferences.biometricAuthEnabled)
+    }
+    
+    func testUserPreferences_AllNotificationSettings() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Testing all notification toggles
+        preferences.notificationsEnabled = false
+        preferences.priceAlertsEnabled = false
+        preferences.newsAlertsEnabled = true
+        preferences.biometricAuthEnabled = true
+        try context.save()
+        
+        // Then: All settings should be updated correctly
+        XCTAssertFalse(preferences.notificationsEnabled)
+        XCTAssertFalse(preferences.priceAlertsEnabled)
+        XCTAssertTrue(preferences.newsAlertsEnabled)
+        XCTAssertTrue(preferences.biometricAuthEnabled)
+    }
+    
+    // MARK: - Theme Enum Tests
+    
+    func testTheme_AllCasesHaveDisplayNames() throws {
+        // Given: Theme enum cases
+        let themes = Theme.allCases
+        
+        // When/Then: All themes should have proper display names
+        XCTAssertEqual(themes.count, 3)
+        XCTAssertEqual(Theme.light.displayName, "Light")
+        XCTAssertEqual(Theme.dark.displayName, "Dark")
+        XCTAssertEqual(Theme.system.displayName, "System")
+    }
+    
+    func testTheme_RawValues() throws {
+        // Given: Theme enum
+        // When/Then: Raw values should be correct
+        XCTAssertEqual(Theme.light.rawValue, "light")
+        XCTAssertEqual(Theme.dark.rawValue, "dark")
+        XCTAssertEqual(Theme.system.rawValue, "system")
+    }
+    
+    func testTheme_FromRawValue() throws {
+        // Given: Raw value strings
+        // When/Then: Should create correct theme enum values
+        XCTAssertEqual(Theme(rawValue: "light"), .light)
+        XCTAssertEqual(Theme(rawValue: "dark"), .dark)
+        XCTAssertEqual(Theme(rawValue: "system"), .system)
+        XCTAssertNil(Theme(rawValue: "invalid"))
+    }
+    
+    // MARK: - Data Persistence Tests
+    
+    func testDataPersistence_MultipleConfigurations() throws {
+        // Given: Multiple configurations
+        let config1 = createTestConfiguration()
+        config1.companyName = "Company 1"
+        
+        let config2 = Configuration()
+        config2.companyName = "Company 2"
+        context.insert(config2)
+        
+        try context.save()
+        
+        // When: Fetching configurations
+        let descriptor = FetchDescriptor<Configuration>()
+        let configurations = try context.fetch(descriptor)
+        
+        // Then: Both should persist
+        XCTAssertEqual(configurations.count, 2)
+        XCTAssertTrue(configurations.contains { $0.companyName == "Company 1" })
+        XCTAssertTrue(configurations.contains { $0.companyName == "Company 2" })
+    }
+    
+    func testDataPersistence_PreferencesWithTimeStamps() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        let createdAt = preferences.createdAt
+        try context.save()
+        
+        // When: Updating preferences
+        Thread.sleep(forTimeInterval: 0.01) // Ensure time difference
+        preferences.currency = "EUR"
+        preferences.lastModified = Date()
+        try context.save()
+        
+        // Then: Timestamps should be managed correctly
+        XCTAssertEqual(preferences.createdAt, createdAt)
+        XCTAssertGreaterThan(preferences.lastModified, createdAt)
+    }
+    
+    // MARK: - Settings View Model Tests
+    
+    func testSettingsView_ConfigurationAndPreferencesPersistence() throws {
+        // Given: Configuration and preferences
+        let config = createTestConfiguration()
+        let preferences = createTestUserPreferences()
+        let originalAPIKey = config.apiKey
+        let originalCurrency = preferences.currency
+        try context.save()
+        
+        // When: Making changes to both models
+        config.apiKey = "updated-api-key"
+        preferences.currency = "EUR"
+        try context.save()
+        
+        // Then: Both changes should persist
+        XCTAssertNotEqual(config.apiKey, originalAPIKey)
+        XCTAssertEqual(config.apiKey, "updated-api-key")
+        XCTAssertNotEqual(preferences.currency, originalCurrency)
+        XCTAssertEqual(preferences.currency, "EUR")
+    }
+    
+    func testSettingsView_MultiplePreferenceChanges() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Making multiple changes
+        let originalNotifications = preferences.notificationsEnabled
+        let originalTheme = preferences.theme
+        let originalCurrency = preferences.currency
+        
+        preferences.notificationsEnabled = !originalNotifications
+        preferences.theme = "dark"
+        preferences.currency = "GBP"
+        try context.save()
+        
+        // Then: All changes should persist
+        XCTAssertNotEqual(preferences.notificationsEnabled, originalNotifications)
+        XCTAssertNotEqual(preferences.theme, originalTheme)
+        XCTAssertNotEqual(preferences.currency, originalCurrency)
+        XCTAssertEqual(preferences.theme, "dark")
+        XCTAssertEqual(preferences.currency, "GBP")
+    }
+    
+    // MARK: - Currency Integration Tests
+    
+    func testCurrencySelection_AllSupportedCurrencies() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        let supportedCurrencies = ["USD", "EUR", "GBP", "JPY"]
+        
+        // When/Then: All currency options should work
+        for currency in supportedCurrencies {
+            preferences.currency = currency
+            try context.save()
+            
+            // Verify the currency was set correctly
+            XCTAssertEqual(preferences.currency, currency)
+        }
+        
+        // Verify the final state
+        XCTAssertEqual(preferences.currency, "JPY")
+    }
+    
+    func testThemeSelection_AllSupportedThemes() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When/Then: All theme options should work
+        for theme in Theme.allCases {
+            preferences.theme = theme.rawValue
+            try context.save()
+            
+            // Verify the theme was set correctly
+            XCTAssertEqual(preferences.theme, theme.rawValue)
+        }
+        
+        // Verify the final state
+        XCTAssertEqual(preferences.theme, Theme.system.rawValue)
+    }
+    
+    // MARK: - Edge Cases Tests
+    
+    func testEdgeCase_EmptyAPIKey() throws {
+        // Given: Configuration with empty API key
+        let config = createTestConfiguration()
+        config.apiKey = ""
+        try context.save()
+        
+        // When/Then: Should handle empty API key
+        XCTAssertEqual(config.apiKey, "")
+        XCTAssertTrue(config.apiKey.isEmpty)
+    }
+    
+    func testEdgeCase_SpecialCharactersInConfiguration() throws {
+        // Given: Configuration with special characters
+        let config = createTestConfiguration()
+        config.companyName = "Test & Company™ 🚀"
+        config.version = "1.0.0-beta+20241201"
+        config.apiKey = "api-key-with-special-chars!@#$%"
+        try context.save()
+        
+        // When/Then: Should handle special characters properly
+        XCTAssertEqual(config.companyName, "Test & Company™ 🚀")
+        XCTAssertEqual(config.version, "1.0.0-beta+20241201")
+        XCTAssertEqual(config.apiKey, "api-key-with-special-chars!@#$%")
+    }
+    
+    func testEdgeCase_InvalidThemeValue() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Setting invalid theme value
+        preferences.theme = "invalid-theme"
+        try context.save()
+        
+        // Then: Should store the value (validation would be at UI level)
+        XCTAssertEqual(preferences.theme, "invalid-theme")
+        
+        // But Theme enum should return nil for invalid values
+        XCTAssertNil(Theme(rawValue: "invalid-theme"))
+    }
+    
+    // MARK: - Performance Tests
+    
+    func testPerformance_SwiftDataOperations() throws {
+        // Given: Multiple configurations and preferences
+        for i in 0..<100 {
+            let config = Configuration()
+            config.companyName = "Company \(i)"
+            config.version = "1.\(i).0"
+            context.insert(config)
+            
+            let preferences = UserPreferences(currency: "USD", theme: "system")
+            preferences.id = "pref-\(i)"
+            context.insert(preferences)
+        }
+        
+        // When: Measuring save performance
+        measure {
+            try! context.save()
+        }
+        
+        // Then: Should save within performance threshold
+        let descriptor = FetchDescriptor<Configuration>()
+        let configs = try context.fetch(descriptor)
+        XCTAssertEqual(configs.count, 100)
+    }
+    
+    func testPerformance_MultiplePreferenceUpdates() throws {
+        // Given: User preferences
+        let preferences = createTestUserPreferences()
+        try context.save()
+        
+        // When: Measuring multiple update performance
+        measure {
+            for i in 0..<100 {
+                preferences.currency = i % 2 == 0 ? "USD" : "EUR"
+                preferences.notificationsEnabled = i % 2 == 0
+                try! context.save()
+            }
+        }
+        
+        // Then: Should handle updates efficiently
+        XCTAssertEqual(preferences.currency, "EUR") // Final state should be EUR
+    }
+}

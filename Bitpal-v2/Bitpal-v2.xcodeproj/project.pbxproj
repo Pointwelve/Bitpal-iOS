@@ -1,0 +1,583 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 90;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		6DC3ED152E2C99C30018B6FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DC3ECFB2E2C99C20018B6FD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6DC3ED022E2C99C20018B6FD;
+			remoteInfo = "Bitpal-v2";
+		};
+		6DC3ED1F2E2C99C30018B6FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DC3ECFB2E2C99C20018B6FD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6DC3ED022E2C99C20018B6FD;
+			remoteInfo = "Bitpal-v2";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6DC3ED032E2C99C20018B6FD /* Bitpal-v2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bitpal-v2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DC3ED142E2C99C30018B6FD /* Bitpal-v2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bitpal-v2Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DC3ED1E2E2C99C30018B6FD /* Bitpal-v2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bitpal-v2UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6DC3ED262E2C99C30018B6FD /* Exceptions for "Bitpal-v2" folder in "Bitpal-v2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6DC3ED022E2C99C20018B6FD /* Bitpal-v2 */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6DC3ED052E2C99C20018B6FD /* Bitpal-v2 */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6DC3ED262E2C99C30018B6FD /* Exceptions for "Bitpal-v2" folder in "Bitpal-v2" target */,
+			);
+			path = "Bitpal-v2";
+			sourceTree = "<group>";
+		};
+		6DC3ED172E2C99C30018B6FD /* Bitpal-v2Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Bitpal-v2Tests";
+			sourceTree = "<group>";
+		};
+		6DC3ED212E2C99C30018B6FD /* Bitpal-v2UITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Bitpal-v2UITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6DC3ED002E2C99C20018B6FD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED112E2C99C30018B6FD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED1B2E2C99C30018B6FD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6DC3ECFA2E2C99C20018B6FD = {
+			isa = PBXGroup;
+			children = (
+				6DC3ED052E2C99C20018B6FD /* Bitpal-v2 */,
+				6DC3ED172E2C99C30018B6FD /* Bitpal-v2Tests */,
+				6DC3ED212E2C99C30018B6FD /* Bitpal-v2UITests */,
+				6DC3ED042E2C99C20018B6FD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6DC3ED042E2C99C20018B6FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6DC3ED032E2C99C20018B6FD /* Bitpal-v2.app */,
+				6DC3ED142E2C99C30018B6FD /* Bitpal-v2Tests.xctest */,
+				6DC3ED1E2E2C99C30018B6FD /* Bitpal-v2UITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6DC3ED022E2C99C20018B6FD /* Bitpal-v2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DC3ED272E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2" */;
+			buildPhases = (
+				6DC3ECFF2E2C99C20018B6FD /* Sources */,
+				6DC3ED002E2C99C20018B6FD /* Frameworks */,
+				6DC3ED012E2C99C20018B6FD /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				6DC3ED052E2C99C20018B6FD /* Bitpal-v2 */,
+			);
+			name = "Bitpal-v2";
+			productName = "Bitpal-v2";
+			productReference = 6DC3ED032E2C99C20018B6FD /* Bitpal-v2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6DC3ED132E2C99C30018B6FD /* Bitpal-v2Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DC3ED2C2E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2Tests" */;
+			buildPhases = (
+				6DC3ED102E2C99C30018B6FD /* Sources */,
+				6DC3ED112E2C99C30018B6FD /* Frameworks */,
+				6DC3ED122E2C99C30018B6FD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6DC3ED162E2C99C30018B6FD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6DC3ED172E2C99C30018B6FD /* Bitpal-v2Tests */,
+			);
+			name = "Bitpal-v2Tests";
+			productName = "Bitpal-v2Tests";
+			productReference = 6DC3ED142E2C99C30018B6FD /* Bitpal-v2Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6DC3ED1D2E2C99C30018B6FD /* Bitpal-v2UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DC3ED2F2E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2UITests" */;
+			buildPhases = (
+				6DC3ED1A2E2C99C30018B6FD /* Sources */,
+				6DC3ED1B2E2C99C30018B6FD /* Frameworks */,
+				6DC3ED1C2E2C99C30018B6FD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6DC3ED202E2C99C30018B6FD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6DC3ED212E2C99C30018B6FD /* Bitpal-v2UITests */,
+			);
+			name = "Bitpal-v2UITests";
+			productName = "Bitpal-v2UITests";
+			productReference = 6DC3ED1E2E2C99C30018B6FD /* Bitpal-v2UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6DC3ECFB2E2C99C20018B6FD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					6DC3ED022E2C99C20018B6FD = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					6DC3ED132E2C99C30018B6FD = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 6DC3ED022E2C99C20018B6FD;
+					};
+					6DC3ED1D2E2C99C30018B6FD = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 6DC3ED022E2C99C20018B6FD;
+					};
+				};
+			};
+			buildConfigurationList = 6DC3ECFE2E2C99C20018B6FD /* Build configuration list for PBXProject "Bitpal-v2" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6DC3ECFA2E2C99C20018B6FD;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 90;
+			productRefGroup = 6DC3ED042E2C99C20018B6FD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6DC3ED022E2C99C20018B6FD /* Bitpal-v2 */,
+				6DC3ED132E2C99C30018B6FD /* Bitpal-v2Tests */,
+				6DC3ED1D2E2C99C30018B6FD /* Bitpal-v2UITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6DC3ED012E2C99C20018B6FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED122E2C99C30018B6FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED1C2E2C99C30018B6FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6DC3ECFF2E2C99C20018B6FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED102E2C99C30018B6FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		6DC3ED1A2E2C99C30018B6FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6DC3ED162E2C99C30018B6FD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6DC3ED022E2C99C20018B6FD /* Bitpal-v2 */;
+			targetProxy = 6DC3ED152E2C99C30018B6FD /* PBXContainerItemProxy */;
+		};
+		6DC3ED202E2C99C30018B6FD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6DC3ED022E2C99C20018B6FD /* Bitpal-v2 */;
+			targetProxy = 6DC3ED1F2E2C99C30018B6FD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6DC3ED282E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Bitpal-v2/Bitpal_v2.entitlements";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Bitpal-v2/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		6DC3ED292E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Bitpal-v2/Bitpal_v2.entitlements";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Bitpal-v2/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		6DC3ED2A2E2C99C30018B6FD /* Debug configuration for PBXProject "Bitpal-v2" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		6DC3ED2B2E2C99C30018B6FD /* Release configuration for PBXProject "Bitpal-v2" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		6DC3ED2D2E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2Tests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bitpal-v2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bitpal-v2";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		6DC3ED2E2E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2Tests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bitpal-v2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bitpal-v2";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		6DC3ED302E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2UITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = "Bitpal-v2";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		6DC3ED312E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2UITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-v2UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = "Bitpal-v2";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6DC3ECFE2E2C99C20018B6FD /* Build configuration list for PBXProject "Bitpal-v2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6DC3ED2A2E2C99C30018B6FD /* Debug configuration for PBXProject "Bitpal-v2" */,
+				6DC3ED2B2E2C99C30018B6FD /* Release configuration for PBXProject "Bitpal-v2" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		6DC3ED272E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6DC3ED282E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2" */,
+				6DC3ED292E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		6DC3ED2C2E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6DC3ED2D2E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2Tests" */,
+				6DC3ED2E2E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2Tests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		6DC3ED2F2E2C99C30018B6FD /* Build configuration list for PBXNativeTarget "Bitpal-v2UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6DC3ED302E2C99C30018B6FD /* Debug configuration for PBXNativeTarget "Bitpal-v2UITests" */,
+				6DC3ED312E2C99C30018B6FD /* Release configuration for PBXNativeTarget "Bitpal-v2UITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6DC3ECFB2E2C99C20018B6FD /* Project object */;
+}
