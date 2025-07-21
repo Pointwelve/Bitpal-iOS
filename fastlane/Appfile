@@ -1,8 +1,0 @@
-app_identifier("com.pointwelve.app.bitpal") # The bundle identifier of your app
-apple_id("bot@pointwelve.com") # Your Apple email address
-
-itc_team_id("118733842") # App Store Connect Team ID
-team_id("Z2Q7ZE2E5A") # Developer Portal Team ID
-
-# For more information about the Appfile, see:
-#     https://docs.fastlane.tools/advanced/#appfile
