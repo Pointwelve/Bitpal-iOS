@@ -1,0 +1,309 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Swift Lint
+  swiftlint:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache SwiftLint
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/swiftlint
+          key: ${{ runner.os }}-swiftlint-${{ hashFiles('**/.swiftlint.yml') }}
+
+      - name: Install SwiftLint
+        run: |
+          if ! command -v swiftlint &> /dev/null; then
+            brew install swiftlint
+          fi
+
+      - name: SwiftLint
+        run: |
+          swiftlint lint --reporter github-actions-logging
+        continue-on-error: false
+
+      - name: SwiftLint Summary
+        if: always()
+        run: |
+          echo "## SwiftLint Results" >> $GITHUB_STEP_SUMMARY
+          swiftlint lint --reporter markdown >> $GITHUB_STEP_SUMMARY || true
+
+  # Swift Format
+  swiftformat:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache SwiftFormat
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/swiftformat
+          key: ${{ runner.os }}-swiftformat-${{ hashFiles('**/.swiftformat') }}
+
+      - name: Install SwiftFormat
+        run: |
+          if ! command -v swiftformat &> /dev/null; then
+            brew install swiftformat
+          fi
+
+      - name: SwiftFormat Check
+        run: |
+          # Check SwiftUI v2
+          if [ -d "Bitpal-v2" ]; then
+            echo "🎨 Checking SwiftUI v2 formatting..."
+            swiftformat --lint --config .swiftformat Bitpal-v2/Bitpal-v2/
+          fi
+          
+          # Check Legacy
+          if [ -d "Legacy/Sources" ]; then
+            echo "🎨 Checking Legacy formatting..."
+            swiftformat --lint --config .swiftformat Legacy/Sources/
+          fi
+
+      - name: SwiftFormat Summary
+        if: failure()
+        run: |
+          echo "## SwiftFormat Issues Found" >> $GITHUB_STEP_SUMMARY
+          echo "Code formatting issues detected. Please run:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo 'swiftformat --config .swiftformat Bitpal-v2/Bitpal-v2/' >> $GITHUB_STEP_SUMMARY
+          echo 'swiftformat --config .swiftformat Legacy/Sources/' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # Dependency Audit
+  dependency-audit:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit SPM Dependencies (SwiftUI v2)
+        if: hashFiles('**/Package.swift') != ''
+        run: |
+          echo "🔍 Auditing SPM dependencies..."
+          cd Bitpal-v2
+          # Check for known vulnerabilities in SPM packages
+          if command -v swift &> /dev/null; then
+            swift package show-dependencies --format json > dependencies.json
+            echo "📦 SPM Dependencies:" >> $GITHUB_STEP_SUMMARY
+            swift package show-dependencies >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Audit Carthage Dependencies (Legacy)
+        if: hashFiles('**/Cartfile') != ''
+        run: |
+          echo "🔍 Auditing Carthage dependencies..."
+          cd Legacy
+          if [ -f "Cartfile.resolved" ]; then
+            echo "📦 Carthage Dependencies:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat Cartfile.resolved >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Code Metrics
+  code-metrics:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Tools
+        run: |
+          # Install code analysis tools
+          if ! command -v cloc &> /dev/null; then
+            brew install cloc
+          fi
+
+      - name: Generate Code Metrics
+        run: |
+          echo "## Code Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Lines of code
+          echo "### Lines of Code" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cloc --exclude-dir=build,DerivedData,Carthage,.git --include-lang=Swift . >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # File counts
+          echo "### File Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Swift Files | Test Files |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------------|------------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "Bitpal-v2" ]; then
+            SWIFT_FILES=$(find Bitpal-v2/Bitpal-v2 -name "*.swift" | wc -l | tr -d ' ')
+            TEST_FILES=$(find Bitpal-v2 -name "*Test*.swift" -o -name "*Tests.swift" | wc -l | tr -d ' ')
+            echo "| SwiftUI v2 | $SWIFT_FILES | $TEST_FILES |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d "Legacy" ]; then
+            SWIFT_FILES=$(find Legacy/Sources -name "*.swift" 2>/dev/null | wc -l | tr -d ' ')
+            TEST_FILES=$(find Legacy -name "*Test*.swift" -o -name "*Tests.swift" 2>/dev/null | wc -l | tr -d ' ')
+            echo "| Legacy | $SWIFT_FILES | $TEST_FILES |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Unused Code Detection
+  unused-code:
+    runs-on: macos-15
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Periphery
+        run: |
+          if ! command -v periphery &> /dev/null; then
+            brew install periphery
+          fi
+
+      - name: Detect Unused Code (SwiftUI v2)
+        if: hashFiles('**/Bitpal-v2.xcodeproj') != ''
+        run: |
+          cd Bitpal-v2
+          echo "🔍 Scanning for unused code in SwiftUI v2..."
+          periphery scan --project Bitpal-v2.xcodeproj --schemes Bitpal-v2 --format json > ../unused-code-v2.json || true
+          
+          if [ -s "../unused-code-v2.json" ]; then
+            echo "⚠️ Unused code detected in SwiftUI v2" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No unused code found in SwiftUI v2" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Unused Code Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unused-code-report
+          path: unused-code-*.json
+          if-no-files-found: ignore
+
+  # Security Scan
+  security-scan:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Security Scan
+        run: |
+          echo "🔒 Running security scan..."
+          
+          # Check for hardcoded secrets/API keys
+          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          
+          # Search for potential secrets in Swift files
+          SECRETS_FOUND=false
+          
+          # Check for API keys, tokens, etc.
+          if grep -r -E "(api[_-]?key|token|secret|password)\s*[:=]\s*['\"][^'\"]+['\"]" --include="*.swift" . >/dev/null 2>&1; then
+            echo "⚠️ Potential hardcoded secrets found" >> $GITHUB_STEP_SUMMARY
+            SECRETS_FOUND=true
+          fi
+          
+          # Check for URLs with credentials
+          if grep -r -E "https?://[^:]+:[^@]+@" --include="*.swift" . >/dev/null 2>&1; then
+            echo "⚠️ URLs with embedded credentials found" >> $GITHUB_STEP_SUMMARY
+            SECRETS_FOUND=true
+          fi
+          
+          if [ "$SECRETS_FOUND" = false ]; then
+            echo "✅ No obvious security issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Documentation Check
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Documentation
+        run: |
+          echo "## Documentation Status" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for required documentation files
+          if [ -f "README.md" ]; then
+            echo "✅ README.md exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ README.md missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f "CLAUDE.md" ]; then
+            echo "✅ CLAUDE.md exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ CLAUDE.md missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f "features.md" ]; then
+            echo "✅ features.md exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ features.md missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check for inline documentation
+          SWIFT_FILES_WITH_DOCS=0
+          TOTAL_SWIFT_FILES=0
+          
+          for file in $(find . -name "*.swift" -not -path "./build/*" -not -path "./.git/*" -not -path "./Carthage/*"); do
+            TOTAL_SWIFT_FILES=$((TOTAL_SWIFT_FILES + 1))
+            if grep -q "///" "$file" || grep -q "/\*\*" "$file"; then
+              SWIFT_FILES_WITH_DOCS=$((SWIFT_FILES_WITH_DOCS + 1))
+            fi
+          done
+          
+          if [ $TOTAL_SWIFT_FILES -gt 0 ]; then
+            DOC_PERCENTAGE=$((SWIFT_FILES_WITH_DOCS * 100 / TOTAL_SWIFT_FILES))
+            echo "📊 Documentation coverage: ${DOC_PERCENTAGE}% (${SWIFT_FILES_WITH_DOCS}/${TOTAL_SWIFT_FILES} files)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Quality Summary
+  quality-summary:
+    runs-on: ubuntu-latest
+    needs: [swiftlint, swiftformat, dependency-audit, code-metrics, unused-code, security-scan, documentation]
+    if: always()
+    steps:
+      - name: Quality Summary
+        run: |
+          echo "## Overall Code Quality Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| SwiftLint | ${{ needs.swiftlint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SwiftFormat | ${{ needs.swiftformat.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependencies | ${{ needs.dependency-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Metrics | ${{ needs.code-metrics.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unused Code | ${{ needs.unused-code.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Documentation | ${{ needs.documentation.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall status
+          if [[ "${{ needs.swiftlint.result }}" == "success" && "${{ needs.swiftformat.result }}" == "success" ]]; then
+            echo "✅ Core quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Core quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if critical checks failed
+        if: needs.swiftlint.result == 'failure' || needs.swiftformat.result == 'failure'
+        run: |
+          echo "Critical code quality checks failed"
+          exit 1

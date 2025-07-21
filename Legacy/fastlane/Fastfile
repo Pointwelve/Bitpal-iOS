@@ -98,15 +98,15 @@ platform :ios do
       )
       upload_to_testflight(skip_submission: true, skip_waiting_for_build_processing: true, verbose: true)
 
-      tag_master(version)
+      tag_main(version)
     end
   end
 
-  def tag_master(version)
+  def tag_main(version)
     reset_git_repo(force: true, skip_clean: true)
     add_git_tag(tag: "#{version}")
     push_to_git_remote(
-      remote_branch: "master",
+      remote_branch: "main",
       tags: true
     )
   end

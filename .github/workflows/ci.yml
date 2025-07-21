@@ -1,0 +1,302 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/*, fix/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
+  XCODE_VERSION: "16.1"
+
+jobs:
+  # Pre-flight checks
+  pre-flight:
+    runs-on: macos-15
+    outputs:
+      should-build-legacy: ${{ steps.changes.outputs.legacy }}
+      should-build-v2: ${{ steps.changes.outputs.v2 }}
+      should-run-tests: ${{ steps.changes.outputs.tests }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            legacy:
+              - 'Legacy/**'
+              - '.github/workflows/**'
+            v2:
+              - 'Bitpal-v2/**'
+              - '.github/workflows/**'
+            tests:
+              - '**/*Tests.swift'
+              - '**/*Test.swift'
+              - '**/test/**'
+
+  # Code Quality Checks
+  code-quality:
+    runs-on: macos-15
+    needs: pre-flight
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Cache SwiftLint
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/swiftlint
+          key: ${{ runner.os }}-swiftlint-${{ hashFiles('**/.swiftlint.yml') }}
+
+      - name: Install SwiftLint
+        run: |
+          if ! command -v swiftlint &> /dev/null; then
+            brew install swiftlint
+          fi
+
+      - name: SwiftLint - Legacy
+        if: needs.pre-flight.outputs.should-build-legacy == 'true'
+        run: |
+          cd Legacy
+          swiftlint lint --config ../.swiftlint.yml --reporter github-actions-logging
+
+      - name: SwiftLint - SwiftUI v2
+        if: needs.pre-flight.outputs.should-build-v2 == 'true'
+        run: |
+          cd Bitpal-v2
+          swiftlint lint --config ../.swiftlint.yml --reporter github-actions-logging
+
+      - name: Cache SwiftFormat
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/swiftformat
+          key: ${{ runner.os }}-swiftformat-${{ hashFiles('**/.swiftformat') }}
+
+      - name: Install SwiftFormat
+        run: |
+          if ! command -v swiftformat &> /dev/null; then
+            brew install swiftformat
+          fi
+
+      - name: SwiftFormat Check - Legacy
+        if: needs.pre-flight.outputs.should-build-legacy == 'true'
+        run: |
+          cd Legacy
+          swiftformat --lint --config ../.swiftformat Sources/
+
+      - name: SwiftFormat Check - SwiftUI v2
+        if: needs.pre-flight.outputs.should-build-v2 == 'true'
+        run: |
+          cd Bitpal-v2
+          swiftformat --lint --config ../.swiftformat Bitpal-v2/
+
+  # Build and Test SwiftUI v2 (Primary)
+  build-swiftui-v2:
+    runs-on: macos-15
+    needs: [pre-flight, code-quality]
+    if: needs.pre-flight.outputs.should-build-v2 == 'true' || github.event_name == 'push'
+    strategy:
+      matrix:
+        destination: 
+          - "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.1"
+          - "platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation),OS=18.1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm/
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages/
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', '**/project.pbxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Resolve SPM Dependencies
+        run: |
+          cd Bitpal-v2
+          xcodebuild -resolvePackageDependencies -project Bitpal-v2.xcodeproj
+
+      - name: Build SwiftUI v2
+        run: |
+          cd Bitpal-v2
+          xcodebuild \
+            -project Bitpal-v2.xcodeproj \
+            -scheme Bitpal-v2 \
+            -destination "${{ matrix.destination }}" \
+            -configuration Debug \
+            build \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test SwiftUI v2
+        if: needs.pre-flight.outputs.should-run-tests == 'true' || github.event_name == 'push'
+        run: |
+          cd Bitpal-v2
+          xcodebuild \
+            -project Bitpal-v2.xcodeproj \
+            -scheme Bitpal-v2 \
+            -destination "${{ matrix.destination }}" \
+            -configuration Debug \
+            test \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults-v2.xcresult
+
+      - name: Upload Test Results
+        if: always() && (needs.pre-flight.outputs.should-run-tests == 'true' || github.event_name == 'push')
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-swiftui-v2-${{ matrix.destination }}
+          path: Bitpal-v2/TestResults-v2.xcresult
+          retention-days: 7  # Keep test results for only 7 days
+
+  # Build and Test Legacy (Reference)
+  build-legacy:
+    runs-on: macos-15
+    needs: [pre-flight, code-quality]
+    if: needs.pre-flight.outputs.should-build-legacy == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Cache Carthage
+        uses: actions/cache@v4
+        with:
+          path: Legacy/Carthage
+          key: ${{ runner.os }}-carthage-${{ hashFiles('**/Cartfile.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-carthage-
+
+      - name: Install Carthage
+        run: |
+          if ! command -v carthage &> /dev/null; then
+            brew install carthage
+          fi
+
+      - name: Carthage Bootstrap
+        run: |
+          cd Legacy
+          carthage bootstrap --cache-builds --platform iOS --use-xcframeworks
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Legacy
+        run: |
+          cd Legacy
+          xcodebuild \
+            -project Bitpal.xcodeproj \
+            -scheme Bitpal \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.1" \
+            -configuration Debug \
+            build \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test Legacy
+        if: needs.pre-flight.outputs.should-run-tests == 'true'
+        run: |
+          cd Legacy
+          xcodebuild \
+            -project Bitpal.xcodeproj \
+            -scheme Bitpal \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.1" \
+            -configuration Debug \
+            test \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults-legacy.xcresult
+
+      - name: Upload Legacy Test Results
+        if: always() && needs.pre-flight.outputs.should-run-tests == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-legacy
+          path: Legacy/TestResults-legacy.xcresult
+          retention-days: 7  # Keep test results for only 7 days
+
+  # Security Scan
+  security-scan:
+    runs-on: macos-15
+    needs: pre-flight
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/swift
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # Build Summary
+  build-summary:
+    runs-on: ubuntu-latest
+    needs: [pre-flight, code-quality, build-swiftui-v2, build-legacy]
+    if: always()
+    steps:
+      - name: Build Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SwiftUI v2 Build | ${{ needs.build-swiftui-v2.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Legacy Build | ${{ needs.build-legacy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.build-swiftui-v2.result }}" == "success" ]]; then
+            echo "✅ SwiftUI v2 build completed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.build-swiftui-v2.result }}" == "skipped" ]]; then
+            echo "⏭️ SwiftUI v2 build skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ SwiftUI v2 build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.build-legacy.result }}" == "success" ]]; then
+            echo "✅ Legacy build completed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.build-legacy.result }}" == "skipped" ]]; then
+            echo "⏭️ Legacy build skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Legacy build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check Overall Status
+        if: needs.code-quality.result == 'failure' || needs.build-swiftui-v2.result == 'failure' || needs.build-legacy.result == 'failure'
+        run: |
+          echo "❌ Build pipeline failed - check individual job results"
+          exit 1

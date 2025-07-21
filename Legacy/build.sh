@@ -5,8 +5,8 @@ if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
   exit 0
 fi
 
-if [[ "$TRAVIS_BRANCH" != "master" ]]; then
-  echo "Testing on a branch other than master. No deployment will be done."
+if [[ "$TRAVIS_BRANCH" != "main" ]]; then
+  echo "Testing on a branch other than main. No deployment will be done."
   exit 0
 fi
 fastlane ios release

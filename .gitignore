@@ -1,17 +1,18 @@
-# Xcode
-#
-# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+# Comprehensive Modern iOS .gitignore
+# For Xcode 16+, Swift 6+, SwiftUI, SPM, and modern iOS development
 
-## User settings
+# =============================================================================
+# Xcode & iOS Development
+# =============================================================================
+
+## User-specific Xcode Settings
 xcuserdata/
+*.xcuserdatad/
+*.xcuserstate
 
-## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+## Xcode Compatibility (Legacy)
 *.xcscmblueprint
 *.xccheckout
-
-## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
-build/
-DerivedData/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
@@ -22,75 +23,331 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
-## Obj-C/Swift specific
-*.hmap
+## Build Products & Derived Data
+build/
+Build/
+DerivedData/
+*.built
+*.o
+*.lo
+*.la
+*.al
+.libs
+*.so
+*.so.[0-9]*
+*.a
+*.la
+*.lai
+*.pyc
+*.pyo
 
-## App packaging
+## App Packaging
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.app
+*.framework
+
+## iOS Simulator
+*.xcappdata/
+
+# =============================================================================
+# Swift & Objective-C
+# =============================================================================
+
+## Compiled Swift
+*.hmap
+*.swiftdoc
+*.swiftmodule
+*.swiftsourceinfo
 
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
 
-# Swift Package Manager
-#
-# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
-# Package.resolved
-# *.xcodeproj
-#
-# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
-# hence it is not needed unless you have added a package configuration file to your project
-# .swiftpm
+## Swift REPL
+.swift-history
 
+# =============================================================================
+# Package Managers
+# =============================================================================
+
+## Swift Package Manager
 .build/
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+xcuserdata/
+DerivedData/
+.netrc
 
-# CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
-# Pods/
-#
-# Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
+## CocoaPods
+Pods/
+!Podfile
+!Podfile.lock
+*.xcworkspace
 
-Carthage
-#
-# Add this line if you want to avoid checking in source code from Carthage dependencies.
-Carthage/Checkouts
+## Carthage
+Carthage/
+!Cartfile
+!Cartfile.resolved
 
-Carthage/Build/
+## Rome
+Rome/
 
-# Accio dependency management
+## Accio
 Dependencies/
 .accio/
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo.
-# Instead, use fastlane to re-generate the screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/#source-control
+# =============================================================================
+# Development Tools & IDEs
+# =============================================================================
 
+## AppCode
+.idea/
+
+## Visual Studio Code
+.vscode/
+*.code-workspace
+
+## Vim
+*.swp
+*.swo
+*~
+
+## Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# CI/CD & Automation
+# =============================================================================
+
+## Fastlane
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+fastlane/test-results/
+fastlane/metadata/
+fastlane/screenshots/
+fastlane/Deliverfile
 
-# Code Injection
-#
-# After new code Injection tools there's a generated folder /iOSInjectionProject
-# https://github.com/johnno1962/injectionforxcode
+## GitHub Actions
+.github/actions-runner/
 
-iOSInjectionProject/
+## Bitrise
+bitrise.yml
 
-.DS_Store
-Firebase/Firebase.plist
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+
+## Test Results (Never commit test outputs)
+test-results/
+TestResults/
+*.xcresult
+*.xcresult/**
+coverage.xml
+coverage.json
+coverage.html
+lcov.info
+*.profdata
+*.profraw
+test_output/
+test-output/
+coverage/
+coverage-*/
+junit.xml
+test.xml
+TestResults*.xml
+
+## Code Coverage Tools
+*.gcno
+*.gcda
+*.gcov
+derived_data/
+codecov.yml
+
+# =============================================================================
+# Configuration & Secrets
+# =============================================================================
+
+## Configuration Files (Keep templates, ignore actual configs)
 Configuration/Configuration.plist
+Config.plist
+GoogleService-Info.plist
+Firebase/Firebase.plist
+firebase_app_id_file.json
 gc_keys.json
 .configuration
+*.secrets
+
+## Environment Files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+
+## API Keys & Certificates
+*.p12
+*.pem
+*.key
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+
+# =============================================================================
+# Temporary & Cache Files
+# =============================================================================
+
+## System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+## Temporary Files
+*.tmp
+*.temp
+*~.nib
+*.swp
+*.log
+*.out
+
+## Network Files
+.netrc
+
+# =============================================================================
+# Code Injection & Dynamic Tools
+# =============================================================================
+
+## InjectionIII
+iOSInjectionProject/
+
+## Reveal
+RevealServer.framework/
+
+## FLEX
+FLEX.framework/
+
+# =============================================================================
+# Documentation & Reports
+# =============================================================================
+
+## Generated Documentation
+docs/generated/
+Documentation/generated/
+*.docset
+
+## Static Analysis
+*.scan
+sonar-project.properties
+.sonarqube/
+
+# =============================================================================
+# Monitoring & Analytics
+# =============================================================================
+
+## Crashlytics
+Crashlytics.framework/
+crashlytics-build.properties
+com_crashlytics_export_strings.xml
+
+## Fabric
+Fabric.framework/
+
+## Sentry
+sentry.properties
+
+# =============================================================================
+# Backup & Archive Files
+# =============================================================================
+
+## Archives
+*.zip
+*.tar.gz
+*.tgz
+*.tar.bz2
+
+## Backup Files
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# Project-Specific Patterns
+# =============================================================================
+
+## Legacy Project Directory
+Legacy/build/
+Legacy/DerivedData/
+Legacy/Carthage/Build/
+
+## SwiftUI v2 Project
+Bitpal-v2/build/
+Bitpal-v2/DerivedData/
+Bitpal-v2/TestResults/
+
+## Scripts Output
+scripts/output/
+scripts/logs/
+scripts/temp/
+
+## Local Development
+local/
+.local/
+dev/
+
+# =============================================================================
+# Keep Important Files (Negative Patterns)
+# =============================================================================
+
+## Keep essential configuration templates
+!Configuration/Configuration.plist.template
+!Config.plist.template
+!GoogleService-Info.plist.template
+
+## Keep project files
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/contents.xcworkspacedata
+
+## Keep schemes (if shared)
+!*.xcodeproj/xcshareddata/xcschemes/
+!*.xcworkspace/xcshareddata/xcschemes/
+
+## Keep package manifests
+!Package.swift
+!Podfile
+!Cartfile
+!project.yml
+
+## Keep documentation
+!README.md
+!CHANGELOG.md
+!LICENSE
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+
+## Keep CI/CD configurations
+!.github/
+!.gitignore
+!.swiftlint.yml
+!.swiftformat
+
+# =============================================================================
+# End of .gitignore
+# =============================================================================

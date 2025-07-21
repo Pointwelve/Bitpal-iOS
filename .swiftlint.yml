@@ -16,10 +16,19 @@ opt_in_rules: # some rules are only opt-in
   # swiftlint rules
 
 included:
-  - Sources
+  - Bitpal-v2/Bitpal-v2
+  - Legacy/Sources
 
 excluded: # paths to ignore during linting. Takes precedence over `included`.
-  - Tests
+  - Bitpal-v2/Bitpal-v2Tests
+  - Bitpal-v2/Bitpal-v2UITests
+  - Legacy/Data/DataTests
+  - Legacy/Domain/DomainTests
+  - Legacy/Sources/BitpalTests
+  - Legacy/Sources/BitpalUITests
+  - Carthage
+  - DerivedData
+  - build
 
 # excluded: # paths to ignore during linting. Takes precedence over `included`.
 

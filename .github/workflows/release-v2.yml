@@ -1,0 +1,302 @@
+name: Release SwiftUI v2
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'Bitpal-v2/**'
+      - '.github/workflows/release-v2.yml'
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      build_configuration:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+
+concurrency:
+  group: release-v2
+  cancel-in-progress: false
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
+  XCODE_VERSION: "16.1"
+
+jobs:
+  # Pre-release validation
+  validate:
+    runs-on: macos-15
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build-number: ${{ steps.version.outputs.build-number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Validate Project
+        run: |
+          cd Bitpal-v2
+          xcodebuild \
+            -project Bitpal-v2.xcodeproj \
+            -scheme Bitpal-v2 \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
+            -configuration Release \
+            build \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run Tests
+        run: |
+          cd Bitpal-v2
+          xcodebuild \
+            -project Bitpal-v2.xcodeproj \
+            -scheme Bitpal-v2 \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
+            -configuration Release \
+            test \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Calculate Version
+        id: version
+        run: |
+          cd Bitpal-v2
+          # Extract current version from project
+          CURRENT_VERSION=$(xcodebuild -showBuildSettings -project Bitpal-v2.xcodeproj -scheme Bitpal-v2 | grep MARKETING_VERSION | head -1 | awk '{print $3}')
+          
+          # Calculate new version based on input or automatic increment
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          else
+            RELEASE_TYPE="patch"
+          fi
+          
+          # Simple version bumping (assumes semantic versioning)
+          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+          case $RELEASE_TYPE in
+            major)
+              NEW_VERSION="$((major + 1)).0.0"
+              ;;
+            minor)
+              NEW_VERSION="$major.$((minor + 1)).0"
+              ;;
+            patch)
+              NEW_VERSION="$major.$minor.$((patch + 1))"
+              ;;
+          esac
+          
+          BUILD_NUMBER=$(date +%Y%m%d%H%M)
+          
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "build-number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "📦 New version: $NEW_VERSION ($BUILD_NUMBER)" >> $GITHUB_STEP_SUMMARY
+
+  # Build for App Store
+  build-release:
+    runs-on: macos-15
+    needs: validate
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Install Apple Certificate and Provisioning Profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Update Version and Build Number
+        run: |
+          cd Bitpal-v2
+          # Update Marketing Version
+          xcrun agvtool new-marketing-version ${{ needs.validate.outputs.version }}
+          
+          # Update Build Number
+          xcrun agvtool new-version -all ${{ needs.validate.outputs.build-number }}
+
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm/
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages/
+          key: ${{ runner.os }}-spm-release-${{ hashFiles('**/Package.resolved', '**/project.pbxproj') }}
+
+      - name: Resolve SPM Dependencies
+        run: |
+          cd Bitpal-v2
+          xcodebuild -resolvePackageDependencies -project Bitpal-v2.xcodeproj
+
+      - name: Build Archive
+        run: |
+          cd Bitpal-v2
+          CONFIGURATION="${{ github.event.inputs.build_configuration || 'Release' }}"
+          
+          xcodebuild \
+            -project Bitpal-v2.xcodeproj \
+            -scheme Bitpal-v2 \
+            -configuration $CONFIGURATION \
+            -destination generic/platform=iOS \
+            -archivePath $RUNNER_TEMP/bitpal-v2.xcarchive \
+            archive
+
+      - name: Export Archive
+        run: |
+          EXPORT_OPTIONS_PATH=$RUNNER_TEMP/ExportOptions.plist
+          
+          cat > $EXPORT_OPTIONS_PATH << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>destination</key>
+              <string>export</string>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>${{ secrets.TEAM_ID }}</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+          
+          xcodebuild \
+            -exportArchive \
+            -archivePath $RUNNER_TEMP/bitpal-v2.xcarchive \
+            -exportOptionsPlist $EXPORT_OPTIONS_PATH \
+            -exportPath $RUNNER_TEMP/export
+
+      - name: Upload to App Store Connect
+        env:
+          ALTOOL_USERNAME: ${{ secrets.ALTOOL_USERNAME }}
+          ALTOOL_PASSWORD: ${{ secrets.ALTOOL_PASSWORD }}
+        run: |
+          xcrun altool \
+            --upload-app \
+            -f $RUNNER_TEMP/export/Bitpal-v2.ipa \
+            -u "$ALTOOL_USERNAME" \
+            -p "$ALTOOL_PASSWORD" \
+            --type ios
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bitpal-v2-${{ needs.validate.outputs.version }}
+          path: |
+            ${{ runner.temp }}/bitpal-v2.xcarchive
+            ${{ runner.temp }}/export/
+          retention-days: 30
+
+      - name: Clean up keychain and provisioning profile
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision || true
+
+  # Create GitHub Release
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [validate, build-release]
+    if: success()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.validate.outputs.version }}
+          release_name: Bitpal v2 - v${{ needs.validate.outputs.version }}
+          body: |
+            ## Bitpal SwiftUI v2 Release v${{ needs.validate.outputs.version }}
+            
+            ### What's New
+            - Modern SwiftUI architecture with iOS 18+ features
+            - Enhanced performance and user experience
+            - Real-time price streaming with WebSocket
+            - Advanced portfolio management
+            
+            ### Technical Details
+            - Build: ${{ needs.validate.outputs.build-number }}
+            - Target: iOS 18.0+
+            - Architecture: SwiftUI + SwiftData + @Observable
+            
+            ### Installation
+            This release has been submitted to App Store Connect for review.
+            
+            ---
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+          draft: false
+          prerelease: false
+
+  # Notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [validate, build-release, create-release]
+    if: always()
+    steps:
+      - name: Notify Teams
+        run: |
+          if [[ "${{ needs.build-release.result }}" == "success" && "${{ needs.create-release.result }}" == "success" ]]; then
+            echo "✅ Bitpal v2 v${{ needs.validate.outputs.version }} successfully released!"
+            echo "📱 Build ${{ needs.validate.outputs.build-number }} uploaded to App Store Connect"
+          else
+            echo "❌ Release failed - check build logs"
+            exit 1
+          fi
