@@ -100,7 +100,9 @@ final class CurrencyPair: Codable {
         low24h: Double? = nil,
         open24h: Double? = nil,
         bid: Double? = nil,
-        ask: Double? = nil
+        ask: Double? = nil,
+        directChange24h: Double? = nil,
+        directChangePercent24h: Double? = nil
     ) {
         self.currentPrice = price
         
@@ -111,6 +113,16 @@ final class CurrencyPair: Codable {
             self.open24h = open
             self.priceChange24h = price - open
             self.priceChangePercent24h = open > 0 ? ((price - open) / open) * 100 : 0
+            print("🧮 Calculated from open24h: change=\(self.priceChange24h), percent=\(self.priceChangePercent24h)%")
+        } else if let change = directChange24h, let changePercent = directChangePercent24h {
+            // Use API-provided change values directly if open24h is not available
+            self.priceChange24h = change
+            self.priceChangePercent24h = changePercent
+            // Calculate open24h from change if possible
+            if change != 0 {
+                self.open24h = price - change
+            }
+            print("📈 Used direct API values: change=\(change), percent=\(changePercent)%")
         }
         if let bidPrice = bid { self.bid = bidPrice }
         if let askPrice = ask { self.ask = askPrice }

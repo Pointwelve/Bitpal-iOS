@@ -10,7 +10,7 @@ import SwiftData
 import UserNotifications
 
 @main
-struct Bitpal_v2App: App {
+struct BitpalApp: App {
     let appCoordinator = AppCoordinator.shared
     
     var body: some Scene {
@@ -22,7 +22,15 @@ struct Bitpal_v2App: App {
                 .environment(appCoordinator.currencySearchService)
                 .environment(appCoordinator.technicalAnalysisService)
                 .environment(appCoordinator.historicalDataService)
-                .modelContainer(appCoordinator.modelContainer)
+                .modelContainer(for: [
+                    CurrencyPair.self,
+                    Currency.self,
+                    Exchange.self,
+                    Alert.self,
+                    HistoricalPrice.self,
+                    Configuration.self,
+                    Watchlist.self
+                ])
                 .task {
                     await setupApp()
                 }
@@ -33,8 +41,10 @@ struct Bitpal_v2App: App {
         // Request notification permissions
         await requestNotificationPermissions()
         
-        // Initialize services
-        await appCoordinator.initializeServices()
+        // Wait for AppCoordinator to initialize
+        while !appCoordinator.isReady {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        }
     }
     
     private func requestNotificationPermissions() async {

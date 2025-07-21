@@ -10,7 +10,7 @@ import SwiftData
 import Charts
 
 struct CurrencyDetailView: View {
-    @Bindable var currencyPair: CurrencyPair
+    let currencyPair: CurrencyPair
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(HistoricalDataService.self) private var historicalDataService
@@ -22,30 +22,48 @@ struct CurrencyDetailView: View {
     @State private var isLoadingChart = false
     @State private var showingCreateAlert = false
     @State private var showingMarketAnalysis = false
-    @State private var selectedDataPoint: ChartData?
-    @State private var selectedTimePeriod = "1D"
+    @State private var selectedTimePeriod = "1H"
+    @State private var chartType: ChartDisplayType = .line
+    @State private var interactionState = ChartInteractionState()
+    @State private var memoizedChartData: [ChartData] = []
+    @State private var lastDataHash: Int = 0
+    @State private var preloadedData: [String: [ChartData]] = [:]
+    @State private var preloadingPeriods: Set<String> = []
+    @State private var priceFlashColor: Color? = nil
+    @State private var lastKnownPrice: Double = 0
     
     // MARK: - Constants
     private enum Constants {
         static let chartHeight: CGFloat = 280
         static let priceIconSize: CGFloat = 50
-        static let tooltipPadding: CGFloat = 20
         static let sectionSpacing: CGFloat = 24
         static let horizontalPadding: CGFloat = 20
         static let bottomSpacing: CGFloat = 100
     }
     
+    
     // MARK: - Computed Properties
     private var backgroundColor: Color {
-        colorScheme == .dark ? .black : Color(.systemGroupedBackground)
+        ChartStyling.backgroundColor(colorScheme: colorScheme)
     }
     
     private var primaryTextColor: Color {
-        colorScheme == .dark ? .white : .primary
+        ChartStyling.primaryTextColor(colorScheme: colorScheme)
+    }
+    
+    private var optimizedChartData: [ChartData] {
+        // Check if we have preloaded data for the current period
+        if let preloaded = preloadedData[selectedTimePeriod], !preloaded.isEmpty {
+            return ChartDataProcessor.optimizeData(preloaded, for: chartType, period: selectedTimePeriod)
+        }
+        return memoizedChartData.isEmpty ? ChartDataProcessor.optimizeData(chartData, for: chartType, period: selectedTimePeriod) : memoizedChartData
     }
     
     private var streamKey: String {
-        "\(currencyPair.baseCurrency?.symbol ?? "")-\(currencyPair.quoteCurrency?.symbol ?? "")-\(currencyPair.exchange?.id ?? "")"
+        // Match the StreamPrice uniqueKey format
+        let base = currencyPair.baseCurrency?.symbol ?? ""
+        let quote = currencyPair.quoteCurrency?.symbol ?? ""
+        return "cadli-\(base)-\(quote)"
     }
     
     var body: some View {
@@ -71,10 +89,23 @@ struct CurrencyDetailView: View {
             CreateAlertView()
         }
         .task {
+            lastKnownPrice = getCurrentPrice()
+            print("🚀 CurrencyDetailView task started for: \(streamKey)")
+            print("🔗 Starting streaming for currency pair: \(currencyPair.displayName)")
+            
+            // Start streaming for this specific currency pair
+            await priceStreamService.subscribe(to: currencyPair)
+            
             await loadInitialData()
         }
         .refreshable {
             await refreshData()
+        }
+        .onChange(of: chartData) { _, newData in
+            updateMemoizedData(for: newData, chartType: chartType)
+        }
+        .onChange(of: chartType) { _, newType in
+            updateMemoizedData(for: chartData, chartType: newType)
         }
     }
     
@@ -128,47 +159,20 @@ struct CurrencyDetailView: View {
     }
     
     private var priceInfo: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(getCurrentPrice().formatted(.currency(code: "USD")))
-                .font(.system(size: 36, weight: .bold, design: .default))
-                .foregroundColor(primaryTextColor)
-            
-            priceChangeInfo
-        }
-    }
-    
-    private var priceChangeInfo: some View {
-        HStack(spacing: 8) {
-            let isPositive = currencyPair.priceChangePercent24h >= 0
-            let changeColor: Color = isPositive ? .green : .red
-            let changePrefix = isPositive ? "+" : ""
-            
-            Text(changePrefix)
-                .foregroundColor(changeColor)
-                .font(.subheadline)
-                .fontWeight(.medium)
-            
-            Text(currencyPair.priceChange24h.formatted(.currency(code: "USD")))
-                .foregroundColor(changeColor)
-                .font(.subheadline)
-                .fontWeight(.medium)
-            
-            Text("(\(String(format: "%.2f", currencyPair.priceChangePercent24h))%)")
-                .foregroundColor(changeColor)
-                .font(.subheadline)
-                .fontWeight(.medium)
-        }
+        ChartPriceChangeView(
+            currentPrice: getCurrentPrice(),
+            priceChange: getCurrentPriceChange(),
+            priceChangePercent: getCurrentPriceChangePercent(),
+            flashColor: priceFlashColor,
+            onPriceChange: handlePriceChange
+        )
     }
     
     private var currencyIcon: some View {
-        Circle()
-            .fill(Color.orange)
-            .frame(width: Constants.priceIconSize, height: Constants.priceIconSize)
-            .overlay {
-                Image(systemName: "bitcoinsign.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-            }
+        CurrencyIcon(
+            currency: currencyPair.baseCurrency,
+            size: Constants.priceIconSize
+        )
     }
     
     private var enhancedChartSection: some View {
@@ -184,13 +188,15 @@ struct CurrencyDetailView: View {
                 
                 HStack(spacing: 12) {
                     Button {
-                        // Pin functionality
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            chartType = chartType == .line ? .candlestick : .line
+                        }
                     } label: {
-                        Image(systemName: "pin")
+                        Image(systemName: chartType.systemImage)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(chartType == .candlestick ? .blue : .secondary)
                             .padding(8)
-                            .background(Color(.systemGray5))
+                            .background(chartType == .candlestick ? Color.blue.opacity(0.2) : Color(.systemGray5))
                             .clipShape(Circle())
                     }
                     
@@ -216,12 +222,41 @@ struct CurrencyDetailView: View {
     }
     
     private var modernChart: some View {
-        let data = chartData.isEmpty ? generateSampleChartData() : chartData
-        let (chartMin, chartMax) = calculateChartRange(for: data)
+        ZStack {
+            if isLoadingChart {
+                chartLoadingView
+                    .transition(.opacity)
+            } else {
+                chartContentView
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.95).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            }
+        }
+        .animation(.easeInOut(duration: 0.4), value: isLoadingChart)
+    }
+    
+    private var chartContentView: some View {
+        let data = optimizedChartData.isEmpty ? ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice()) : optimizedChartData
+        let (chartMin, chartMax) = ChartDataProcessor.calculateChartRange(for: data, chartType: chartType)
         
         return Chart(data) { dataPoint in
-            chartLine(for: dataPoint)
-            chartSelectionIndicator(for: dataPoint)
+            switch chartType {
+            case .line:
+                chartLine(for: dataPoint)
+            case .candlestick:
+                chartCandlestick(for: dataPoint)
+            case .area:
+                AreaMark(
+                    x: .value("Time", dataPoint.date),
+                    y: .value("Price", dataPoint.close)
+                )
+                .foregroundStyle(ChartStyling.chartAreaGradient(lineColor: chartLineColor))
+                .interpolationMethod(.catmullRom)
+            }
+            
+            ChartSelectionOverlay(selectedDataPoint: interactionState.selectedDataPoint, chartType: chartType)
         }
         .frame(height: Constants.chartHeight)
         .chartYScale(domain: chartMin...chartMax)
@@ -234,11 +269,19 @@ struct CurrencyDetailView: View {
                     .font(.caption)
             }
         }
-        .overlay(alignment: .topLeading) {
-            chartTooltip
-        }
         .chartOverlay { proxy in
-            chartInteractionOverlay(proxy: proxy)
+            GeometryReader { geometry in
+                ChartInteractionArea(
+                    interactionState: interactionState,
+                    geometry: geometry,
+                    proxy: proxy,
+                    data: data
+                )
+                
+                if let selectedPoint = interactionState.selectedDataPoint {
+                    dynamicFloaterView(for: selectedPoint, in: geometry, with: proxy)
+                }
+            }
         }
     }
     
@@ -253,85 +296,73 @@ struct CurrencyDetailView: View {
     }
     
     @ChartContentBuilder
-    private func chartSelectionIndicator(for dataPoint: ChartData) -> some ChartContent {
-        if let selected = selectedDataPoint, selected.id == dataPoint.id {
-            RuleMark(x: .value("Time", selected.date))
-                .foregroundStyle(.white.opacity(0.3))
-                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
-            
-            PointMark(
-                x: .value("Time", selected.date),
-                y: .value("Price", selected.close)
+    private func chartCandlestick(for dataPoint: ChartData) -> some ChartContent {
+        let bodyColor = dataPoint.isPositive ? Color.green : Color.red
+        
+        // High-Low line (wick)
+        RectangleMark(
+            x: .value("Time", dataPoint.date),
+            yStart: .value("Low", dataPoint.low),
+            yEnd: .value("High", dataPoint.high),
+            width: .fixed(1)
+        )
+        .foregroundStyle(bodyColor.opacity(0.6))
+        
+        // Open-Close body
+        RectangleMark(
+            x: .value("Time", dataPoint.date),
+            yStart: .value("Open", min(dataPoint.open, dataPoint.close)),
+            yEnd: .value("Close", max(dataPoint.open, dataPoint.close)),
+            width: .fixed(8)
+        )
+        .foregroundStyle(
+            LinearGradient(
+                colors: [
+                    bodyColor.opacity(0.8),
+                    bodyColor.opacity(0.6)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
             )
-            .foregroundStyle(.white)
-            .symbolSize(80)
-            .symbol(.circle)
-            
-            PointMark(
-                x: .value("Time", selected.date),
-                y: .value("Price", selected.close)
-            )
-            .foregroundStyle(.blue)
-            .symbolSize(40)
-            .symbol(.circle)
-        }
+        )
+        .cornerRadius(1)
     }
     
-    private var chartTooltip: some View {
-        Group {
-            if let selected = selectedDataPoint {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(selected.date.formatted(.dateTime.month(.abbreviated).day().hour(.defaultDigits(amPM: .omitted)).minute()))
-                        .font(.caption2)
-                        .foregroundColor(.white)
-                    
-                    Text(selected.close.formatted(.currency(code: "USD")))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(Color.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .padding(.top, Constants.tooltipPadding)
-                .padding(.leading, Constants.tooltipPadding)
-            }
-        }
-    }
     
-    private func chartInteractionOverlay(proxy: ChartProxy) -> some View {
-        GeometryReader { geometry in
-            Rectangle()
-                .fill(Color.clear)
-                .contentShape(Rectangle())
-                .onTapGesture { location in
-                    handleChartTap(location: location, geometry: geometry, proxy: proxy)
-                }
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            handleChartDrag(location: value.location, geometry: geometry, proxy: proxy)
-                        }
-                )
-        }
-    }
+    
     
     // MARK: - Chart Helper Properties
     private var chartLineColor: Color {
-        colorScheme == .dark ? .white : .blue
+        ChartStyling.chartLineColor(for: chartData, colorScheme: colorScheme)
     }
     
     private var axisLabelColor: Color {
-        (colorScheme == .dark ? Color.white : Color.primary).opacity(0.7)
+        ChartStyling.axisLabelColor(colorScheme: colorScheme)
     }
     
-    private func calculateChartRange(for data: [ChartData]) -> (min: Double, max: Double) {
-        let minPrice = data.map(\.close).min() ?? 0
-        let maxPrice = data.map(\.close).max() ?? 1
-        let priceRange = maxPrice - minPrice
-        let padding = priceRange * 0.1
-        return (max(0, minPrice - padding), maxPrice + padding)
+    @ViewBuilder
+    private func dynamicFloaterView(for dataPoint: ChartData, in geometry: GeometryProxy, with proxy: ChartProxy) -> some View {
+        if let xPosition = proxy.position(forX: dataPoint.date),
+           let yPosition = proxy.position(forY: dataPoint.close) {
+            
+            let chartPosition = CGPoint(x: xPosition, y: yPosition)
+            let isLeftHalf = chartPosition.x < geometry.frame(in: .local).midX
+            let position: FloaterPosition = isLeftHalf ? .topRight : .topLeft
+            let offset = position.offset
+            let finalPosition = CGPoint(x: chartPosition.x + offset.x, y: chartPosition.y + offset.y)
+            
+            ChartFloaterView(
+                dataPoint: dataPoint,
+                currencyPair: currencyPair,
+                position: position
+            )
+            .position(finalPosition)
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.9).combined(with: .opacity),
+                removal: .opacity
+            ))
+            .animation(.easeOut(duration: 0.2), value: position)
+        }
     }
     
     private var timePeriodSelector: some View {
@@ -349,11 +380,28 @@ struct CurrencyDetailView: View {
     }
     
     private func selectTimePeriod(_ period: String) {
+        // Immediate visual feedback for button selection
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedTimePeriod = period
         }
-        Task {
-            await loadChartDataForPeriod(period)
+        
+        // Clear interaction state smoothly
+        withAnimation(.easeOut(duration: 0.3)) {
+            interactionState.clearSelection()
+        }
+        
+        // Check if we have preloaded data for this period
+        if let preloaded = preloadedData[period], !preloaded.isEmpty {
+            // Use preloaded data immediately
+            chartData = preloaded
+            updateMemoizedData(for: preloaded, chartType: chartType)
+        } else {
+            // Load new data with loading state
+            Task {
+                // Add small delay for smoother transition
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                await loadChartDataForPeriod(period)
+            }
         }
     }
     
@@ -378,7 +426,7 @@ struct CurrencyDetailView: View {
             
             ModernStatCard(
                 title: "Volume (24 hours)",
-                value: "$98,669.59",
+                value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
                 colorScheme: colorScheme
             )
             
@@ -396,13 +444,13 @@ struct CurrencyDetailView: View {
             
             ModernStatCard(
                 title: "Low (24 hours)",
-                value: "$98,669.59",
+                value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
                 colorScheme: colorScheme
             )
             
             ModernStatCard(
                 title: "High (24 hours)",
-                value: "11,669.59",
+                value: CurrencyFormatter.formatCurrencyEnhanced(11669.59),
                 colorScheme: colorScheme
             )
         }
@@ -415,12 +463,87 @@ struct CurrencyDetailView: View {
         priceStreamService.prices[streamKey]?.price ?? currencyPair.currentPrice
     }
     
+    private func getCurrentPriceChange() -> Double {
+        // Use API/model data as primary source
+        let modelChange = currencyPair.priceChange24h
+        print("💾 API/Model 24h price change: \(modelChange)")
+        
+        // If model data is available and non-zero, use it
+        if modelChange != 0 {
+            return modelChange
+        }
+        
+        // Only check stream data if model data is unavailable or zero
+        if let streamPrice = priceStreamService.prices[streamKey] {
+            print("🔄 Stream data found for key: \(streamKey)")
+            print("📊 Stream price: \(streamPrice.price ?? 0), open24h: \(streamPrice.open24Hour ?? 0), change: \(streamPrice.priceChange24h)")
+            return streamPrice.priceChange24h
+        } else {
+            print("❌ No stream data for key: \(streamKey)")
+            print("🔍 Available keys: \(Array(priceStreamService.prices.keys))")
+            return modelChange // Return model data (could be 0)
+        }
+    }
+    
+    private func getCurrentPriceChangePercent() -> Double {
+        // Use API/model data as primary source
+        let modelPercent = currencyPair.priceChangePercent24h
+        print("📉 API/Model 24h change percent: \(modelPercent)")
+        print("💾 Model data - current: \(currencyPair.currentPrice), change24h: \(currencyPair.priceChange24h)")
+        
+        // If model data is available and non-zero, use it
+        if modelPercent != 0 {
+            return modelPercent
+        }
+        
+        // Only check stream data if model data is unavailable or zero
+        if let streamPrice = priceStreamService.prices[streamKey] {
+            let streamPercent = streamPrice.priceChangePercent24h
+            print("📈 Stream 24h change percent: \(streamPercent)")
+            print("📊 Stream data - current: \(streamPrice.price ?? 0), open24h: \(streamPrice.open24Hour ?? 0)")
+            
+            if streamPercent != 0 {
+                return streamPercent
+            }
+        } else {
+            print("❌ No stream data for key: \(streamKey)")
+            print("🔍 Available stream keys: \(Array(priceStreamService.prices.keys))")
+        }
+        
+        // If both model and stream data are zero, try to calculate manually from available API data
+        let currentPrice = getCurrentPrice()
+        if currentPrice > 0 && currencyPair.priceChange24h != 0 {
+            // Calculate percentage from absolute change and current price
+            let calculatedPercent = (currencyPair.priceChange24h / (currentPrice - currencyPair.priceChange24h)) * 100
+            print("🧮 Calculated 24h percent from API data: \(calculatedPercent)%")
+            return calculatedPercent
+        }
+        
+        print("⚠️ No valid 24h price change data available from API or stream")
+        return 0 // Return 0 instead of sample data
+    }
+    
     private func getLatestPriceUpdate() -> Date? {
         priceStreamService.prices[streamKey] != nil ? Date() : currencyPair.lastUpdated
     }
     
+    private func handlePriceChange(_ newPrice: Double) {
+        if lastKnownPrice > 0 {
+            let flashColor = newPrice > lastKnownPrice ? Color.green : Color.red
+            priceFlashColor = flashColor
+            
+            // Clear the flash color after animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                priceFlashColor = nil
+            }
+        }
+        lastKnownPrice = newPrice
+    }
+    
     private func loadInitialData() async {
         await loadChartData()
+        // Start preloading other periods in background
+        await preloadOtherPeriods()
     }
     
     private func refreshData() async {
@@ -439,9 +562,11 @@ struct CurrencyDetailView: View {
         } catch {
             print("Failed to load chart data: \(error)")
             // Use sample data as fallback
-            chartData = generateSampleChartData()
+            chartData = ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice())
         }
         
+        // Update memoized data after loading
+        updateMemoizedData(for: chartData, chartType: chartType)
         isLoadingChart = false
     }
     
@@ -455,15 +580,22 @@ struct CurrencyDetailView: View {
         selectedPeriod = chartPeriod
         
         do {
-            chartData = try await historicalDataService.loadHistoricalData(
+            let data = try await historicalDataService.loadHistoricalData(
                 for: currencyPair,
                 period: chartPeriod,
                 forceRefresh: false
             )
+            
+            chartData = data
+            // Store in preloaded cache for future use
+            preloadedData[period] = data
         } catch {
             print("Failed to load chart data for period \(period): \(error)")
-            chartData = generateSampleChartData()
+            chartData = ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice())
         }
+        
+        // Update memoized data after loading
+        updateMemoizedData(for: chartData, chartType: chartType)
     }
     
     private func mapStringToChartPeriod(_ period: String) -> ChartPeriod {
@@ -477,117 +609,133 @@ struct CurrencyDetailView: View {
         }
     }
     
-    private func generateSampleChartData() -> [ChartData] {
-        let basePrice = getCurrentPrice()
-        let dataPoints = 24
+    private func updateMemoizedData(for data: [ChartData], chartType: ChartDisplayType) {
+        let currentHash = data.count.hashValue ^ chartType.hashValue ^ selectedTimePeriod.hashValue
+        if currentHash != lastDataHash || memoizedChartData.isEmpty {
+            memoizedChartData = ChartDataProcessor.optimizeData(data, for: chartType, period: selectedTimePeriod)
+            lastDataHash = currentHash
+        }
+    }
+    
+    private func preloadOtherPeriods() async {
+        let periodsToPreload = ["1D", "1W", "1M"] // Preload common periods
         
-        return (0..<dataPoints).map { i in
-            let date = Calendar.current.date(byAdding: .hour, value: -dataPoints + i + 1, to: Date()) ?? Date()
-            let progress = Double(i) / Double(dataPoints)
-            let trend = basePrice * 0.1 * progress
-            let noise = basePrice * Double.random(in: -0.015...0.015)
-            let price = max(0.01, basePrice * 0.95 + trend + noise)
-            
-            return ChartData(
-                id: "sample-\(i)",
-                date: date,
-                open: price,
-                high: price * (1 + Double.random(in: 0...0.01)),
-                low: price * (1 - Double.random(in: 0...0.01)),
-                close: price,
-                volume: Double.random(in: 1000...5000)
+        await withTaskGroup(of: Void.self) { group in
+            for period in periodsToPreload {
+                if period != selectedTimePeriod && !preloadingPeriods.contains(period) {
+                    group.addTask {
+                        await self.preloadPeriodData(period)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func preloadPeriodData(_ period: String) async {
+        guard !preloadingPeriods.contains(period) else { return }
+        
+        preloadingPeriods.insert(period)
+        defer { preloadingPeriods.remove(period) }
+        
+        let chartPeriod = mapStringToChartPeriod(period)
+        
+        do {
+            let data = try await historicalDataService.loadHistoricalData(
+                for: currencyPair,
+                period: chartPeriod,
+                forceRefresh: false
             )
+            
+            await MainActor.run {
+                preloadedData[period] = data
+            }
+        } catch {
+            print("Failed to preload data for period \(period): \(error)")
         }
     }
     
-    private func handleChartTap(location: CGPoint, geometry: GeometryProxy, proxy: ChartProxy) {
-        guard let closest = findClosestDataPoint(location: location, geometry: geometry, proxy: proxy) else { return }
-        
-        withAnimation(.easeInOut(duration: 0.2)) {
-            selectedDataPoint = closest
+    private var chartLoadingView: some View {
+        VStack(spacing: 20) {
+            // Skeleton chart lines
+            chartSkeletonView
+            
+            Spacer()
+            
+            // Animated loading dots with message
+            VStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    ForEach(0..<3, id: \.self) { index in
+                        Circle()
+                            .fill(Color.blue.opacity(0.6))
+                            .frame(width: 8, height: 8)
+                            .scaleEffect(animateDots ? 1.2 : 0.8)
+                            .animation(
+                                .easeInOut(duration: 0.6)
+                                .repeatForever(autoreverses: true)
+                                .delay(Double(index) * 0.2),
+                                value: animateDots
+                            )
+                    }
+                }
+                
+                Text("Loading \(selectedTimePeriod) data...")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .opacity(0.8)
+            }
+        }
+        .frame(height: Constants.chartHeight)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.tertiary, lineWidth: 1)
+                )
+        )
+        .onAppear {
+            animateDots = true
         }
     }
     
-    private func handleChartDrag(location: CGPoint, geometry: GeometryProxy, proxy: ChartProxy) {
-        selectedDataPoint = findClosestDataPoint(location: location, geometry: geometry, proxy: proxy)
-    }
-    
-    private func findClosestDataPoint(location: CGPoint, geometry: GeometryProxy, proxy: ChartProxy) -> ChartData? {
-        let plotFrame = geometry.frame(in: .local)
-        let relativeXPosition = location.x - plotFrame.origin.x
-        
-        guard let plotValue = proxy.value(atX: relativeXPosition, as: Date.self) else { return nil }
-        
-        let data = chartData.isEmpty ? generateSampleChartData() : chartData
-        return data.min { first, second in
-            abs(first.date.timeIntervalSince(plotValue)) < abs(second.date.timeIntervalSince(plotValue))
+    private var chartSkeletonView: some View {
+        VStack(spacing: 8) {
+            ForEach(0..<4, id: \.self) { lineIndex in
+                HStack {
+                    ForEach(0..<8, id: \.self) { pointIndex in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 25, height: CGFloat.random(in: 8...30))
+                            .opacity(animateSkeleton ? 0.3 : 0.7)
+                            .animation(
+                                .easeInOut(duration: 1.2)
+                                .repeatForever(autoreverses: true)
+                                .delay(Double(lineIndex + pointIndex) * 0.1),
+                                value: animateSkeleton
+                            )
+                        
+                        if pointIndex < 7 {
+                            Spacer(minLength: 4)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.top, 20)
+        .onAppear {
+            animateSkeleton = true
         }
     }
     
-    private func formatVolume(_ volume: Double) -> String {
-        if volume > 1_000_000_000 {
-            return String(format: "%.2fB", volume / 1_000_000_000)
-        } else if volume > 1_000_000 {
-            return String(format: "%.2fM", volume / 1_000_000)
-        } else if volume > 1_000 {
-            return String(format: "%.2fK", volume / 1_000)
-        } else {
-            return String(format: "%.2f", volume)
-        }
-    }
+    @State private var animateSkeleton = false
+    
+    @State private var animateDots = false
+    
 }
 
 // MARK: - Supporting Views
 
-struct TimePeriodButton: View {
-    let period: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(period)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(isSelected ? .white : .secondary)
-                .frame(minWidth: 32, minHeight: 28)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(isSelected ? Color.blue : Color.clear)
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-struct ModernStatCard: View {
-    let title: String
-    let value: String
-    let colorScheme: ColorScheme
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.leading)
-            
-            Text(value)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(colorScheme == .dark ? .white : .primary)
-                .multilineTextAlignment(.leading)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(
-            colorScheme == .dark 
-                ? Color(.systemGray6).opacity(0.3)
-                : Color(.systemBackground)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
 
 struct InfoRow: View {
     let title: String

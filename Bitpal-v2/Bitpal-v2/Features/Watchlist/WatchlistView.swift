@@ -108,11 +108,18 @@ struct WatchlistRowView: View {
         streamPrice?.price ?? currencyPair.currentPrice
     }
     
+    private var currentPriceChange: Double {
+        streamPrice?.priceChange24h ?? currencyPair.priceChange24h
+    }
+    
+    private var currentPriceChangePercent: Double {
+        streamPrice?.priceChangePercent24h ?? currencyPair.priceChangePercent24h
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
             // Currency Icon
-            CurrencyIconView(symbol: currencyPair.baseCurrency?.symbol ?? "")
-                .frame(width: 40, height: 40)
+            CurrencyIcon(currency: currencyPair.baseCurrency, size: 40)
             
             // Currency Info
             VStack(alignment: .leading, spacing: 4) {
@@ -137,8 +144,8 @@ struct WatchlistRowView: View {
                     .animation(.easeInOut(duration: 0.3), value: animatePrice)
                 
                 PriceChangeView(
-                    change: currencyPair.priceChange24h,
-                    changePercent: currencyPair.priceChangePercent24h
+                    change: currentPriceChange,
+                    changePercent: currentPriceChangePercent
                 )
             }
         }
@@ -149,6 +156,16 @@ struct WatchlistRowView: View {
                     animatePrice = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    animatePrice = false
+                }
+            }
+        }
+        .onChange(of: streamPrice?.priceChangePercent24h) { oldValue, newValue in
+            if oldValue != newValue && newValue != nil {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    animatePrice = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     animatePrice = false
                 }
             }
@@ -187,38 +204,6 @@ struct PriceChangeView: View {
     }
 }
 
-struct CurrencyIconView: View {
-    let symbol: String
-    
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(backgroundColorForSymbol(symbol))
-            
-            Text(symbol.prefix(2))
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-        }
-    }
-    
-    private func backgroundColorForSymbol(_ symbol: String) -> Color {
-        switch symbol.uppercased() {
-        case "BTC":
-            return .orange
-        case "ETH":
-            return .blue
-        case "ADA":
-            return .indigo
-        case "DOT":
-            return .pink
-        case "LTC":
-            return .gray
-        default:
-            return .accentColor
-        }
-    }
-}
 
 struct EmptyWatchlistView: View {
     let onAddCurrency: () -> Void

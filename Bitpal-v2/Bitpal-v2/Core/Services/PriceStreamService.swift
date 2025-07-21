@@ -226,24 +226,69 @@ final class PriceStreamService {
                 continue 
             }
             
-            let price = tickData.value
-            print("💰 Found price for \(instrumentKey): \(price)")
-            
-            let currentTime = Date()
+            // Extract all available data from PriceMultiResponse
             let currentPrice = pair.currentPrice
+            let apiPrice = tickData.value
+            let apiOpen24h = tickData.currentDayOpen
+            let apiHigh24h = tickData.currentDayHigh
+            let apiLow24h = tickData.currentDayLow
+            let apiChange24h = tickData.currentDayChange
+            let apiChangePercent24h = tickData.currentDayChangePercentage
             
-            pair.updateFromStream(price: price)
-            print("✅ Updated \(instrumentKey) price from \(currentPrice) to \(price)")
+            print("💰 PriceMultiResponse data for \(instrumentKey):")
+            print("   Current: \(apiPrice)")
+            print("   Open24h: \(apiOpen24h ?? 0)")
+            print("   High24h: \(apiHigh24h ?? 0)")
+            print("   Low24h: \(apiLow24h ?? 0)")
+            print("   Change24h: \(apiChange24h ?? 0)")
+            print("   ChangePercent24h: \(apiChangePercent24h ?? 0)%")
+            
+            // Prioritize PriceMultiResponse data - use direct API values first
+            if let change = apiChange24h, let changePercent = apiChangePercent24h {
+                // Use pre-calculated values from CoinDesk API
+                pair.updateFromStream(
+                    price: apiPrice,
+                    volume24h: nil,
+                    high24h: apiHigh24h,
+                    low24h: apiLow24h,
+                    open24h: apiOpen24h,
+                    bid: nil,
+                    ask: nil,
+                    directChange24h: change,
+                    directChangePercent24h: changePercent
+                )
+                print("✅ Used direct PriceMultiResponse values: \(change) (\(changePercent)%)")
+            } else if let open = apiOpen24h {
+                // Fallback: calculate from open24h if direct values not available
+                pair.updateFromStream(
+                    price: apiPrice,
+                    volume24h: nil,
+                    high24h: apiHigh24h,
+                    low24h: apiLow24h,
+                    open24h: open,
+                    bid: nil,
+                    ask: nil
+                )
+                print("✅ Calculated from PriceMultiResponse open24h: \(open)")
+            } else {
+                // Last resort: just update price
+                pair.updateFromStream(price: apiPrice)
+                print("⚠️ Only price available from PriceMultiResponse")
+            }
+            
+            print("✅ Updated \(instrumentKey) from \(currentPrice) to \(apiPrice)")
+            print("💾 Final 24h change: \(pair.priceChange24h) (\(pair.priceChangePercent24h)%)")
             
             // Create price history entry if price changed significantly
-            if currentPrice > 0 && abs(price - currentPrice) / currentPrice > 0.001 { // 0.1% change threshold
+            if currentPrice > 0 && abs(apiPrice - currentPrice) / currentPrice > 0.001 { // 0.1% change threshold
+                let currentTime = Date()
                 let historicalPrice = HistoricalPrice(
                     currencyPair: pair,
                     timestamp: Int(currentTime.timeIntervalSince1970),
                     open: currentPrice,
-                    high: max(currentPrice, price),
-                    low: min(currentPrice, price),
-                    close: price,
+                    high: max(currentPrice, apiPrice),
+                    low: min(currentPrice, apiPrice),
+                    close: apiPrice,
                     period: .oneMinute
                 )
                 modelContext.insert(historicalPrice)

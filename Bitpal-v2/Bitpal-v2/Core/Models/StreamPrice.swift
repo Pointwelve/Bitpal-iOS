@@ -219,12 +219,16 @@ struct StreamPrice: Codable, Sendable {
     }
     
     var priceChange24h: Double {
-        guard let current = price, let open = open24Hour, open > 0 else { return 0 }
+        guard let current = price, let open = open24Hour, open > 0 else { 
+            return 0 
+        }
         return current - open
     }
     
     var priceChangePercent24h: Double {
-        guard let current = price, let open = open24Hour, open > 0 else { return 0 }
+        guard let current = price, let open = open24Hour, open > 0 else { 
+            return 0 
+        }
         return ((current - open) / open) * 100
     }
     

@@ -185,7 +185,7 @@ enum ChartPeriod: String, CaseIterable, Codable, Sendable {
 }
 
 // Chart data structure for SwiftUI Charts
-struct ChartData: Identifiable, Sendable {
+struct ChartData: Identifiable, Sendable, Equatable {
     let id: String
     let date: Date
     let open: Double
