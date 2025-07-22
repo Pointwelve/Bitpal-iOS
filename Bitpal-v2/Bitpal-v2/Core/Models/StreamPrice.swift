@@ -209,7 +209,7 @@ struct StreamPrice: Codable, Sendable {
     
     var uniqueKey: String {
         if let instrumentName = instrument {
-            return "\(market ?? "cadli")-\(instrumentName)"
+            return instrumentName  // Return "BTC-USD" format to match CurrencyPair.primaryKey
         }
         return "\(baseCurrency)-\(quoteCurrency)"
     }

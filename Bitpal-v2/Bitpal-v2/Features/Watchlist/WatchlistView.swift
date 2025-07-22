@@ -44,6 +44,17 @@ struct WatchlistView: View {
                 // Only start price streaming if not already started by AppCoordinator
                 await watchlistViewModel.startPriceStreamingIfNeeded(for: currencyPairs)
             }
+            .onChange(of: currencyPairs.count) { oldCount, newCount in
+                // Handle newly added currency pairs
+                if newCount > oldCount {
+                    print("🆕 WatchlistView: Detected new currency pairs (\(oldCount) → \(newCount))")
+                    Task {
+                        // Give a small delay to ensure SwiftData changes are fully processed
+                        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                        await watchlistViewModel.startPriceStreamingIfNeeded(for: currencyPairs)
+                    }
+                }
+            }
             .refreshable {
                 await refreshPrices()
             }
@@ -97,7 +108,7 @@ struct WatchlistView: View {
 
 struct WatchlistRowView: View {
     let currencyPair: CurrencyPair
-    @State private var priceStreamService = PriceStreamService.shared
+    @Environment(PriceStreamService.self) private var priceStreamService
     @State private var animatePrice = false
     
     private var streamPrice: StreamPrice? {
@@ -169,6 +180,27 @@ struct WatchlistRowView: View {
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     animatePrice = false
+                }
+            }
+        }
+        .onAppear {
+            // Check if this currency pair needs price subscription
+            if currentPrice == 0.0 {
+                print("⚠️ WatchlistRowView: Currency pair \(currencyPair.displayName) has no price, triggering subscription")
+                Task {
+                    // Small delay to ensure UI is ready
+                    try? await Task.sleep(nanoseconds: 250_000_000) // 0.25 seconds
+                    
+                    // Subscribe to price streaming
+                    await priceStreamService.subscribe(to: currencyPair)
+                    
+                    // Also try to fetch latest price
+                    do {
+                        try await priceStreamService.fetchLatestPrices(for: [currencyPair])
+                        print("✅ WatchlistRowView: Fetched price for \(currencyPair.displayName)")
+                    } catch {
+                        print("⚠️ WatchlistRowView: Failed to fetch price for \(currencyPair.displayName): \(error)")
+                    }
                 }
             }
         }

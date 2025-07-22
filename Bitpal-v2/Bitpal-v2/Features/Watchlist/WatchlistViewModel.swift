@@ -46,9 +46,22 @@ final class WatchlistViewModel {
     func startPriceStreamingIfNeeded(for pairs: [CurrencyPair]) async {
         guard !pairs.isEmpty else { return }
         
-        // Check if streaming is already active
+        print("🔄 WatchlistViewModel: Checking price streaming for \(pairs.count) pairs")
+        
+        // Always ensure all pairs are subscribed, regardless of streaming state
         if priceStreamService.isStreaming {
             print("ℹ️ Price streaming already active, ensuring all pairs are subscribed")
+            
+            // Fetch latest prices for any pairs that might not have prices yet
+            let pairsWithoutPrices = pairs.filter { $0.currentPrice == 0.0 }
+            if !pairsWithoutPrices.isEmpty {
+                print("📊 Fetching initial prices for \(pairsWithoutPrices.count) pairs without prices")
+                do {
+                    try await priceStreamService.fetchLatestPrices(for: pairsWithoutPrices)
+                } catch {
+                    print("⚠️ Failed to fetch initial prices: \(error)")
+                }
+            }
             
             // Ensure all current pairs are subscribed
             for pair in pairs {
@@ -58,6 +71,8 @@ final class WatchlistViewModel {
             print("🔄 Starting fresh price streaming for watchlist")
             await startPriceStreaming(for: pairs)
         }
+        
+        print("✅ WatchlistViewModel: Price streaming setup complete")
     }
     
     func refreshPrices(for pairs: [CurrencyPair]) async {

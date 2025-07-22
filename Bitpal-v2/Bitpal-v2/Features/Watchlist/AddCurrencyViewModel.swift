@@ -162,15 +162,33 @@ final class AddCurrencyViewModel {
                 if duplicateCheck.isEmpty {
                     context.insert(currencyPair)
                     print("✅ Currency pair inserted with sort order: \(nextSortOrder)")
+                    
+                    try context.save()
+                    print("✅ Context saved successfully")
+                    
+                    // Immediately subscribe to price streaming for the new pair
+                    Task {
+                        let priceService = PriceStreamService.shared
+                        
+                        // First, fetch initial price data
+                        do {
+                            try await priceService.fetchLatestPrices(for: [currencyPair])
+                            print("✅ Fetched initial price for \(currencyPair.displayName)")
+                        } catch {
+                            print("⚠️ Failed to fetch initial price for \(currencyPair.displayName): \(error)")
+                        }
+                        
+                        // Then subscribe to WebSocket streaming
+                        await priceService.subscribe(to: currencyPair)
+                        print("✅ Subscribed \(currencyPair.displayName) to price streaming")
+                    }
+                    
                 } else {
                     print("⚠️ Duplicate currency pair detected during insertion, skipping")
                 }
             } else {
                 print("⚠️ Currency pair already exists, skipping")
             }
-            
-            try context.save()
-            print("✅ Context saved successfully")
             
         } catch {
             errorMessage = "Failed to add currency: \(error.localizedDescription)"

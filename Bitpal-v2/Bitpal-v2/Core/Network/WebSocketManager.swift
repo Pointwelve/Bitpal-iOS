@@ -181,7 +181,10 @@ final class WebSocketManager {
     func subscribe(to symbol: String) async {
         subscriptions.insert(symbol)
         
-        guard connectionState == .connected else { return }
+        guard connectionState == .connected else { 
+            print("📡 WebSocket: Queued subscription for \(symbol) (not connected yet)")
+            return 
+        }
         
         // CoinDesk subscription format
         let subscribeMessage: [String: Any] = [
@@ -193,6 +196,7 @@ final class WebSocketManager {
         ]
         
         await sendMessage(subscribeMessage)
+        print("📡 WebSocket: Sent subscription for \(symbol)")
     }
     
     func unsubscribe(from symbol: String) async {

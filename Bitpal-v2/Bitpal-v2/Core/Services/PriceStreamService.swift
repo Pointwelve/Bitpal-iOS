@@ -96,10 +96,8 @@ final class PriceStreamService {
         let instrument = "\(base)-\(quote)"
         await webSocketManager.unsubscribe(from: instrument)
         
-        // Remove from local cache using consistent key format
-        let exchangeKey = "cadli"
-        let streamKey = "\(exchangeKey)-\(instrument)"
-        prices.removeValue(forKey: streamKey)
+        // Remove from local cache using instrument key format
+        prices.removeValue(forKey: instrument)
     }
     
     func updatePrice(_ streamPrice: StreamPrice) {
