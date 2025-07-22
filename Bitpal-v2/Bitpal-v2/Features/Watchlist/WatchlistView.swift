@@ -120,11 +120,21 @@ struct WatchlistRowView: View {
     }
     
     private var currentPriceChange: Double {
-        streamPrice?.priceChange24h ?? currencyPair.priceChange24h
+        // Hybrid approach: Use live WebSocket price + stored 24h open price for live 24h change calculation
+        if let livePrice = streamPrice?.price, currencyPair.open24h > 0 {
+            return livePrice - currencyPair.open24h
+        }
+        // Fallback to stored 24h change when no live price
+        return currencyPair.priceChange24h
     }
     
     private var currentPriceChangePercent: Double {
-        streamPrice?.priceChangePercent24h ?? currencyPair.priceChangePercent24h
+        // Hybrid approach: Use live WebSocket price + stored 24h open price for live 24h percentage calculation
+        if let livePrice = streamPrice?.price, currencyPair.open24h > 0 {
+            return ((livePrice - currencyPair.open24h) / currencyPair.open24h) * 100
+        }
+        // Fallback to stored 24h percentage when no live price
+        return currencyPair.priceChangePercent24h
     }
     
     var body: some View {
