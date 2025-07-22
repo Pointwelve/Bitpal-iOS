@@ -104,6 +104,9 @@ final class PriceStreamService {
         let key = streamPrice.uniqueKey
         prices[key] = streamPrice
         
+        // Debug: Log when WebSocket price updates are received
+        print("📡 RECEIVED WebSocket price: \(key) = \(streamPrice.price?.description ?? "nil")")
+        
         // Add to pending batch updates instead of immediate processing
         pendingUpdates[key] = streamPrice
         
@@ -154,6 +157,8 @@ final class PriceStreamService {
                     let low24h = streamPrice.moving24Hour?.low ?? streamPrice.currentDay?.low ?? streamPrice.low24Hour
                     let open24h = streamPrice.moving24Hour?.open ?? streamPrice.currentDay?.open ?? streamPrice.open24Hour
                     
+                    let beforePercent = pair.priceChangePercent24h
+                    
                     pair.updateFromStream(
                         price: price,
                         volume24h: volume24h,
@@ -163,6 +168,8 @@ final class PriceStreamService {
                         bid: streamPrice.bid,
                         ask: streamPrice.ask
                     )
+                    
+                    print("🔄 WebSocket update \(pair.displayName): \(beforePercent)% → \(pair.priceChangePercent24h)% (open24h: \(open24h?.description ?? "nil"))")
                     hasChanges = true
                 }
             }
@@ -278,6 +285,11 @@ final class PriceStreamService {
             
             print("✅ Updated \(instrumentKey) from \(currentPrice) to \(apiPrice)")
             print("💾 Final 24h change: \(pair.priceChange24h) (\(pair.priceChangePercent24h)%)")
+            
+            // Ensure context changes are processed on main thread for SwiftUI observation
+            await MainActor.run {
+                pair.updateLastModified()
+            }
             
             // Create price history entry if price changed significantly
             if currentPrice > 0 && abs(apiPrice - currentPrice) / currentPrice > 0.001 { // 0.1% change threshold

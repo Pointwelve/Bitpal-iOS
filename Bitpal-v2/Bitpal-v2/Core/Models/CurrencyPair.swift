@@ -144,6 +144,8 @@ extension CurrencyPair {
         } else if let change = directChange24h, let changePercent = directChangePercent24h {
             updateWithDirectChange(price: price, change: change, changePercent: changePercent)
         }
+        // If neither open24h nor direct values provided, preserve existing percentage data
+        // This prevents WebSocket updates from wiping out API-calculated percentages
         
         if let bidPrice = bid, bidPrice >= 0 { 
             self.bid = bidPrice 
