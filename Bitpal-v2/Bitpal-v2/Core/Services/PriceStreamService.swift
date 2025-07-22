@@ -157,6 +157,10 @@ final class PriceStreamService {
                     let low24h = streamPrice.moving24Hour?.low ?? streamPrice.currentDay?.low ?? streamPrice.low24Hour
                     let open24h = streamPrice.moving24Hour?.open ?? streamPrice.currentDay?.open ?? streamPrice.open24Hour
                     
+                    // Prefer pre-calculated CoinDesk change values over open24h calculation
+                    let directChange24h = streamPrice.moving24Hour?.change ?? streamPrice.currentDay?.change
+                    let directChangePercent24h = streamPrice.moving24Hour?.changePercentage ?? streamPrice.currentDay?.changePercentage
+                    
                     let beforePercent = pair.priceChangePercent24h
                     
                     pair.updateFromStream(
@@ -166,10 +170,12 @@ final class PriceStreamService {
                         low24h: low24h,
                         open24h: open24h,
                         bid: streamPrice.bid,
-                        ask: streamPrice.ask
+                        ask: streamPrice.ask,
+                        directChange24h: directChange24h,
+                        directChangePercent24h: directChangePercent24h
                     )
                     
-                    print("🔄 WebSocket update \(pair.displayName): \(beforePercent)% → \(pair.priceChangePercent24h)% (open24h: \(open24h?.description ?? "nil"))")
+                    print("🔄 WebSocket update \(pair.displayName): \(beforePercent)% → \(pair.priceChangePercent24h)% (direct: \(directChangePercent24h?.description ?? "nil")%, open24h: \(open24h?.description ?? "nil"))")
                     hasChanges = true
                 }
             }
