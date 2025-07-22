@@ -187,7 +187,7 @@ extension CurrencyPair {
     }
     
     var exchangeName: String {
-        exchange?.displayName ?? "Unknown Exchange"
+        exchange?.displayName ?? "Aggregated"
     }
     
     var isPositiveChange: Bool {

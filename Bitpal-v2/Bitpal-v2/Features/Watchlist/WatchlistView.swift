@@ -127,9 +127,11 @@ struct WatchlistRowView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                Text(currencyPair.exchangeName)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let exchange = currencyPair.exchange {
+                    Text(exchange.displayName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             
             Spacer()
