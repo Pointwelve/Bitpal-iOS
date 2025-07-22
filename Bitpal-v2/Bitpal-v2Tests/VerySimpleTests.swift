@@ -35,4 +35,19 @@ final class VerySimpleTests: XCTestCase {
         XCTAssertFalse(config.apiHost.isEmpty)
         XCTAssertFalse(config.socketHost.isEmpty)
     }
+    
+    func testCurrencyPairCreationWithoutExchange() {
+        let btc = Currency.bitcoin()
+        let usd = Currency.usd()
+        
+        let pair = CurrencyPair(
+            baseCurrency: btc,
+            quoteCurrency: usd
+        )
+        
+        XCTAssertEqual(pair.id, "BTC-USD")
+        XCTAssertEqual(pair.displayName, "BTC/USD")
+        XCTAssertNil(pair.exchange)
+        XCTAssertTrue(pair.isValidPair)
+    }
 }

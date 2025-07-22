@@ -195,6 +195,7 @@ final class AppCoordinator {
             Currency.self,
             Exchange.self,
             Alert.self,
+            AlertList.self,
             HistoricalPrice.self,
             Configuration.self,
             Watchlist.self

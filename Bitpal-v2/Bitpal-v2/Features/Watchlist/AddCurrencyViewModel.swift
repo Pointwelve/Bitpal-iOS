@@ -81,13 +81,13 @@ final class AddCurrencyViewModel {
         isLoading = false
     }
     
-    func addCurrencyPair(_ availableCurrency: AvailableCurrency, exchange: Exchange) {
+    func addCurrencyPair(_ availableCurrency: AvailableCurrency) {
         guard let context = modelContext else { 
             print("❌ AddCurrencyViewModel: No model context available")
             return 
         }
         
-        print("🔄 Adding currency pair: \(availableCurrency.symbol) on \(exchange.name)")
+        print("🔄 Adding currency pair: \(availableCurrency.symbol)/USD")
         
         do {
             // Check if currency already exists
@@ -125,28 +125,8 @@ final class AddCurrencyViewModel {
                 context.insert(quoteCurrency)
             }
             
-            // Get or create exchange (always create new to avoid context conflicts)
-            let allExchanges = try context.fetch(FetchDescriptor<Exchange>())
-            let existingExchanges = allExchanges.filter { $0.id == exchange.id }
-            
-            let targetExchange: Exchange
-            if let existing = existingExchanges.first {
-                targetExchange = existing
-            } else {
-                // Create a new Exchange object to avoid context conflicts
-                targetExchange = Exchange(
-                    id: exchange.id,
-                    name: exchange.name,
-                    displayName: exchange.displayName,
-                    website: exchange.website,
-                    logoURL: exchange.logoURL,
-                    country: exchange.country
-                )
-                context.insert(targetExchange)
-            }
-            
-            // Check if pair already exists using the generated ID
-            let expectedPairId = "\(availableCurrency.symbol.uppercased())-USD-\(targetExchange.id.lowercased())"
+            // Check if pair already exists using the generated ID (without exchange)
+            let expectedPairId = "\(availableCurrency.symbol.uppercased())-USD"
             let pairDescriptor = FetchDescriptor<CurrencyPair>(
                 predicate: #Predicate { $0.id == expectedPairId }
             )
@@ -164,11 +144,10 @@ final class AddCurrencyViewModel {
                 let allPairs = try context.fetch(allPairsDescriptor)
                 let nextSortOrder = (allPairs.first?.sortOrder ?? -1) + 1
                 
-                // Create the currency pair
+                // Create the currency pair without exchange
                 let currencyPair = CurrencyPair(
                     baseCurrency: baseCurrency,
                     quoteCurrency: quoteCurrency,
-                    exchange: targetExchange,
                     sortOrder: nextSortOrder
                 )
                 

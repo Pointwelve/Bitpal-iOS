@@ -63,8 +63,37 @@ final class CurrencyPair {
         self.isDeleted = false
     }
     
+    init(
+        baseCurrency: Currency,
+        quoteCurrency: Currency,
+        sortOrder: Int = 0
+    ) {
+        self.id = Self.generateId(base: baseCurrency.symbol, quote: quoteCurrency.symbol)
+        self.baseCurrency = baseCurrency
+        self.quoteCurrency = quoteCurrency
+        self.exchange = nil
+        self.sortOrder = sortOrder
+        self.currentPrice = 0.0
+        self.priceChange24h = 0.0
+        self.priceChangePercent24h = 0.0
+        self.volume24h = 0.0
+        self.high24h = 0.0
+        self.low24h = 0.0
+        self.open24h = 0.0
+        self.marketCap = 0.0
+        let now = Date()
+        self.lastUpdated = now
+        self.createdAt = now
+        self.lastModified = now
+        self.isDeleted = false
+    }
+    
     private static func generateId(base: String, quote: String, exchange: String) -> String {
         "\(base.uppercased())-\(quote.uppercased())-\(exchange.lowercased())"
+    }
+    
+    private static func generateId(base: String, quote: String) -> String {
+        "\(base.uppercased())-\(quote.uppercased())"
     }
     
     func markAsDeleted() {
@@ -239,7 +268,7 @@ extension CurrencyPair {
 // MARK: - Validation
 extension CurrencyPair {
     var isValidPair: Bool {
-        baseCurrency != nil && quoteCurrency != nil && exchange != nil
+        baseCurrency != nil && quoteCurrency != nil
     }
     
     var hasRecentData: Bool {
