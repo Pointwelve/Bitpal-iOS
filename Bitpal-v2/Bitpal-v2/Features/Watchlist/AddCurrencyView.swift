@@ -21,14 +21,12 @@ struct AddCurrencyView: View {
         case popular = "Popular"
         case trending = "Trending"
         case all = "All"
-        case recent = "Recent"
         
         var systemImage: String {
             switch self {
             case .popular: return "star.fill"
             case .trending: return "chart.line.uptrend.xyaxis"
             case .all: return "list.bullet"
-            case .recent: return "clock.fill"
             }
         }
     }
@@ -188,12 +186,11 @@ struct AddCurrencyView: View {
         case .popular:
             return searchService.getTopCurrencies()
         case .trending:
-            // This would be loaded async, for now show popular
+            // TODO: Implement actual trending data from API
+            // For now, show popular currencies
             return searchService.getTopCurrencies()
         case .all:
             return searchService.availableCurrencies
-        case .recent:
-            return searchService.getRecentlyAdded()
         }
     }
     
