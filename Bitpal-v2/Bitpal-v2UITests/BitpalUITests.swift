@@ -16,9 +16,6 @@ final class BitpalUITests: XCTestCase {
         app = XCUIApplication()
         app.launchArguments = ["UI_TESTING"]
         app.launch()
-        
-        // Wait for app initialization to complete
-        _ = waitForAppInitialization()
     }
     
     override func tearDownWithError() throws {

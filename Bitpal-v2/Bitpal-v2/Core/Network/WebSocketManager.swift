@@ -181,7 +181,10 @@ final class WebSocketManager {
     func subscribe(to symbol: String) async {
         subscriptions.insert(symbol)
         
-        guard connectionState == .connected else { return }
+        guard connectionState == .connected else { 
+            print("📡 WebSocket: Queued subscription for \(symbol) (not connected yet)")
+            return 
+        }
         
         // CoinDesk subscription format
         let subscribeMessage: [String: Any] = [
@@ -193,6 +196,7 @@ final class WebSocketManager {
         ]
         
         await sendMessage(subscribeMessage)
+        print("📡 WebSocket: Sent subscription for \(symbol)")
     }
     
     func unsubscribe(from symbol: String) async {
@@ -268,8 +272,16 @@ final class WebSocketManager {
     private func handleMessage(_ text: String) async {
         guard let data = text.data(using: .utf8) else { return }
         
+        // Debug: Log ALL incoming WebSocket messages
+        print("🔍 WebSocket RAW message: \(String(text.prefix(500)))")
+        
         do {
             if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                print("🔍 WebSocket JSON keys: \(Array(json.keys).sorted())")
+                if let type = json["TYPE"] as? String {
+                    print("🔍 WebSocket TYPE: \(type)")
+                }
+                
                 // CoinDesk uses TYPE field with string values like "4000", "4013"
                 if let typeString = json["TYPE"] as? String,
                    let messageTypeRaw = Int(typeString),
@@ -333,6 +345,12 @@ final class WebSocketManager {
             print("✅ WebSocket: \(messageType.description)")
             isAuthenticated = true
             connectionState = .connected
+            
+            // Process queued subscriptions now that we're connected
+            print("📡 WebSocket: Processing \(subscriptions.count) queued subscriptions")
+            for subscription in subscriptions {
+                await subscribe(to: subscription)
+            }
             
         case .subscriptionAccepted:
             print("✅ WebSocket: \(messageType.description)")

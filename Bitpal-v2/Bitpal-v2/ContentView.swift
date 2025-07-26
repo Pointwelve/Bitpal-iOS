@@ -129,7 +129,11 @@ final class ContentViewModel {
             modelContext.insert(exchange)
             
             try modelContext.save()
-            logger.info("Created \(defaultCurrencies.count) default currencies and exchange")
+            
+            // Create default currency pairs (BTC/USD, ETH/USD)
+            try await createDefaultCurrencyPairs(modelContext: modelContext)
+            
+            logger.info("Created \(defaultCurrencies.count) default currencies, exchange, and currency pairs")
         } else {
             logger.info("Currencies already exist (\(currencies.count) found)")
         }
@@ -143,6 +147,38 @@ final class ContentViewModel {
             Currency(id: "eur", name: "Euro", symbol: "EUR", displaySymbol: "€"),
             Currency(id: "gbp", name: "British Pound", symbol: "GBP", displaySymbol: "£")
         ]
+    }
+    
+    private func createDefaultCurrencyPairs(modelContext: ModelContext) async throws {
+        // Get the currencies we just created
+        let currencyDescriptor = FetchDescriptor<Currency>()
+        let currencies = try modelContext.fetch(currencyDescriptor)
+        
+        guard let btc = currencies.first(where: { $0.symbol == "BTC" }),
+              let eth = currencies.first(where: { $0.symbol == "ETH" }),
+              let usd = currencies.first(where: { $0.symbol == "USD" }) else {
+            logger.error("Failed to find default currencies for creating pairs")
+            return
+        }
+        
+        // Create default pairs without exchange (using our new exchange-optional model)
+        let btcUsd = CurrencyPair(
+            baseCurrency: btc,
+            quoteCurrency: usd,
+            sortOrder: 0
+        )
+        
+        let ethUsd = CurrencyPair(
+            baseCurrency: eth,
+            quoteCurrency: usd,
+            sortOrder: 1
+        )
+        
+        modelContext.insert(btcUsd)
+        modelContext.insert(ethUsd)
+        
+        try modelContext.save()
+        logger.info("Created default currency pairs: BTC/USD, ETH/USD")
     }
 }
 

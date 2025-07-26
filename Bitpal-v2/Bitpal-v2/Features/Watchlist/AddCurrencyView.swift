@@ -16,21 +16,17 @@ struct AddCurrencyView: View {
     
     @State private var searchText = ""
     @State private var selectedCategory: CurrencyCategory = .popular
-    @State private var showingExchangeSelection = false
-    @State private var selectedCurrency: AvailableCurrency?
     
     enum CurrencyCategory: String, CaseIterable {
         case popular = "Popular"
         case trending = "Trending"
         case all = "All"
-        case recent = "Recent"
         
         var systemImage: String {
             switch self {
             case .popular: return "star.fill"
             case .trending: return "chart.line.uptrend.xyaxis"
             case .all: return "list.bullet"
-            case .recent: return "clock.fill"
             }
         }
     }
@@ -54,16 +50,6 @@ struct AddCurrencyView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                }
-            }
-            .sheet(isPresented: $showingExchangeSelection) {
-                if let currency = selectedCurrency {
-                    ExchangeSelectionView(
-                        currency: currency,
-                        onComplete: { exchange in
-                            addCurrencyPair(currency: currency, exchange: exchange)
-                        }
-                    )
                 }
             }
             .task {
@@ -163,8 +149,7 @@ struct AddCurrencyView: View {
                         CurrencyRow(
                             currency: currency,
                             onTap: {
-                                selectedCurrency = currency
-                                showingExchangeSelection = true
+                                addCurrencyPair(currency: currency)
                             }
                         )
                     }
@@ -201,12 +186,11 @@ struct AddCurrencyView: View {
         case .popular:
             return searchService.getTopCurrencies()
         case .trending:
-            // This would be loaded async, for now show popular
+            // TODO: Implement actual trending data from API
+            // For now, show popular currencies
             return searchService.getTopCurrencies()
         case .all:
             return searchService.availableCurrencies
-        case .recent:
-            return searchService.getRecentlyAdded()
         }
     }
     
@@ -220,8 +204,8 @@ struct AddCurrencyView: View {
         }
     }
     
-    private func addCurrencyPair(currency: AvailableCurrency, exchange: Exchange) {
-        viewModel.addCurrencyPair(currency, exchange: exchange)
+    private func addCurrencyPair(currency: AvailableCurrency) {
+        viewModel.addCurrencyPair(currency)
         dismiss()
     }
 }
@@ -231,126 +215,50 @@ struct CurrencyRow: View {
     let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                // Currency Icon Placeholder
-                Circle()
-                    .fill(Color.accentColor.opacity(0.1))
-                    .frame(width: 40, height: 40)
-                    .overlay {
-                        Text(currency.symbol.prefix(1))
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.accentColor)
-                    }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(currency.name)
+        HStack(spacing: 12) {
+            // Currency Icon Placeholder
+            Circle()
+                .fill(Color.accentColor.opacity(0.1))
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Text(currency.symbol.prefix(1))
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .fontWeight(.bold)
+                        .foregroundColor(.accentColor)
+                }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(currency.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                HStack {
+                    Text(currency.symbol)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                     
-                    HStack {
-                        Text(currency.symbol)
+                    if let displaySymbol = currency.displaySymbol, displaySymbol != currency.symbol {
+                        Text("• \(displaySymbol)")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                        
-                        if let displaySymbol = currency.displaySymbol, displaySymbol != currency.symbol {
-                            Text("• \(displaySymbol)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
                     }
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
-            .padding(.vertical, 4)
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 
-struct ExchangeSelectionView: View {
-    let currency: AvailableCurrency
-    let onComplete: (Exchange) -> Void
-    
-    @Environment(\.dismiss) private var dismiss
-    @Environment(CurrencySearchService.self) private var searchService
-    @State private var availableExchanges: [Exchange] = []
-    @State private var isLoading = true
-    
-    var body: some View {
-        NavigationStack {
-            VStack {
-                if isLoading {
-                    ProgressView("Loading exchanges...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    List {
-                        Section {
-                            ForEach(availableExchanges, id: \.id) { exchange in
-                                Button {
-                                    onComplete(exchange)
-                                    dismiss()
-                                } label: {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text(exchange.displayName)
-                                                .font(.headline)
-                                                .foregroundColor(.primary)
-                                            
-                                            if exchange.displayName != exchange.name {
-                                                Text(exchange.name)
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "chevron.right")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        } header: {
-                            Text("Select Exchange for \(currency.symbol)")
-                        } footer: {
-                            Text("Different exchanges may have different prices and trading volumes.")
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Select Exchange")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-            .task {
-                await loadExchanges()
-            }
-        }
-    }
-    
-    private func loadExchanges() async {
-        isLoading = true
-        availableExchanges = await searchService.getAvailableExchanges(
-            for: currency.symbol,
-            quoteCurrency: "USD"
-        )
-        isLoading = false
-    }
-}
 
 #Preview {
     AddCurrencyView()

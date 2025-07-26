@@ -44,6 +44,17 @@ struct WatchlistView: View {
                 // Only start price streaming if not already started by AppCoordinator
                 await watchlistViewModel.startPriceStreamingIfNeeded(for: currencyPairs)
             }
+            .onChange(of: currencyPairs.count) { oldCount, newCount in
+                // Handle newly added currency pairs
+                if newCount > oldCount {
+                    print("🆕 WatchlistView: Detected new currency pairs (\(oldCount) → \(newCount))")
+                    Task {
+                        // Give a small delay to ensure SwiftData changes are fully processed
+                        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                        await watchlistViewModel.startPriceStreamingIfNeeded(for: currencyPairs)
+                    }
+                }
+            }
             .refreshable {
                 await refreshPrices()
             }
@@ -97,7 +108,7 @@ struct WatchlistView: View {
 
 struct WatchlistRowView: View {
     let currencyPair: CurrencyPair
-    @State private var priceStreamService = PriceStreamService.shared
+    @Environment(PriceStreamService.self) private var priceStreamService
     @State private var animatePrice = false
     
     private var streamPrice: StreamPrice? {
@@ -109,11 +120,21 @@ struct WatchlistRowView: View {
     }
     
     private var currentPriceChange: Double {
-        streamPrice?.priceChange24h ?? currencyPair.priceChange24h
+        // Hybrid approach: Use live WebSocket price + stored 24h open price for live 24h change calculation
+        if let livePrice = streamPrice?.price, currencyPair.open24h > 0 {
+            return livePrice - currencyPair.open24h
+        }
+        // Fallback to stored 24h change when no live price
+        return currencyPair.priceChange24h
     }
     
     private var currentPriceChangePercent: Double {
-        streamPrice?.priceChangePercent24h ?? currencyPair.priceChangePercent24h
+        // Hybrid approach: Use live WebSocket price + stored 24h open price for live 24h percentage calculation
+        if let livePrice = streamPrice?.price, currencyPair.open24h > 0 {
+            return ((livePrice - currencyPair.open24h) / currencyPair.open24h) * 100
+        }
+        // Fallback to stored 24h percentage when no live price
+        return currencyPair.priceChangePercent24h
     }
     
     var body: some View {
@@ -127,9 +148,11 @@ struct WatchlistRowView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                Text(currencyPair.exchangeName)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let exchange = currencyPair.exchange {
+                    Text(exchange.displayName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             
             Spacer()
@@ -167,6 +190,27 @@ struct WatchlistRowView: View {
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     animatePrice = false
+                }
+            }
+        }
+        .onAppear {
+            // Check if this currency pair needs price subscription
+            if currentPrice == 0.0 {
+                print("⚠️ WatchlistRowView: Currency pair \(currencyPair.displayName) has no price, triggering subscription")
+                Task {
+                    // Small delay to ensure UI is ready
+                    try? await Task.sleep(nanoseconds: 250_000_000) // 0.25 seconds
+                    
+                    // Subscribe to price streaming
+                    await priceStreamService.subscribe(to: currencyPair)
+                    
+                    // Also try to fetch latest price
+                    do {
+                        try await priceStreamService.fetchLatestPrices(for: [currencyPair])
+                        print("✅ WatchlistRowView: Fetched price for \(currencyPair.displayName)")
+                    } catch {
+                        print("⚠️ WatchlistRowView: Failed to fetch price for \(currencyPair.displayName): \(error)")
+                    }
                 }
             }
         }
