@@ -216,23 +216,34 @@ struct CurrencyRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            // Currency Icon Placeholder
-            Circle()
-                .fill(Color.accentColor.opacity(0.1))
-                .frame(width: 40, height: 40)
-                .overlay {
-                    Text(currency.symbol.prefix(1))
-                        .font(.headline)
+            // Rank badge and Currency Icon
+            HStack(spacing: 8) {
+                if let rank = currency.rank {
+                    Text("\(rank)")
+                        .font(.caption2)
                         .fontWeight(.bold)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.secondary)
+                        .frame(width: 20)
                 }
+                
+                // Currency Icon Placeholder
+                Circle()
+                    .fill(Color.accentColor.opacity(0.1))
+                    .frame(width: 40, height: 40)
+                    .overlay {
+                        Text(currency.symbol.prefix(1))
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.accentColor)
+                    }
+            }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(currency.name)
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                HStack {
+                HStack(spacing: 4) {
                     Text(currency.symbol)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -242,14 +253,32 @@ struct CurrencyRow: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
+                    
+                    if let marketCap = currency.formattedMarketCap {
+                        Text("• \(marketCap)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             
             Spacer()
             
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            VStack(alignment: .trailing, spacing: 2) {
+                if let price = currency.formattedPrice {
+                    Text(price)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                }
+                
+                if let change = currency.formattedChange24h, let changeValue = currency.change24hPercentage {
+                    Text(change)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(changeValue >= 0 ? .green : .red)
+                }
+            }
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())

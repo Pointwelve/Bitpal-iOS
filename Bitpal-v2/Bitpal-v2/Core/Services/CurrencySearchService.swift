@@ -17,6 +17,7 @@ final class CurrencySearchService {
     private(set) var availableCurrencies: [AvailableCurrency] = []
     private(set) var availableExchanges: [Exchange] = []
     private(set) var searchResults: [AvailableCurrency] = []
+    private(set) var topListCurrencies: [AvailableCurrency] = []
     private(set) var isLoading = false
     private(set) var errorMessage: String?
     
@@ -35,6 +36,7 @@ final class CurrencySearchService {
     func loadInitialData() async {
         await loadAvailableCurrencies()
         await loadAvailableExchanges()
+        await loadTopCurrencies()
     }
     
     private func loadAvailableCurrencies() async {
@@ -70,6 +72,56 @@ final class CurrencySearchService {
         }
         
         isLoading = false
+    }
+    
+    private func loadTopCurrencies() async {
+        print("🔄 Starting to load top currencies from CoinDesk API...")
+        
+        do {
+            let endpoint = CryptoAPIEndpoint.topList(page: 1, pageSize: 20)
+            print("📡 Making API request to: \(endpoint.path)")
+            
+            // Debug: Print the exact URL that will be used
+            let baseURL = await apiClient.baseURL
+            let apiKey = await apiClient.apiKey
+            if let url = endpoint.url(baseURL: baseURL, apiKey: apiKey) {
+                print("🔍 Full URL: \(url.absoluteString)")
+            } else {
+                print("❌ Failed to construct URL")
+            }
+            
+            let response: CoinDeskTopListResponse = try await apiClient.request(endpoint)
+            
+            print("✅ API response received with \(response.data.list.count) currencies")
+            
+            topListCurrencies = response.data.list.map { topCurrency in
+                AvailableCurrency(
+                    id: topCurrency.symbol.lowercased(),
+                    name: topCurrency.name,
+                    symbol: topCurrency.symbol,
+                    displaySymbol: nil,
+                    imageUrl: topCurrency.logoUrl,
+                    isActive: true,
+                    priceUsd: topCurrency.priceUsd,
+                    marketCapUsd: topCurrency.circulatingMarketCapUsd,
+                    change24hPercentage: topCurrency.change24hPercentage,
+                    rank: topCurrency.marketCapRank
+                )
+            }
+            
+            print("✅ Successfully loaded \(topListCurrencies.count) top currencies")
+            if let first = topListCurrencies.first {
+                print("📊 First currency: \(first.name) (\(first.symbol)) - Price: \(first.formattedPrice ?? "N/A"), Rank: \(first.rank ?? -1)")
+            }
+            
+        } catch {
+            print("❌ Failed to load top currencies: \(error)")
+            print("🔍 Error details: \(String(describing: error))")
+            
+            // Fallback to hardcoded popular currencies if API fails
+            topListCurrencies = getPopularCurrencies()
+            print("⚠️ Falling back to hardcoded popular currencies")
+        }
     }
     
     private func loadAvailableExchanges() async {
@@ -189,7 +241,8 @@ final class CurrencySearchService {
     // MARK: - Currency Categories
     
     func getTopCurrencies() -> [AvailableCurrency] {
-        return getPopularCurrencies()
+        print("📋 getTopCurrencies called - topListCurrencies.count: \(topListCurrencies.count)")
+        return topListCurrencies.isEmpty ? getPopularCurrencies() : topListCurrencies
     }
     
     func getTrendingCurrencies() async -> [AvailableCurrency] {
@@ -271,18 +324,73 @@ struct AvailableCurrency: Identifiable, Codable, Hashable {
     let displaySymbol: String?
     let imageUrl: String?
     let isActive: Bool
+    let priceUsd: Double?
+    let marketCapUsd: Double?
+    let change24hPercentage: Double?
+    let rank: Int?
     
-    init(id: String, name: String, symbol: String, displaySymbol: String? = nil, imageUrl: String? = nil, isActive: Bool = true) {
+    init(id: String, name: String, symbol: String, displaySymbol: String? = nil, imageUrl: String? = nil, isActive: Bool = true, priceUsd: Double? = nil, marketCapUsd: Double? = nil, change24hPercentage: Double? = nil, rank: Int? = nil) {
         self.id = id
         self.name = name
         self.symbol = symbol
         self.displaySymbol = displaySymbol
         self.imageUrl = imageUrl
         self.isActive = isActive
+        self.priceUsd = priceUsd
+        self.marketCapUsd = marketCapUsd
+        self.change24hPercentage = change24hPercentage
+        self.rank = rank
     }
     
     var effectiveDisplaySymbol: String {
         displaySymbol ?? symbol
+    }
+    
+    var formattedPrice: String? {
+        guard let priceUsd = priceUsd else { return nil }
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.maximumFractionDigits = priceUsd < 1 ? 6 : 2
+        return formatter.string(from: NSNumber(value: priceUsd))
+    }
+    
+    var formattedMarketCap: String? {
+        guard let marketCapUsd = marketCapUsd else { return nil }
+        return formatLargeNumber(marketCapUsd)
+    }
+    
+    var formattedChange24h: String? {
+        guard let change24hPercentage = change24hPercentage else { return nil }
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.positivePrefix = "+"
+        return formatter.string(from: NSNumber(value: change24hPercentage / 100))
+    }
+    
+    private func formatLargeNumber(_ number: Double) -> String {
+        let trillion = 1_000_000_000_000.0
+        let billion = 1_000_000_000.0
+        let million = 1_000_000.0
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        
+        if number >= trillion {
+            let value = number / trillion
+            return "$\(formatter.string(from: NSNumber(value: value)) ?? "0")T"
+        } else if number >= billion {
+            let value = number / billion
+            return "$\(formatter.string(from: NSNumber(value: value)) ?? "0")B"
+        } else if number >= million {
+            let value = number / million
+            return "$\(formatter.string(from: NSNumber(value: value)) ?? "0")M"
+        } else {
+            return "$\(formatter.string(from: NSNumber(value: number)) ?? "0")"
+        }
     }
 }
 

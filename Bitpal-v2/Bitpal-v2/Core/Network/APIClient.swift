@@ -168,8 +168,10 @@ extension APIEndpoint {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
         
         var items = queryItems ?? []
-        if !apiKey.isEmpty {
-            items.append(URLQueryItem(name: "a10b6019948f0cd3183025f3f306083209665c4267fcd01db73a4a58e6123c2d", value: apiKey))
+        
+        // Add API key only for endpoints that specifically require it
+        if let cryptoEndpoint = self as? CryptoAPIEndpoint, cryptoEndpoint.requiresAPIKey && !apiKey.isEmpty {
+            items.append(URLQueryItem(name: "api_key", value: apiKey))
         }
         
         if !items.isEmpty {
@@ -182,12 +184,25 @@ extension APIEndpoint {
 
 // API Endpoints
 enum CryptoAPIEndpoint: APIEndpoint {
+    
+    // MARK: - API Key Requirements
+    var requiresAPIKey: Bool {
+        switch self {
+        case .topList:
+            return false // Top list works without authentication
+        case .priceMulti, .priceHistorical:
+            return true // Price endpoints need authentication for WebSocket
+        default:
+            return false // Most endpoints work without API key
+        }
+    }
     // CoinDesk API
     case priceMulti(symbols: [String], currencies: [String])
     case priceHistorical(symbol: String, currency: String, exchange: String?, period: APIChartPeriod, limit: Int)
     case coinList
     case exchangeList
     case topCoins(limit: Int, currency: String)
+    case topList(page: Int, pageSize: Int)
     case trendingCoins
     case validateCurrencyPair(CurrencyPairValidationRequest)
     case priceStream(symbols: [String], currencies: [String], exchange: String?)
@@ -280,6 +295,8 @@ enum CryptoAPIEndpoint: APIEndpoint {
         case .topCoins:
             // TODO: No direct CoinDesk equivalent - may need alternative data source
             return "/v2/crypto/top"
+        case .topList:
+            return "/asset/v1/top/list"
         case .trendingCoins:
             // TODO: No direct CoinDesk equivalent - may need alternative data source
             return "/v2/crypto/trending"
@@ -459,6 +476,15 @@ enum CryptoAPIEndpoint: APIEndpoint {
             return [
                 URLQueryItem(name: "limit", value: String(limit)),
                 URLQueryItem(name: "tsym", value: currency)
+            ]
+        case .topList(let page, let pageSize):
+            return [
+                URLQueryItem(name: "page", value: String(page)),
+                URLQueryItem(name: "page_size", value: String(pageSize)),
+                URLQueryItem(name: "sort_by", value: "CIRCULATING_MKT_CAP_USD"),
+                URLQueryItem(name: "sort_direction", value: "DESC"),
+                URLQueryItem(name: "groups", value: "ID,BASIC,SUPPLY,PRICE,MKT_CAP,VOLUME,CHANGE,TOPLIST_RANK"),
+                URLQueryItem(name: "toplist_quote_asset", value: "USD")
             ]
         case .priceStream(let symbols, let currencies, let exchangeParam):
             var items = [
