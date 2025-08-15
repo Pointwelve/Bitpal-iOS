@@ -562,6 +562,90 @@ struct PaginationInfo: Codable {
     let hasPrevious: Bool
 }
 
+// MARK: - CoinDesk Top List API Models
+
+struct CoinDeskTopListResponse: Codable {
+    let data: CoinDeskTopListData
+    let err: CoinDeskError?
+    
+    private enum CodingKeys: String, CodingKey {
+        case data = "Data"
+        case err = "Err"
+    }
+}
+
+struct CoinDeskTopListData: Codable {
+    let stats: TopListStats
+    let list: [TopListCurrency]
+    
+    private enum CodingKeys: String, CodingKey {
+        case stats = "STATS"
+        case list = "LIST"
+    }
+}
+
+struct TopListStats: Codable {
+    let page: Int
+    let pageSize: Int
+    let totalAssets: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case page = "PAGE"
+        case pageSize = "PAGE_SIZE"
+        case totalAssets = "TOTAL_ASSETS"
+    }
+}
+
+struct TopListCurrency: Codable {
+    let id: Int
+    let symbol: String
+    let name: String
+    let logoUrl: String?
+    let priceUsd: Double?
+    let circulatingMarketCapUsd: Double?
+    let change24hPercentage: Double?
+    let topListBaseRank: TopListBaseRank?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "ID"
+        case symbol = "SYMBOL"
+        case name = "NAME"
+        case logoUrl = "LOGO_URL"
+        case priceUsd = "PRICE_USD"
+        case circulatingMarketCapUsd = "CIRCULATING_MKT_CAP_USD"
+        case change24hPercentage = "SPOT_MOVING_24_HOUR_CHANGE_PERCENTAGE_USD"
+        case topListBaseRank = "TOPLIST_BASE_RANK"
+    }
+    
+    var marketCapRank: Int? {
+        return topListBaseRank?.circulatingMktCapUsd
+    }
+}
+
+struct TopListBaseRank: Codable {
+    let circulatingMktCapUsd: Int?
+    let totalMktCapUsd: Int?
+    let createdOn: Int?
+    
+    private enum CodingKeys: String, CodingKey {
+        case circulatingMktCapUsd = "CIRCULATING_MKT_CAP_USD"
+        case totalMktCapUsd = "TOTAL_MKT_CAP_USD"
+        case createdOn = "CREATED_ON"
+    }
+}
+
+struct CoinDeskError: Codable {
+    let type: Int?
+    let message: String?
+    let otherInfo: [String: String]?
+    
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case message
+        case otherInfo = "other_info"
+    }
+}
+
 // MARK: - Codable Extensions
 
 extension Encodable {
