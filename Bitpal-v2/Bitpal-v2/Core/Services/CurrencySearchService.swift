@@ -202,34 +202,76 @@ final class CurrencySearchService {
         searchTask?.cancel()
         
         guard !query.isEmpty else {
-            searchResults = Array(availableCurrencies.prefix(100))
+            // Show popular/trending currencies when search is empty
+            searchResults = Array(topListCurrencies.prefix(20))
             return
         }
         
         searchTask = Task {
-            // Add small delay for better UX
-            try? await Task.sleep(nanoseconds: 150_000_000) // 0.15 seconds
+            // Debounce: 300ms for API calls to respect rate limits
+            try? await Task.sleep(nanoseconds: 300_000_000)
             
             guard !Task.isCancelled else { return }
             
-            let lowercaseQuery = query.lowercased()
-            let filtered = allCurrencies.filter { currency in
-                currency.name.lowercased().contains(lowercaseQuery) ||
-                currency.symbol.lowercased().contains(lowercaseQuery) ||
-                currency.id.lowercased().contains(lowercaseQuery)
+            do {
+                print("🔍 Searching CoinDesk API for: '\(query)'")
+                
+                // Call CoinDesk search API
+                let endpoint = CryptoAPIEndpoint.currencySearch(query: query, limit: 50)
+                let response: CoinDeskSearchResponse = try await apiClient.request(endpoint)
+                
+                guard !Task.isCancelled else { return }
+                
+                // Map search results to AvailableCurrency format
+                let mappedResults = response.Data.LIST.compactMap { topListCurrency -> AvailableCurrency? in
+                    AvailableCurrency(
+                        id: topListCurrency.symbol.lowercased(),
+                        name: topListCurrency.name,
+                        symbol: topListCurrency.symbol,
+                        displaySymbol: nil,
+                        imageUrl: topListCurrency.logoUrl,
+                        isActive: true,
+                        priceUsd: topListCurrency.priceUsd,
+                        marketCapUsd: topListCurrency.circulatingMarketCapUsd,
+                        change24hPercentage: topListCurrency.change24hPercentage,
+                        rank: topListCurrency.topListBaseRank?.circulatingMktCapUsd
+                    )
+                }
+                
+                print("✅ Found \(mappedResults.count) search results for '\(query)'")
+                if let first = mappedResults.first {
+                    print("🎯 Top result: \(first.name) (\(first.symbol))")
+                }
+                
+                searchResults = mappedResults
+                
+            } catch {
+                print("❌ Search API failed: \(error)")
+                print("⚠️ Falling back to local search")
+                
+                // Fallback to local search if API fails
+                performLocalSearch(query)
             }
-            
-            // Sort by relevance
-            let sorted = filtered.sorted { first, second in
-                let firstScore = calculateRelevanceScore(currency: first, query: lowercaseQuery)
-                let secondScore = calculateRelevanceScore(currency: second, query: lowercaseQuery)
-                return firstScore > secondScore
-            }
-            
-            guard !Task.isCancelled else { return }
-            
-            searchResults = Array(sorted.prefix(50)) // Limit results
         }
+    }
+    
+    private func performLocalSearch(_ query: String) {
+        let lowercaseQuery = query.lowercased()
+        let filtered = allCurrencies.filter { currency in
+            currency.name.lowercased().contains(lowercaseQuery) ||
+            currency.symbol.lowercased().contains(lowercaseQuery) ||
+            currency.id.lowercased().contains(lowercaseQuery)
+        }
+        
+        // Sort by relevance
+        let sorted = filtered.sorted { first, second in
+            let firstScore = calculateRelevanceScore(currency: first, query: lowercaseQuery)
+            let secondScore = calculateRelevanceScore(currency: second, query: lowercaseQuery)
+            return firstScore > secondScore
+        }
+        
+        searchResults = Array(sorted.prefix(50))
+        print("📱 Local search found \(searchResults.count) results for '\(query)'")
     }
     
     private func calculateRelevanceScore(currency: AvailableCurrency, query: String) -> Int {

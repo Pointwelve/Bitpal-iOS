@@ -188,8 +188,8 @@ enum CryptoAPIEndpoint: APIEndpoint {
     // MARK: - API Key Requirements
     var requiresAPIKey: Bool {
         switch self {
-        case .topList, .topListTrending:
-            return false // Top list endpoints work without authentication
+        case .topList, .topListTrending, .currencySearch:
+            return false // Top list and search endpoints work without authentication
         case .priceMulti, .priceHistorical:
             return true // Price endpoints need authentication for WebSocket
         default:
@@ -204,6 +204,7 @@ enum CryptoAPIEndpoint: APIEndpoint {
     case topCoins(limit: Int, currency: String)
     case topList(page: Int, pageSize: Int)
     case topListTrending(page: Int, pageSize: Int)
+    case currencySearch(query: String, limit: Int = 20)
     case trendingCoins
     case validateCurrencyPair(CurrencyPairValidationRequest)
     case priceStream(symbols: [String], currencies: [String], exchange: String?)
@@ -300,6 +301,8 @@ enum CryptoAPIEndpoint: APIEndpoint {
             return "/asset/v1/top/list"
         case .topListTrending:
             return "/asset/v1/top/list"
+        case .currencySearch:
+            return "/asset/v1/search"
         case .trendingCoins:
             // TODO: No direct CoinDesk equivalent - may need alternative data source
             return "/v2/crypto/trending"
@@ -497,6 +500,11 @@ enum CryptoAPIEndpoint: APIEndpoint {
                 URLQueryItem(name: "sort_direction", value: "DESC"),
                 URLQueryItem(name: "groups", value: "ID,BASIC,SUPPLY,PRICE,MKT_CAP,VOLUME,CHANGE,TOPLIST_RANK"),
                 URLQueryItem(name: "toplist_quote_asset", value: "USD")
+            ]
+        case .currencySearch(let query, let limit):
+            return [
+                URLQueryItem(name: "search_string", value: query),
+                URLQueryItem(name: "limit", value: String(limit))
             ]
         case .priceStream(let symbols, let currencies, let exchangeParam):
             var items = [

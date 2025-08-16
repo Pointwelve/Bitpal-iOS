@@ -89,6 +89,17 @@ struct UpdateUserPreferencesRequest: Codable {
     let hapticEnabled: Bool?
 }
 
+// MARK: - Search API Models
+
+struct CoinDeskSearchResponse: Codable {
+    let Data: CoinDeskSearchData
+    let Err: CoinDeskError?
+}
+
+struct CoinDeskSearchData: Codable {
+    let LIST: [TopListCurrency]
+}
+
 // MARK: - Watchlist API Models
 
 struct CreateWatchlistRequest: Codable {
