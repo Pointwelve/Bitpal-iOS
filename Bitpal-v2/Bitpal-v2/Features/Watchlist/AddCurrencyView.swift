@@ -20,13 +20,11 @@ struct AddCurrencyView: View {
     enum CurrencyCategory: String, CaseIterable {
         case popular = "Popular"
         case trending = "Trending"
-        case all = "All"
         
         var systemImage: String {
             switch self {
             case .popular: return "star.fill"
             case .trending: return "chart.line.uptrend.xyaxis"
-            case .all: return "list.bullet"
             }
         }
     }
@@ -186,20 +184,16 @@ struct AddCurrencyView: View {
         case .popular:
             return searchService.getTopCurrencies()
         case .trending:
-            // TODO: Implement actual trending data from API
-            // For now, show popular currencies
-            return searchService.getTopCurrencies()
-        case .all:
-            return searchService.availableCurrencies
+            return searchService.getTrendingCurrencies()
         }
     }
     
     private func loadCategoryData(_ category: CurrencyCategory) async {
         switch category {
         case .trending:
-            // Load trending currencies
-            break
-        default:
+            await searchService.loadTrendingCurrencies()
+        case .popular:
+            // Popular data is already loaded on initialization
             break
         }
     }

@@ -18,6 +18,7 @@ final class CurrencySearchService {
     private(set) var availableExchanges: [Exchange] = []
     private(set) var searchResults: [AvailableCurrency] = []
     private(set) var topListCurrencies: [AvailableCurrency] = []
+    private(set) var trendingCurrencies: [AvailableCurrency] = []
     private(set) var isLoading = false
     private(set) var errorMessage: String?
     
@@ -121,6 +122,56 @@ final class CurrencySearchService {
             // Fallback to hardcoded popular currencies if API fails
             topListCurrencies = getPopularCurrencies()
             print("⚠️ Falling back to hardcoded popular currencies")
+        }
+    }
+    
+    func loadTrendingCurrencies() async {
+        print("🔄 Starting to load trending currencies from CoinDesk API...")
+        
+        do {
+            let endpoint = CryptoAPIEndpoint.topListTrending(page: 1, pageSize: 20)
+            print("📡 Making API request to: \(endpoint.path) (trending)")
+            
+            // Debug: Print the exact URL that will be used
+            let baseURL = await apiClient.baseURL
+            let apiKey = await apiClient.apiKey
+            if let url = endpoint.url(baseURL: baseURL, apiKey: apiKey) {
+                print("🔍 Full trending URL: \(url.absoluteString)")
+            } else {
+                print("❌ Failed to construct trending URL")
+            }
+            
+            let response: CoinDeskTopListResponse = try await apiClient.request(endpoint)
+            
+            print("✅ Trending API response received with \(response.data.list.count) currencies")
+            
+            trendingCurrencies = response.data.list.map { topCurrency in
+                AvailableCurrency(
+                    id: topCurrency.symbol.lowercased(),
+                    name: topCurrency.name,
+                    symbol: topCurrency.symbol,
+                    displaySymbol: nil,
+                    imageUrl: topCurrency.logoUrl,
+                    isActive: true,
+                    priceUsd: topCurrency.priceUsd,
+                    marketCapUsd: topCurrency.circulatingMarketCapUsd,
+                    change24hPercentage: topCurrency.change24hPercentage,
+                    rank: topCurrency.marketCapRank
+                )
+            }
+            
+            print("✅ Successfully loaded \(trendingCurrencies.count) trending currencies")
+            if let first = trendingCurrencies.first {
+                print("📈 Top trending: \(first.name) (\(first.symbol)) - Price: \(first.formattedPrice ?? "N/A"), Change: \(first.formattedChange24h ?? "N/A")")
+            }
+            
+        } catch {
+            print("❌ Failed to load trending currencies: \(error)")
+            print("🔍 Error details: \(String(describing: error))")
+            
+            // Fallback to hardcoded popular currencies if API fails
+            trendingCurrencies = Array(getPopularCurrencies().prefix(10))
+            print("⚠️ Falling back to hardcoded popular currencies for trending")
         }
     }
     
@@ -245,7 +296,12 @@ final class CurrencySearchService {
         return topListCurrencies.isEmpty ? getPopularCurrencies() : topListCurrencies
     }
     
-    func getTrendingCurrencies() async -> [AvailableCurrency] {
+    func getTrendingCurrencies() -> [AvailableCurrency] {
+        print("📈 getTrendingCurrencies called - trendingCurrencies.count: \(trendingCurrencies.count)")
+        return trendingCurrencies.isEmpty ? getPopularCurrencies() : trendingCurrencies
+    }
+    
+    func getTrendingCurrenciesAsync() async -> [AvailableCurrency] {
         do {
             let response: TrendingCurrenciesResponse = try await apiClient.request(CryptoAPIEndpoint.trendingCoins)
             return response.coins.compactMap { coinData in
