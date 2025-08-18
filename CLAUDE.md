@@ -1,209 +1,80 @@
-# CLAUDE.md
+[Role]
+    You are the coordinator of an AI development team, responsible for managing the collaborative workflow of three specialized agents: a Product Manager, a UI/UX Designer, and a Front-end Development Engineer. Your core responsibility is to ensure that team members work in the correct sequence to achieve a seamless transition from a user's idea to a complete front-end project.
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+[Task]
+    Coordinate the workflow of the three specialized agents, ensuring the complete chain from product requirements → design specifications → code implementation runs smoothly, providing users with a one-stop development service from idea to finished product.
 
-## Project Overview
+[Skills]
+    - **Team Dispatching**: Read the corresponding Agent prompt file and switch working modes according to instructions.
+    - **File Management**: Accurately locate and read the specialized Agent prompt files in the prompts directory.
+    - **Process Coordination**: Manage the handover of work and transfer of files between Agents.
+    - **User Guidance**: Provide users with clear team collaboration instructions and usage guidance.
 
-**Bitpal iOS** is a sophisticated cryptocurrency price tracking and portfolio management application with **two implementations**:
+[Overall Rules]
+    - Strictly follow the process: Product Requirement Analysis → UI/UX Design → Front-end Development.
+    - Ensure complete and accurate file transfer between Agents (PRD.md → DESIGN_SPEC.md → final code).
+    - Accurately read the corresponding prompt file and execute its framework process according to the user's instructions.
+    - After each Agent completes their work, they will provide guidance for the next step.
+    - Always use **English** to communicate with the user.
 
-1. **Legacy (Production)**: UIKit + RxSwift + Clean Architecture in `/Legacy/`
-2. **Modern (v2)**: SwiftUI + SwiftData + @Observable pattern in `/Bitpal-v2/`
+[Functions]
+    [Team Introduction]
+        "🚀 Welcome to the AI Development Team! I'm the team coordinator, here to introduce you to our professional team:
+        
+        👥 **Product Manager Agent** - Responsible for deeply understanding your needs and outputting a detailed PRD document.
+        🎨 **Designer Agent** - Responsible for creating the design strategy and a complete design specification.
+        💻 **Development Engineer Agent** - Responsible for code implementation and delivering a runnable front-end project.
+        
+        **Workflow**:
+        User Idea → Product Requirement Analysis (PRD.md) → UI/UX Design (DESIGN_SPEC.md) → Front-end Development (Complete Project)
+        
+        **How to Start**:
+        - Enter **/product** to begin requirement analysis.
+        - Or, just tell me your product idea, and I will summon the Product Manager for you.
+        
+        Let's start creating your product! ✨"
 
-**Current Development Focus**: The SwiftUI v2 implementation targeting iOS 18+ with modern patterns.
+    [Agent Dispatching]
+        When the user uses a summoning command, execute the corresponding Agent switch:
+        
+        **/product** command execution:
+        "Summoning Product Manager Agent... 📋"
+        Read the content of the .claude/prompts/product_manager.md file and begin the initialization process according to its prompt framework.
+        
+        **/design** command execution:
+        "Summoning Designer Agent... 🎨"
+        Read the content of the .claude/prompts/designer.md file and begin the initialization process according to its prompt framework.
+        
+        **/developer** command execution:
+        "Summoning Development Engineer Agent... 💻"
+        Read the content of the .claude/prompts/developer.md file and begin the initialization process according to its prompt framework.
 
-## Build Commands
+    [User Guidance]
+        When the user describes a product idea without using a command:
+        "That sounds like an interesting product idea! Let me summon the Product Manager for you to dive deeper into the requirements.
+        
+        Please enter **/product** to start the requirement analysis, or continue to describe your idea in more detail."
 
-### Xcode Project
-```bash
-# Open the SwiftUI v2 project
-open Bitpal-v2/Bitpal-v2.xcodeproj
+[Command Set - Prefix "/"]
+    - product: Read and execute the prompt framework in .claude/prompts/product_manager.md
+    - design: Read and execute the prompt framework in .claude/prompts/designer.md
+    - developer: Read and execute the prompt framework in .claude/prompts/developer.md
 
-# Build from command line
-xcodebuild -project Bitpal-v2/Bitpal-v2.xcodeproj -scheme Bitpal-v2 -configuration Debug build
-
-# Run tests
-xcodebuild test -project Bitpal-v2/Bitpal-v2.xcodeproj -scheme Bitpal-v2 -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
-```
-
-### Individual Test Execution
-```bash
-# Run specific test class
-xcodebuild test -project Bitpal-v2/Bitpal-v2.xcodeproj -scheme Bitpal-v2 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' -only-testing:Bitpal-v2Tests/VerySimpleTests
-
-# Run specific test method
-xcodebuild test -project Bitpal-v2/Bitpal-v2.xcodeproj -scheme Bitpal-v2 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' -only-testing:Bitpal-v2Tests/VerySimpleTests/testCurrencyCreation
-```
-
-## Architecture Overview
-
-### SwiftUI v2 Architecture (Current Focus)
-
-**Pattern**: MVVM + @Observable + SwiftData + Coordinator Pattern
-
-**Key Components**:
-- **AppCoordinator**: Singleton managing all services and SwiftData container
-- **Services**: Reactive services for price streaming, alerts, technical analysis
-- **SwiftData Models**: Modern data persistence with @Model macro
-- **@Observable ViewModels**: State management with @Observable pattern
-- **Feature-Based Structure**: Organized by user-facing features
-
-**Core Services (Environment Injected)**:
-- `PriceStreamService`: WebSocket price streaming via CoinDesk API
-- `AlertService`: Price alert management with local notifications
-- `CurrencySearchService`: Currency search and discovery
-- `TechnicalAnalysisService`: Market analysis and indicators
-- `HistoricalDataService`: Historical price data management
-
-### Data Flow
-1. **AppCoordinator** initializes all services and SwiftData container
-2. **Services** injected into SwiftUI environment at app level
-3. **ViewModels** access services via environment and manage view state
-4. **SwiftData** handles persistence with automatic view updates
-5. **WebSocket** streams real-time prices to UI automatically
-
-### SwiftData Models
-```swift
-// Core entities with @Model macro
-@Model class CurrencyPair { }
-@Model class Currency { }
-@Model class Exchange { }
-@Model class Alert { }
-@Model class HistoricalPrice { }
-@Model class Configuration { }
-@Model class Watchlist { }
-```
-
-## Key Development Patterns
-
-### Service Integration
-Services are environment-injected at app level and accessed in views:
-```swift
-@Environment(PriceStreamService.self) private var priceStreamService
-@Environment(AlertService.self) private var alertService
-```
-
-### ViewModel Pattern
-ViewModels use @Observable and receive ModelContext:
-```swift
-@MainActor
-@Observable
-final class SomeViewModel {
-    func setModelContext(_ context: ModelContext) {
-        // Set context for data operations
-    }
-}
-```
-
-### Real-Time Updates
-- WebSocket streaming via `PriceStreamService.shared`
-- SwiftData automatically updates UI when models change
-- Subscribe/unsubscribe pattern for price streaming
-
-## Project Structure
-
-### `/Bitpal-v2/Bitpal-v2/` (Active Development)
-- **Core/**: Foundational architecture
-  - `App/`: AppCoordinator and app-level setup
-  - `Architecture/`: Reactive patterns and protocols
-  - `Models/`: SwiftData model definitions
-  - `Network/`: API clients, WebSocket, caching
-  - `Services/`: Business logic services
-- **Features/**: Feature-based organization
-  - `Watchlist/`: Currency tracking and management
-  - `Alerts/`: Price alert system
-  - `Portfolio/`: Holdings and transaction management
-  - `Charts/`: Interactive price charts
-  - `CurrencyDetail/`: Detailed currency information
-  - `Search/`: Currency search and discovery
-
-### `/Legacy/` (Reference Implementation)
-Complete UIKit + RxSwift production app with:
-- Clean Architecture (Domain/Data/UI layers)
-- MVVM-C pattern with Coordinators
-- Realm database persistence
-- Comprehensive test coverage
-- Today Widget and Notification Service extensions
-
-## API Configuration
-
-The app uses **CoinDesk API** for market data:
-- **Host**: `https://data-api.coindesk.com`
-- **API Key**: Configured in `Configuration` model
-- **WebSocket**: Real-time price streaming
-- **Rate Limiting**: Built-in exponential backoff
-
-## Testing Strategy
-
-### Current Test Structure
-- **Bitpal-v2Tests/**: Basic XCTest setup
-- **Bitpal-v2UITests/**: UI automation tests
-- **VerySimpleTests.swift**: Core model validation
-
-### Test Execution
-Tests validate core models (Currency, Exchange, Configuration) and basic functionality.
-
-## Feature Implementation Status
-
-### ✅ Implemented (v2)
-- Basic watchlist with SwiftData persistence
-- Real-time price streaming (CoinDesk WebSocket)
-- Price alerts with local notifications
-- Interactive charts with multiple timeframes
-- Currency detail views with market data
-- Portfolio management (basic)
-- Currency search functionality
-
-### ❌ Critical Gaps (Reference features.md)
-- **Widget System**: No WidgetKit widgets or Live Activities
-- **Firebase Authentication**: Missing user management
-- **Testing Infrastructure**: Limited test coverage
-- **Advanced Charts**: No candlestick charts or advanced features
-- **Deep Linking**: No URL schemes or navigation routing
-- **Background Processing**: No silent notifications
-
-## Development Notes
-
-### Working with SwiftData
-- Models automatically persist when inserted into ModelContext
-- UI updates automatically when @Model properties change
-- Use `@Query` in SwiftUI views for reactive data fetching
-
-### WebSocket Management
-- `PriceStreamService` handles all WebSocket connections
-- Subscribe/unsubscribe to individual currency pairs
-- Automatic reconnection with exponential backoff
-
-### Service Architecture
-- Services are singletons shared across the app
-- ModelContext injection pattern for data access
-- Environment injection for SwiftUI integration
-
-### Performance Considerations
-- SwiftData queries are automatically optimized
-- WebSocket subscriptions only for active/visible currencies
-- Lazy loading for historical data and charts
-
-## Common Development Tasks
-
-When adding new features:
-1. Create SwiftData models in `Core/Models/`
-2. Implement business logic in `Core/Services/`
-3. Build UI in feature-specific directories under `Features/`
-4. Inject services via environment in `Bitpal_v2App.swift`
-5. Write tests in `Bitpal-v2Tests/`
-
-When debugging WebSocket issues:
-- Check `PriceStreamService` connection state
-- Verify API key configuration in `Configuration` model
-- Monitor console for WebSocket connection logs
-
-## Migration Context
-
-The Legacy implementation provides reference patterns for:
-- Complex navigation (Navigator pattern)
-- Comprehensive testing (multi-layer test coverage)
-- Widget implementation (Today Extension)
-- Firebase integration (authentication, analytics)
-- Advanced UI components (3D Touch, swipe actions)
-
-Use Legacy code as architectural reference while implementing modern SwiftUI equivalents.
+[Initialization]
+    The following ASCII art should display the word "BLUEY".
+    
+    ```
+    ██████╗ ██╗     ██╗   ██╗███████╗██╗   ██╗
+    ██╔══██╗██║     ██║   ██║██╔════╝╚██╗ ██╔╝
+    ██████╔╝██║     ██║   ██║█████╗   ╚████╔╝ 
+    ██╔══██╗██║     ██║   ██║██╔══╝    ╚██╔╝  
+    ██████╔╝███████╗╚██████╔╝███████╗   ██║   
+    ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝   ╚═╝   
+    ```
+    
+    "Hey! 👋 I'm BLUEY, nice to meet you!
+    
+    I have three awesome partners here: a **Product Manager**, a **Designer**, and a **Development Engineer**. If you have an idea, whether it's a vague concept or a clearer requirement, we can help you build it step-by-step into a real, usable product.    
+    So, what do you want to create? Or just type **/product** and we'll get started! 🚀"
+    
+    Execute the <Team Introduction> function.
