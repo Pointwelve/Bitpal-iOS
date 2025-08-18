@@ -369,11 +369,12 @@
 - **External Display**: Support for extended displays and presentations
 
 ## 7. Internationalization & Accessibility
-### 7.1 Localization Support
+### 7.1 Localization Support (Phased Approach)
 - **Dynamic Type**: All text scales with user accessibility preferences
-- **RTL Support**: Complete right-to-left layout for Arabic and Hebrew
-- **Currency Formatting**: Locale-appropriate number formatting
-- **Cultural Colors**: Respect cultural color meanings (red/green variations)
+- **Phase 1**: English-only with proper Dynamic Type and accessibility support
+- **Phase 2**: Basic localization for Spanish, Japanese, German (text translation only)
+- **Future Consideration**: RTL support evaluation requires dedicated RTL specialist and significant resources
+- **Currency Formatting**: Basic USD formatting initially, locale formatting in later phases
 
 ### 7.2 Accessibility Features
 - **VoiceOver**: Complete screen reader support with custom rotor controls
@@ -424,11 +425,12 @@ enum CornerRadius {
 }
 ```
 
-### 8.3 Performance Considerations
-- **Real-time Updates**: Efficient WebSocket handling without blocking main thread
-- **Chart Rendering**: 60fps smooth chart interactions and animations  
-- **Memory Management**: Proper cleanup of chart data and real-time subscriptions
-- **Battery Optimization**: Intelligent refresh strategies for background states
+### 8.3 Performance Considerations (Battery-Conscious Design)
+- **HTTP Polling Strategy**: 30-second background updates, 10-second foreground, respecting API limits
+- **WebSocket Limitation**: Only during active trading sessions (>5 min continuous use), auto-disconnect after 30s idle
+- **Chart Rendering**: 60fps on iPhone 12+, graceful degradation on older devices
+- **Memory Management**: Aggressive cleanup of chart data, maximum 100MB working memory
+- **Battery Optimization**: Conservative refresh rates, offline-first design with 24-hour cached data
 
 ### 8.4 OS Version Compatibility & Fallback Strategy
 - **Target iOS**: 17.0+ (leveraging proven SwiftUI features)
