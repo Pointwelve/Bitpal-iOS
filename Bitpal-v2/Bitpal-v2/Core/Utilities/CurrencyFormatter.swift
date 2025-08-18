@@ -34,6 +34,36 @@ struct CurrencyFormatter {
         return formatter.string(from: NSNumber(value: value)) ?? "$\(value)"
     }
     
+    // MARK: - Compact Price Formatting (for main display)
+    
+    static func formatPriceCompact(_ value: Double, code: String = "USD") -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = code
+        formatter.usesGroupingSeparator = true // Add thousands separators
+        
+        // Smart decimal formatting without abbreviations
+        if value < 0.01 {
+            // For very small values, show more decimals
+            formatter.minimumFractionDigits = 4
+            formatter.maximumFractionDigits = 6
+        } else if value < 1.0 {
+            // For values under $1, show 3-4 decimals
+            formatter.minimumFractionDigits = 3
+            formatter.maximumFractionDigits = 4
+        } else if value < 100.0 {
+            // For values under $100, show 2-3 decimals
+            formatter.minimumFractionDigits = 2
+            formatter.maximumFractionDigits = 3
+        } else {
+            // For larger values, show 2 decimals max with thousands separators
+            formatter.minimumFractionDigits = 2
+            formatter.maximumFractionDigits = 2
+        }
+        
+        return formatter.string(from: NSNumber(value: value)) ?? "$\(value)"
+    }
+    
     // MARK: - Volume Formatting
     
     static func formatVolume(_ volume: Double) -> String {

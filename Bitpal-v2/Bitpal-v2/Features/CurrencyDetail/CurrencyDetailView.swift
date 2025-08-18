@@ -22,7 +22,7 @@ struct CurrencyDetailView: View {
     @State private var isLoadingChart = false
     @State private var showingCreateAlert = false
     @State private var showingMarketAnalysis = false
-    @State private var selectedTimePeriod = "1H"
+    @State private var selectedTimePeriod = "1D"
     @State private var chartType: ChartDisplayType = .line
     @State private var interactionState = ChartInteractionState()
     @State private var memoizedChartData: [ChartData] = []
@@ -31,12 +31,13 @@ struct CurrencyDetailView: View {
     @State private var preloadingPeriods: Set<String> = []
     @State private var priceFlashColor: Color? = nil
     @State private var lastKnownPrice: Double = 0
+    @State private var chartLoadError: String? = nil
     
     // MARK: - Constants
     private enum Constants {
         static let chartHeight: CGFloat = 280
         static let priceIconSize: CGFloat = 50
-        static let sectionSpacing: CGFloat = 24
+        static let sectionSpacing: CGFloat = 32 // Increased for better visual separation
         static let horizontalPadding: CGFloat = 20
         static let bottomSpacing: CGFloat = 100
     }
@@ -71,16 +72,17 @@ struct CurrencyDetailView: View {
             backgroundColor.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                navigationHeader
+                modernHeader
                 
                 ScrollView {
                     LazyVStack(spacing: Constants.sectionSpacing) {
-                        priceSection
+                        modernPriceSection
+                        quickActionsSection
                         enhancedChartSection
-                        marketStatsGrid
+                        horizontalStatsSection
+                        priceAlertsSection
                         Spacer(minLength: Constants.bottomSpacing)
                     }
-                    .padding(.horizontal, Constants.horizontalPadding)
                 }
             }
         }
@@ -108,6 +110,51 @@ struct CurrencyDetailView: View {
             updateMemoizedData(for: chartData, chartType: newType)
         }
     }
+    
+    // MARK: - Modern UI Components
+    
+    private var modernHeader: some View {
+        ModernDetailHeader(
+            currencyPair: currencyPair,
+            onBack: { dismiss() },
+            onMenu: { /* Menu actions */ }
+        )
+        .padding(.top, 10)
+    }
+    
+    private var modernPriceSection: some View {
+        ModernPriceDisplay(
+            currentPrice: getCurrentPrice(),
+            priceChange: getCurrentPriceChange(),
+            priceChangePercent: getCurrentPriceChangePercent(),
+            flashColor: priceFlashColor,
+            onPriceChange: handlePriceChange
+        )
+        .padding(.horizontal, Constants.horizontalPadding)
+    }
+    
+    private var quickActionsSection: some View {
+        QuickActionsBar(
+            currencyPair: currencyPair,
+            onAddAlert: { showingCreateAlert = true },
+            onToggleWatchlist: { /* Toggle watchlist */ },
+            onAddToPortfolio: { /* Add to portfolio */ },
+            onShare: { /* Share functionality */ }
+        )
+    }
+    
+    private var horizontalStatsSection: some View {
+        HorizontalStatCards(currencyPair: currencyPair)
+    }
+    
+    private var priceAlertsSection: some View {
+        PriceAlertsSection(
+            currencyPair: currencyPair,
+            onAddAlert: { showingCreateAlert = true }
+        )
+    }
+    
+    // MARK: - Legacy Components (keeping for chart functionality)
     
     private var navigationHeader: some View {
         HStack {
@@ -177,44 +224,16 @@ struct CurrencyDetailView: View {
     
     private var enhancedChartSection: some View {
         VStack(spacing: 16) {
-            // Global Average Header
-            HStack {
-                Text("Global Average")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(colorScheme == .dark ? .white : .primary)
-                
-                Spacer()
-                
-                HStack(spacing: 12) {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            chartType = chartType == .line ? .candlestick : .line
-                        }
-                    } label: {
-                        Image(systemName: chartType.systemImage)
-                            .font(.caption)
-                            .foregroundColor(chartType == .candlestick ? .blue : .secondary)
-                            .padding(8)
-                            .background(chartType == .candlestick ? Color.blue.opacity(0.2) : Color(.systemGray5))
-                            .clipShape(Circle())
-                    }
-                    
-                    Button {
-                        // Expand functionality
-                    } label: {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(8)
-                            .background(Color(.systemGray5))
-                            .clipShape(Circle())
-                    }
-                }
-            }
+            // Modern Chart Header
+            EnhancedChartHeader(
+                chartType: $chartType,
+                onExpand: { /* Expand functionality */ }
+            )
+            .padding(.horizontal, Constants.horizontalPadding)
             
             // Enhanced Chart
             modernChart
+                .padding(.horizontal, Constants.horizontalPadding)
             
             // Time Period Selector
             timePeriodSelector
@@ -238,10 +257,37 @@ struct CurrencyDetailView: View {
     }
     
     private var chartContentView: some View {
-        let data = optimizedChartData.isEmpty ? ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice()) : optimizedChartData
+        // Show error view if there's an error or no data
+        if let errorMessage = chartLoadError {
+            return AnyView(
+                ChartErrorView(
+                    errorMessage: errorMessage,
+                    onRetry: {
+                        Task {
+                            await loadChartDataForPeriod(selectedTimePeriod)
+                        }
+                    }
+                )
+            )
+        }
+        
+        let data = optimizedChartData
+        guard !data.isEmpty else {
+            return AnyView(
+                ChartErrorView(
+                    errorMessage: "No chart data available",
+                    onRetry: {
+                        Task {
+                            await loadChartDataForPeriod(selectedTimePeriod)
+                        }
+                    }
+                )
+            )
+        }
+        
         let (chartMin, chartMax) = ChartDataProcessor.calculateChartRange(for: data, chartType: chartType)
         
-        return Chart(data) { dataPoint in
+        return AnyView(Chart(data) { dataPoint in
             switch chartType {
             case .line:
                 chartLine(for: dataPoint)
@@ -282,7 +328,7 @@ struct CurrencyDetailView: View {
                     dynamicFloaterView(for: selectedPoint, in: geometry, with: proxy)
                 }
             }
-        }
+        })
     }
     
     private func chartLine(for dataPoint: ChartData) -> some ChartContent {
@@ -291,41 +337,77 @@ struct CurrencyDetailView: View {
             y: .value("Price", dataPoint.close)
         )
         .foregroundStyle(chartLineColor)
-        .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
         .interpolationMethod(.catmullRom)
     }
     
     @ChartContentBuilder
     private func chartCandlestick(for dataPoint: ChartData) -> some ChartContent {
         let bodyColor = dataPoint.isPositive ? Color.green : Color.red
+        let candlestickWidth = calculateCandlestickWidth()
+        // Improved wick visibility with minimum width of 2
+        let wickWidth = max(2, candlestickWidth / 6)
         
-        // High-Low line (wick)
+        // High-Low line (wick) - more visible
         RectangleMark(
             x: .value("Time", dataPoint.date),
             yStart: .value("Low", dataPoint.low),
             yEnd: .value("High", dataPoint.high),
-            width: .fixed(1)
+            width: .fixed(wickWidth)
         )
-        .foregroundStyle(bodyColor.opacity(0.6))
+        .foregroundStyle(bodyColor.opacity(0.7))
         
-        // Open-Close body
+        // Open-Close body - natural data values
         RectangleMark(
             x: .value("Time", dataPoint.date),
             yStart: .value("Open", min(dataPoint.open, dataPoint.close)),
             yEnd: .value("Close", max(dataPoint.open, dataPoint.close)),
-            width: .fixed(8)
+            width: .fixed(candlestickWidth)
         )
         .foregroundStyle(
             LinearGradient(
                 colors: [
-                    bodyColor.opacity(0.8),
-                    bodyColor.opacity(0.6)
+                    bodyColor.opacity(0.9),
+                    bodyColor.opacity(0.7)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
         )
-        .cornerRadius(1)
+        .cornerRadius(1.5)
+    }
+    
+    // MARK: - Dynamic Candlestick Width
+    
+    private func calculateCandlestickWidth() -> CGFloat {
+        let dataCount = optimizedChartData.count
+        let chartWidth: CGFloat = 350 // Approximate chart width
+        let period = selectedTimePeriod
+        
+        // Calculate width to prevent overlapping with consistent spacing
+        let baseWidth: CGFloat
+        switch period {
+        case "15m":
+            // ~45 candles: need smaller width to prevent overlap
+            baseWidth = max(4, min(6, chartWidth / CGFloat(max(dataCount, 45)) * 0.7))
+        case "1h":
+            // ~45 candles: balanced width with spacing
+            baseWidth = max(5, min(7, chartWidth / CGFloat(max(dataCount, 45)) * 0.75))
+        case "4h":
+            // ~45 candles: slightly wider for better visibility
+            baseWidth = max(6, min(8, chartWidth / CGFloat(max(dataCount, 45)) * 0.8))
+        case "1D":
+            // ~48 candles: consistent with other periods
+            baseWidth = max(6, min(8, chartWidth / CGFloat(max(dataCount, 48)) * 0.8))
+        case "1W":
+            baseWidth = max(8, min(12, chartWidth / CGFloat(dataCount) * 0.9))
+        case "1Y", "YTD":
+            baseWidth = max(10, min(16, chartWidth / CGFloat(dataCount) * 1.0))
+        default:
+            baseWidth = 7
+        }
+        
+        return baseWidth
     }
     
     
@@ -348,8 +430,12 @@ struct CurrencyDetailView: View {
             let chartPosition = CGPoint(x: xPosition, y: yPosition)
             let isLeftHalf = chartPosition.x < geometry.frame(in: .local).midX
             let position: FloaterPosition = isLeftHalf ? .topRight : .topLeft
-            let offset = position.offset
-            let finalPosition = CGPoint(x: chartPosition.x + offset.x, y: chartPosition.y + offset.y)
+            
+            // Position card above the chart to avoid overlap
+            let finalPosition = CGPoint(
+                x: max(50, min(chartPosition.x, geometry.size.width - 50)), // Keep within bounds
+                y: max(20, chartPosition.y - 60) // Always position above, with safe margin
+            )
             
             ChartFloaterView(
                 dataPoint: dataPoint,
@@ -407,48 +493,49 @@ struct CurrencyDetailView: View {
     
     // MARK: - Helper Types
     private enum TimePeriod: String, CaseIterable {
-        case oneHour = "1H"
+        case fifteenMinutes = "15m"
+        case oneHour = "1h"
+        case fourHours = "4h"
         case oneDay = "1D"
         case oneWeek = "1W"
-        case oneMonth = "1M"
-        case sixMonths = "6M"
         case oneYear = "1Y"
-        case all = "ALL"
+        case yearToDate = "YTD"
     }
     
+    // Legacy market stats grid - keeping for reference but not used in new design
     private var marketStatsGrid: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
-            ModernStatCard(
+            LegacyStatCard(
                 title: "Market Cap",
                 value: "41,375.00 BTC",
                 colorScheme: colorScheme
             )
             
-            ModernStatCard(
+            LegacyStatCard(
                 title: "Volume (24 hours)",
                 value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
                 colorScheme: colorScheme
             )
             
-            ModernStatCard(
+            LegacyStatCard(
                 title: "Available Supply",
                 value: "17.332.275",
                 colorScheme: colorScheme
             )
             
-            ModernStatCard(
+            LegacyStatCard(
                 title: "Total Supply",
                 value: "17.332.275",
                 colorScheme: colorScheme
             )
             
-            ModernStatCard(
+            LegacyStatCard(
                 title: "Low (24 hours)",
                 value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
                 colorScheme: colorScheme
             )
             
-            ModernStatCard(
+            LegacyStatCard(
                 title: "High (24 hours)",
                 value: CurrencyFormatter.formatCurrencyEnhanced(11669.59),
                 colorScheme: colorScheme
@@ -552,6 +639,7 @@ struct CurrencyDetailView: View {
     
     private func loadChartData(forceRefresh: Bool = false) async {
         isLoadingChart = true
+        chartLoadError = nil
         
         do {
             chartData = try await historicalDataService.loadHistoricalData(
@@ -559,10 +647,11 @@ struct CurrencyDetailView: View {
                 period: selectedPeriod,
                 forceRefresh: forceRefresh
             )
+            chartLoadError = nil
         } catch {
             print("Failed to load chart data: \(error)")
-            // Use sample data as fallback
-            chartData = ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice())
+            chartLoadError = "Chart data not available for this time period"
+            chartData = []
         }
         
         // Update memoized data after loading
@@ -574,6 +663,7 @@ struct CurrencyDetailView: View {
         guard !isLoadingChart else { return }
         
         isLoadingChart = true
+        chartLoadError = nil
         defer { isLoadingChart = false }
         
         let chartPeriod = mapStringToChartPeriod(period)
@@ -587,11 +677,13 @@ struct CurrencyDetailView: View {
             )
             
             chartData = data
+            chartLoadError = nil
             // Store in preloaded cache for future use
             preloadedData[period] = data
         } catch {
             print("Failed to load chart data for period \(period): \(error)")
-            chartData = ChartDataProcessor.generateSampleChartData(basePrice: getCurrentPrice())
+            chartLoadError = "Chart data not available for \(period) time period"
+            chartData = []
         }
         
         // Update memoized data after loading
@@ -600,11 +692,13 @@ struct CurrencyDetailView: View {
     
     private func mapStringToChartPeriod(_ period: String) -> ChartPeriod {
         switch period {
-        case "1H": .oneHour
+        case "15m": .fifteenMinutes
+        case "1h": .oneHour
+        case "4h": .fourHours
         case "1D": .oneDay
         case "1W": .oneWeek
-        case "1M": .oneMonth
-        case "6M", "1Y", "ALL": .oneMonth // Fallback to oneMonth
+        case "1Y": .oneMonth // Map to oneMonth until yearly data is available
+        case "YTD": .oneMonth // Map to oneMonth for year-to-date calculation
         default: .oneDay
         }
     }
@@ -618,7 +712,7 @@ struct CurrencyDetailView: View {
     }
     
     private func preloadOtherPeriods() async {
-        let periodsToPreload = ["1D", "1W", "1M"] // Preload common periods
+        let periodsToPreload = ["1h", "4h", "1W"] // Preload common periods
         
         await withTaskGroup(of: Void.self) { group in
             for period in periodsToPreload {
@@ -732,6 +826,64 @@ struct CurrencyDetailView: View {
     
     @State private var animateDots = false
     
+}
+
+// MARK: - Chart Error View
+
+struct ChartErrorView: View {
+    let errorMessage: String
+    let onRetry: (() -> Void)?
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+                .opacity(0.6)
+            
+            VStack(spacing: 8) {
+                Text("Data Unavailable")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+            }
+            
+            if let onRetry = onRetry {
+                Button(action: onRetry) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 14, weight: .medium))
+                        Text("Retry")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.blue.opacity(0.1))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(height: 280)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.tertiary, lineWidth: 1)
+                )
+        )
+    }
 }
 
 // MARK: - Supporting Views

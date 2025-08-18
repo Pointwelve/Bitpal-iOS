@@ -118,43 +118,83 @@ class ChartInteractionState {
     }
 }
 
-// MARK: - Chart Selection Overlay
+// MARK: - Chart Selection Overlay with iOS 26 Liquid Glass
 
 @ChartContentBuilder
 func ChartSelectionOverlay(selectedDataPoint: ChartData?, chartType: ChartDisplayType) -> some ChartContent {
     if let selected = selectedDataPoint {
-        // Vertical crosshair line
+        // Subtle liquid glass vertical guide line
         RuleMark(x: .value("Time", selected.date))
-            .foregroundStyle(.primary.opacity(0.3))
-            .lineStyle(StrokeStyle(lineWidth: 2, dash: [8, 4]))
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        .clear,
+                        .white.opacity(0.15),
+                        .gray.opacity(0.1),
+                        .clear
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .lineStyle(StrokeStyle(lineWidth: 1.5))
         
-        // Horizontal crosshair line
-        RuleMark(y: .value("Price", selected.close))
-            .foregroundStyle(.primary.opacity(0.3))
-            .lineStyle(StrokeStyle(lineWidth: 2, dash: [8, 4]))
-        
-        // Enhanced selection point with multiple layers
+        // Outer liquid glass aura
         PointMark(
             x: .value("Time", selected.date),
             y: .value("Price", selected.close)
         )
-        .foregroundStyle(.white)
-        .symbolSize(150)
-        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+        .foregroundStyle(
+            RadialGradient(
+                colors: [
+                    .white.opacity(0.2),
+                    .white.opacity(0.1),
+                    .gray.opacity(0.05),
+                    .clear
+                ],
+                center: .center,
+                startRadius: 5,
+                endRadius: 25
+            )
+        )
+        .symbolSize(400) // Soft liquid glass glow
         
+        // Main liquid glass ring
         PointMark(
             x: .value("Time", selected.date),
             y: .value("Price", selected.close)
         )
-        .foregroundStyle(.blue)
+        .foregroundStyle(.white.opacity(0.4))
         .symbolSize(100)
+        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
         
+        // Inner glass ring with subtle gradient
         PointMark(
             x: .value("Time", selected.date),
             y: .value("Price", selected.close)
         )
-        .foregroundStyle(.white)
+        .foregroundStyle(
+            LinearGradient(
+                colors: [
+                    .white.opacity(0.6),
+                    .gray.opacity(0.3),
+                    .white.opacity(0.4)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
         .symbolSize(50)
+        .shadow(color: .white.opacity(0.3), radius: 2, x: 0, y: 0)
+        
+        // Central liquid glass point
+        PointMark(
+            x: .value("Time", selected.date),
+            y: .value("Price", selected.close)
+        )
+        .foregroundStyle(.white.opacity(0.9))
+        .symbolSize(16)
+        .shadow(color: .black.opacity(0.15), radius: 1, x: 0, y: 1)
     }
 }
 
@@ -228,80 +268,58 @@ struct ChartFloaterView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            // Compact date with enhanced styling
             Text(dataPoint.date.formatted(.dateTime.month().day().hour().minute()))
                 .font(.caption2)
                 .foregroundColor(.secondary)
+                .fontWeight(.medium)
             
-            VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    Text("Close:")
+            // Main price - most important info
+            Text(CurrencyFormatter.formatCurrencyEnhanced(dataPoint.close))
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            // Price change if significant
+            if abs(dataPoint.priceChange) > 0.01 {
+                HStack(spacing: 3) {
+                    Image(systemName: dataPoint.isPositive ? "arrow.up" : "arrow.down")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text(CurrencyFormatter.formatCurrencyEnhanced(dataPoint.close))
+                        .fontWeight(.bold)
+                        .foregroundColor(dataPoint.isPositive ? .green : .red)
+                    Text("\(dataPoint.isPositive ? "+" : "")\(String(format: "%.2f", dataPoint.priceChange))")
                         .font(.caption)
                         .fontWeight(.semibold)
-                }
-                
-                if dataPoint.open != dataPoint.close {
-                    HStack {
-                        Text("Open:")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(CurrencyFormatter.formatCurrencyEnhanced(dataPoint.open))
-                            .font(.caption2)
-                    }
-                }
-                
-                if dataPoint.high != dataPoint.low {
-                    HStack {
-                        Text("Range:")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(CurrencyFormatter.formatCurrencyEnhanced(dataPoint.low)) - \(CurrencyFormatter.formatCurrencyEnhanced(dataPoint.high))")
-                            .font(.caption2)
-                    }
-                }
-            }
-            
-            if dataPoint.isPositive {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.up")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                    Text("+\(CurrencyFormatter.formatCurrencyEnhanced(abs(dataPoint.priceChange)).replacingOccurrences(of: "$", with: ""))")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                }
-            } else if dataPoint.priceChange < 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.down")
-                        .font(.caption2)
-                        .foregroundColor(.red)
-                    Text("-\(CurrencyFormatter.formatCurrencyEnhanced(abs(dataPoint.priceChange)).replacingOccurrences(of: "$", with: ""))")
-                        .font(.caption2)
-                        .foregroundColor(.red)
+                        .foregroundColor(dataPoint.isPositive ? .green : .red)
                 }
             }
         }
-        .padding(10)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(.primary.opacity(0.1), lineWidth: 0.5)
-        )
-        .frame(width: 130)
-        .overlay(
-            Triangle()
-                .fill(.regularMaterial)
-                .frame(width: 12, height: 8)
-                .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
-                .rotationEffect(pointerRotation),
-            alignment: pointerAlignment
-        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background {
+            // Glass morphism effect
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    // Subtle glass border
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(0.6),
+                                    .white.opacity(0.2),
+                                    .clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                }
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+        }
+        .frame(width: 120)
     }
     
     private var pointerAlignment: Alignment {
