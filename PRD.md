@@ -171,30 +171,29 @@ iPad Keyboard Connected → Portfolio Tab → Bulk Transaction Entry via Keyboar
 Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation → Side-by-Side Portfolio Comparison → Keyboard-Driven Response Composition → Enhanced Sharing Options
 
 ## 6. Product Constraints
-- **Platform Requirements**: iOS 16.0+ and iPadOS 16.0+ for SwiftUI 4.0 features, SwiftData for persistence, modern async/await patterns, Universal app with optimized iPad experience, Full internationalization support with RTL language compatibility
+- **Platform Requirements**: iOS 17.0+ and iPadOS 17.0+ for SwiftUI 5.0 features, SwiftData for persistence, modern async/await patterns, Universal app with optimized iPad experience, Phased internationalization starting with 5 core languages
 - **Feature Scope**: 
   - In Scope: Real-time price tracking, portfolio management, alerts, basic charting, currency search, social investment community, discussion forums, portfolio sharing
   - Out of Scope: Advanced trading execution, DeFi protocol integration, NFT tracking, direct messaging, premium social features (Phase 1)
 - **Content Guidelines**: 
   - Support 1000+ cryptocurrencies via CoinDesk API
-  - Real-time price updates with 2-second refresh rate
+  - Real-time price updates with 10-second refresh rate (5-second for active view)
   - Historical data available for major cryptocurrencies (1+ years)
   - Alert threshold precision to 8 decimal places
   - Community content moderation with automated and manual review
   - Anonymous portfolio sharing with no actual dollar amounts displayed
   - User-generated content guidelines for discussion quality
-  - **Localization Requirements**:
-    - Full app localization for 15+ major languages
-    - Proper currency formatting and number localization for each region
-    - Right-to-left (RTL) layout support for Arabic and Hebrew markets
-    - Regional cryptocurrency name variations and local market preferences
-    - Localized community content moderation and cultural sensitivity
+  - **Localization Requirements (Phased Approach)**:
+    - Phase 1: Core 5 languages (English, Spanish, Japanese, German, French)
+    - Phase 2: Additional 6 languages including RTL support (Arabic, Hebrew, Chinese, Korean, Portuguese, Italian)
+    - Phase 3: Remaining languages and full cultural adaptations
+    - Currency formatting and number localization for supported regions
     - Time zone-aware price alerts and market data display
 - **Technical Constraints**: 
   - WebSocket connection for real-time data streaming
   - SwiftData for local persistence and offline capability
   - Local notifications for price alerts
-  - Maximum 10MB app storage for historical data caching
+  - Maximum 50MB app storage for historical data caching with intelligent cleanup
   - Background app refresh support for alert monitoring
   - Community backend API for user-generated content and social features
   - Content moderation system with automated filtering and manual review
@@ -237,11 +236,12 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
   - Cultural content adaptation APIs for community features
 
 ## 8. Performance Requirements  
-- **App Launch**: Cold start under 3 seconds, warm start under 1 second
-- **Price Updates**: Real-time updates with sub-2 second latency
-- **Chart Rendering**: Smooth 60fps chart interactions with touch responsiveness
-- **Memory Usage**: Efficient memory management with automatic cleanup of cached data
-- **Battery Optimization**: Intelligent background refresh and WebSocket management
+- **App Launch**: Cold start under 2 seconds, warm start under 0.5 seconds
+- **Price Updates**: Real-time updates with 10-second refresh (5-second for active screens)
+- **Chart Rendering**: Smooth 60fps chart interactions on supported devices (iPhone 12+, degraded gracefully on older devices)
+- **Memory Usage**: Efficient memory management with automatic cleanup, maximum 100MB working memory
+- **Battery Optimization**: Intelligent background refresh with adaptive refresh rates based on usage patterns
+- **Network Efficiency**: Batch API requests, implement proper caching strategies, respect API rate limits
 - **iPad-Specific Performance**:
   - Split-view performance with dual real-time updates without lag
   - Apple Pencil latency under 20ms for chart annotations
@@ -303,17 +303,69 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - **Accessibility**: VoiceOver and accessibility support in all languages
 - **Testing Automation**: Automated testing for all language/region combinations
 
-## 10. Security & Privacy
-- **Data Protection**: Local data encryption using SwiftData security features
-- **Network Security**: HTTPS/WSS for all API communications
-- **Privacy Policy**: No personal financial data collection, anonymous usage analytics only
-- **Local Storage**: All sensitive data stored locally on device, no cloud backup of financial information
-- **Community Privacy**: Anonymous user system, no real names or personal identifiers required
-- **Portfolio Sharing Security**: Anonymized data only (portfolio allocation percentages, no dollar amounts)
-- **Content Moderation**: Automated filtering for inappropriate content, manual review system
-- **User Safety**: Report and block functionality, community guidelines enforcement
+## 10. Technical Feasibility & Risk Mitigation
 
-## 10. Future Enhancements (Post-MVP)
+### 10.1 API Dependencies & Fallback Strategies
+- **Primary Data Source**: CoinDesk API with comprehensive rate limiting and caching
+- **Backup APIs**: Integration with CoinGecko API and Binance API for redundancy
+- **Offline Capability**: Cached data for up to 24 hours, graceful degradation when APIs are unavailable
+- **Rate Limiting Strategy**: Exponential backoff, request queuing, and intelligent batching
+- **Network Resilience**: Automatic retry logic with circuit breaker pattern
+
+### 10.2 Performance Benchmarking & Validation
+- **Device Testing Matrix**: iPhone SE (2nd gen) through iPhone 15 Pro Max, iPad (9th gen) through iPad Pro
+- **Performance Targets**: Validated against actual device performance, not theoretical maximums  
+- **Memory Profiling**: Regular memory leak detection and optimization cycles
+- **Battery Impact Testing**: Continuous monitoring of background processing impact
+- **Chart Rendering Optimization**: Level-of-detail rendering for complex datasets
+
+### 10.3 Implementation Phases & Rollout Strategy
+**Phase 1 (MVP - 3 months)**:
+- Core watchlist functionality with basic real-time updates
+- Essential portfolio tracking without advanced analytics
+- iOS 17/18 native implementation with iOS 26 preparation
+- English language only, 5 core cryptocurrencies
+
+**Phase 2 (Enhanced - 6 months)**:
+- Full social community features with moderated content
+- Advanced charting and technical analysis
+- Core 5 language localization
+- iPad Pro optimization and Apple Pencil integration
+
+**Phase 3 (Global - 12 months)**:
+- Complete international rollout with RTL support
+- Advanced iOS 26 Liquid Glass implementation (when available)
+- Full cryptocurrency coverage (1000+ currencies)
+- AI-powered portfolio insights and recommendations
+
+### 10.4 Risk Assessment & Mitigation Plans
+**High Priority Risks**:
+- **iOS 26 Delay Risk**: Fallback to iOS 17/18 native materials with equivalent visual appeal
+- **API Rate Limiting**: Multi-tier caching strategy and alternative API integration
+- **Community Moderation Scale**: Automated tools with human oversight and clear escalation paths
+- **International Complexity**: Phased rollout with cultural consultants and local testing
+
+**Medium Priority Risks**:
+- **Performance on Older Devices**: Progressive enhancement with feature detection
+- **Battery Drain**: Adaptive refresh rates and intelligent background processing
+- **Data Privacy Regulations**: Built-in compliance frameworks and regular audits
+
+## 11. Security & Privacy
+- **Data Protection**: Local data encryption using SwiftData security features with Keychain integration for sensitive data
+- **Network Security**: HTTPS/WSS for all API communications with certificate pinning
+- **Privacy Policy**: No personal financial data collection, anonymous usage analytics only, GDPR and CCPA compliant
+- **Local Storage**: All sensitive data stored locally on device, no cloud backup of financial information
+- **Community Privacy**: Enhanced anonymous user system with device fingerprinting protection
+- **Portfolio Sharing Security**: 
+  - Multiple anonymization layers (percentage ranges instead of exact percentages)
+  - No correlation between portfolio data and user behavior patterns
+  - Regular purging of sharing data to prevent pattern analysis
+- **Content Moderation**: Automated filtering with human oversight for investment advice, clear community guidelines
+- **User Safety**: Report and block functionality, community guidelines enforcement, automated spam detection
+- **API Security**: Rate limiting, request validation, secure API key management
+- **Third-party Security**: Regular security audits of third-party dependencies and APIs
+
+## 12. Future Enhancements (Post-MVP)
 - **Advanced Technical Analysis**: RSI, MACD, Bollinger Bands indicators
 - **DeFi Integration**: DEX price tracking and liquidity pool monitoring  
 - **Enhanced Social Features**: Direct messaging, premium community features, expert investor verification
