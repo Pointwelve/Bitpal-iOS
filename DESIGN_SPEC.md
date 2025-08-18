@@ -425,12 +425,19 @@ enum CornerRadius {
 }
 ```
 
-### 8.3 Performance Considerations (Battery-Conscious Design)
+### 8.3 Performance Considerations (iOS Standards Optimized)
+- **App Launch Optimization**: <1.5s cold start through lazy loading and deferred initialization
 - **HTTP Polling Strategy**: 30-second background updates, 10-second foreground, respecting API limits
 - **WebSocket Limitation**: Only during active trading sessions (>5 min continuous use), auto-disconnect after 30s idle
-- **Chart Rendering**: 60fps on iPhone 12+, graceful degradation on older devices
-- **Memory Management**: Aggressive cleanup of chart data, maximum 100MB working memory
-- **Battery Optimization**: Conservative refresh rates, offline-first design with 24-hour cached data
+- **Device-Specific Chart Rendering**: 
+  - iPhone 13+: 60fps with full visual effects and glass materials
+  - iPhone 11-12: 30-45fps with reduced effects, standard materials
+  - iPhone SE/older: Basic line charts only, prioritize responsiveness
+- **Memory Management**: 
+  - Working memory: 75MB maximum (below iOS recommendations)
+  - Cache storage: 25MB for 500 cryptocurrencies with intelligent LRU eviction
+  - Automatic cleanup: Charts, price history, and community content
+- **Battery Optimization**: Target <5% battery drain per hour, offline-first design with 24-hour cached data
 
 ### 8.4 OS Version Compatibility & Fallback Strategy
 - **Target iOS**: 17.0+ (leveraging proven SwiftUI features)
@@ -466,10 +473,17 @@ struct AdaptiveMaterial: View {
 ```
 
 ### 9.2 Performance Optimization Patterns
-- **Chart Rendering**: Level-of-detail rendering based on device capabilities
-- **Real-time Updates**: Intelligent batching and differential updates
-- **Memory Management**: Automatic cleanup of unused chart data and price history
-- **Battery Optimization**: Adaptive refresh rates based on app state and usage patterns
+- **Launch Optimization**: Lazy loading, deferred non-critical initializations, minimal startup data
+- **Chart Rendering**: Device-specific level-of-detail rendering, progressive enhancement
+- **Real-time Updates**: Intelligent batching, differential updates, delta-only API responses
+- **Memory Management**: 
+  - LRU cache eviction for 500 cryptocurrency limit
+  - Automatic cleanup of unused chart data and price history
+  - 75MB maximum working memory with strict monitoring
+- **Battery Optimization**: 
+  - Adaptive refresh rates based on app state and usage patterns
+  - Target <5% battery drain per hour of active use
+  - Aggressive power management in background state
 
 ### 9.3 Accessibility Implementation
 - **VoiceOver Integration**: Custom accessibility labels for financial data

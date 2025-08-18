@@ -193,7 +193,7 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
   - Hybrid data strategy: HTTP polling primary, WebSocket only for active trading sessions to minimize battery drain
   - SwiftData for local persistence and offline capability
   - Local notifications for price alerts
-  - Maximum 50MB app storage for historical data caching with intelligent cleanup
+  - Optimized storage: 25MB price cache + 15MB historical charts + 10MB community content = 50MB total with LRU cleanup
   - Background app refresh support for alert monitoring
   - Community backend API for user-generated content and social features
   - Content moderation system with automated filtering and manual review
@@ -235,13 +235,19 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
   - Localized push notification content with regional compliance
   - Cultural content adaptation APIs for community features
 
-## 8. Performance Requirements  
-- **App Launch**: Cold start under 2 seconds, warm start under 0.5 seconds
+## 8. Performance Requirements (iOS Standards Compliant)
+- **App Launch**: Cold start under 1.5 seconds (exceeds iOS standard), warm start under 0.3 seconds
 - **Price Updates**: Adaptive refresh strategy - 30s background, 10s foreground, 5s during active interaction, respecting API rate limits
-- **Chart Rendering**: Smooth 60fps chart interactions on supported devices (iPhone 12+, degraded gracefully on older devices)
-- **Memory Usage**: Efficient memory management with automatic cleanup, maximum 100MB working memory
-- **Battery Optimization**: Intelligent background refresh with adaptive refresh rates based on usage patterns
-- **Network Efficiency**: Batch API requests, implement proper caching strategies, respect API rate limits
+- **Chart Rendering**: 
+  - iPhone 13+: Target 60fps with full visual effects
+  - iPhone 11-12: 30-45fps with reduced effects
+  - iPhone SE/older: Basic charts only, prioritize responsiveness over visual flair
+- **Memory Usage**: 
+  - Working memory: 75MB maximum (reduced from 100MB)
+  - Cache storage: 25MB for price data (increased from 10MB, supports ~500 cryptocurrencies efficiently)
+  - Intelligent cache eviction: LRU algorithm with user preference weighting
+- **Battery Optimization**: Target <5% battery drain per hour of active use
+- **Network Efficiency**: Batch API requests, aggressive caching, delta updates only
 - **iPad-Specific Performance**:
   - Split-view performance with dual real-time updates without lag
   - Apple Pencil latency under 20ms for chart annotations
@@ -325,35 +331,39 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - Core watchlist functionality with 30-second HTTP polling updates
 - Basic portfolio tracking with manual transaction entry
 - iOS 17/18 native implementation only
-- English language only, 20 major cryptocurrencies
+- English language only, 50 major cryptocurrencies (realistic cache limit)
 - Simple HTTP API integration, no WebSocket complexity
+- Target: <1.5s cold start, 25MB cache, basic charts only
 
-**Phase 2 (Social - 12 months)**:
-- Community features with basic discussion threads
+**Phase 2 (Enhanced - 12 months)**:
+- Community features with simple discussion threads (max 1000 concurrent users)
 - Enhanced portfolio analytics and performance tracking
 - Improved caching and offline functionality
-- 100+ cryptocurrencies support
+- 200 cryptocurrencies support with intelligent caching
 - User testing and feedback collection
+- Advanced charts for iPhone 11+ devices
 
-**Phase 3 (Expansion - 18+ months)**:
-- Evaluate demand for additional languages (Spanish, Japanese, German)
-- Advanced features based on user feedback and usage data
+**Phase 3 (Scalable - 18+ months)**:
+- Community scalability improvements (10K+ users with CDN and database optimization)
+- Evaluate additional languages based on user analytics
+- Advanced visual effects for iPhone 13+ devices
 - Consider iOS 26 features when available
-- Evaluate RTL support feasibility with dedicated specialist
-- Premium features based on sustainable business model
+- Backend infrastructure scaling based on actual usage patterns
 
 ### 10.4 Risk Assessment & Realistic Mitigation Plans
 **High Priority Risks & Mitigations**:
+- **Cold Start Performance**: Target <1.5s with lazy loading, minimal initial data, deferred non-critical initializations
+- **Memory Constraints**: 25MB cache limit supporting 500 cryptocurrencies efficiently, LRU eviction algorithm
+- **Chart Performance**: Device-specific rendering (basic charts on older devices, 60fps only on iPhone 13+)
 - **API Rate Limiting**: Conservative 10 req/min limit, 5-minute stale data acceptance, single API source at a time
-- **Battery Drain**: HTTP polling only, 30-second minimum intervals, WebSocket only for active use
-- **Development Complexity**: 6-month MVP focused on core functionality only
-- **Internationalization Costs**: English-only for 6+ months, evaluate additional languages based on actual user demand
+- **Battery Drain**: HTTP polling only, 30-second minimum intervals, <5% battery per hour target
 
 **Medium Priority Risks & Mitigations**:
-- **RTL Implementation Complexity**: Not included in initial phases, requires dedicated specialist evaluation
-- **Cultural Adaptation Costs**: Limited to basic number formatting, no cultural color adaptations initially
-- **Maintenance Overhead**: Start with 1 language, add others only with dedicated maintenance resources
-- **Community Moderation Scale**: Simple forums with basic automated filtering, human review for reports only
+- **Community Scalability**: Start with 1000 concurrent users, horizontal scaling plan for 10K+ users
+- **Backend Architecture**: Simple forum structure initially, microservices architecture for Phase 3 scaling
+- **Chart Rendering Complexity**: Progressive enhancement - basic line charts → advanced candles → glass effects
+- **Memory Leaks**: Automated memory profiling, strict cleanup protocols, maximum 75MB working memory
+- **Storage Optimization**: Intelligent cache partitioning: 25MB prices + 15MB charts + 10MB community
 
 ## 11. Security & Privacy
 - **Data Protection**: Local data encryption using SwiftData security features with Keychain integration for sensitive data
