@@ -177,20 +177,20 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
   - Out of Scope: Advanced trading execution, DeFi protocol integration, NFT tracking, direct messaging, premium social features (Phase 1)
 - **Content Guidelines**: 
   - Support 1000+ cryptocurrencies via CoinDesk API
-  - Real-time price updates with 10-second refresh rate (5-second for active view)
+  - Intelligent price updates: 30-second baseline, 10-second for active screens, 5-second for user interaction
   - Historical data available for major cryptocurrencies (1+ years)
   - Alert threshold precision to 8 decimal places
   - Community content moderation with automated and manual review
   - Anonymous portfolio sharing with no actual dollar amounts displayed
   - User-generated content guidelines for discussion quality
-  - **Localization Requirements (Phased Approach)**:
-    - Phase 1: Core 5 languages (English, Spanish, Japanese, German, French)
-    - Phase 2: Additional 6 languages including RTL support (Arabic, Hebrew, Chinese, Korean, Portuguese, Italian)
-    - Phase 3: Remaining languages and full cultural adaptations
-    - Currency formatting and number localization for supported regions
-    - Time zone-aware price alerts and market data display
+  - **Localization Requirements (Conservative Phased Approach)**:
+    - Phase 1: English only (6 months) - Focus on core functionality and performance
+    - Phase 2: Add 3 major markets (Spanish, Japanese, German) (12 months) - Basic localization without cultural adaptation
+    - Phase 3: Consider additional languages based on user demand and resources (18+ months)
+    - RTL support: Evaluate feasibility after Phase 2 completion, may require dedicated RTL specialist
+    - Cultural adaptations: Limited to basic number/currency formatting initially
 - **Technical Constraints**: 
-  - WebSocket connection for real-time data streaming
+  - Hybrid data strategy: HTTP polling primary, WebSocket only for active trading sessions to minimize battery drain
   - SwiftData for local persistence and offline capability
   - Local notifications for price alerts
   - Maximum 50MB app storage for historical data caching with intelligent cleanup
@@ -237,7 +237,7 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 
 ## 8. Performance Requirements  
 - **App Launch**: Cold start under 2 seconds, warm start under 0.5 seconds
-- **Price Updates**: Real-time updates with 10-second refresh (5-second for active screens)
+- **Price Updates**: Adaptive refresh strategy - 30s background, 10s foreground, 5s during active interaction, respecting API rate limits
 - **Chart Rendering**: Smooth 60fps chart interactions on supported devices (iPhone 12+, degraded gracefully on older devices)
 - **Memory Usage**: Efficient memory management with automatic cleanup, maximum 100MB working memory
 - **Battery Optimization**: Intelligent background refresh with adaptive refresh rates based on usage patterns
@@ -305,12 +305,13 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 
 ## 10. Technical Feasibility & Risk Mitigation
 
-### 10.1 API Dependencies & Fallback Strategies
-- **Primary Data Source**: CoinDesk API with comprehensive rate limiting and caching
-- **Backup APIs**: Integration with CoinGecko API and Binance API for redundancy
-- **Offline Capability**: Cached data for up to 24 hours, graceful degradation when APIs are unavailable
-- **Rate Limiting Strategy**: Exponential backoff, request queuing, and intelligent batching
-- **Network Resilience**: Automatic retry logic with circuit breaker pattern
+### 10.1 API Dependencies & Sustainable Data Strategy
+- **Primary Data Source**: CoinDesk API with conservative rate limiting (max 10 requests/minute)
+- **Smart Caching**: Aggressive caching with 5-minute stale data acceptance for non-critical updates
+- **Backup APIs**: CoinGecko as secondary source, not simultaneous to respect rate limits
+- **Offline-First Design**: Up to 24-hour cached data, app remains functional offline
+- **WebSocket Strategy**: Only for active trading sessions (>5 min continuous use), automatic disconnect after 30s inactivity
+- **Battery-Conscious Updates**: Background refresh limited to 1x per 30 seconds maximum
 
 ### 10.2 Performance Benchmarking & Validation
 - **Device Testing Matrix**: iPhone SE (2nd gen) through iPhone 15 Pro Max, iPad (9th gen) through iPad Pro
@@ -319,36 +320,40 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - **Battery Impact Testing**: Continuous monitoring of background processing impact
 - **Chart Rendering Optimization**: Level-of-detail rendering for complex datasets
 
-### 10.3 Implementation Phases & Rollout Strategy
-**Phase 1 (MVP - 3 months)**:
-- Core watchlist functionality with basic real-time updates
-- Essential portfolio tracking without advanced analytics
-- iOS 17/18 native implementation with iOS 26 preparation
-- English language only, 5 core cryptocurrencies
+### 10.3 Realistic Implementation Phases & Rollout Strategy
+**Phase 1 (MVP - 6 months)**:
+- Core watchlist functionality with 30-second HTTP polling updates
+- Basic portfolio tracking with manual transaction entry
+- iOS 17/18 native implementation only
+- English language only, 20 major cryptocurrencies
+- Simple HTTP API integration, no WebSocket complexity
 
-**Phase 2 (Enhanced - 6 months)**:
-- Full social community features with moderated content
-- Advanced charting and technical analysis
-- Core 5 language localization
-- iPad Pro optimization and Apple Pencil integration
+**Phase 2 (Social - 12 months)**:
+- Community features with basic discussion threads
+- Enhanced portfolio analytics and performance tracking
+- Improved caching and offline functionality
+- 100+ cryptocurrencies support
+- User testing and feedback collection
 
-**Phase 3 (Global - 12 months)**:
-- Complete international rollout with RTL support
-- Advanced iOS 26 Liquid Glass implementation (when available)
-- Full cryptocurrency coverage (1000+ currencies)
-- AI-powered portfolio insights and recommendations
+**Phase 3 (Expansion - 18+ months)**:
+- Evaluate demand for additional languages (Spanish, Japanese, German)
+- Advanced features based on user feedback and usage data
+- Consider iOS 26 features when available
+- Evaluate RTL support feasibility with dedicated specialist
+- Premium features based on sustainable business model
 
-### 10.4 Risk Assessment & Mitigation Plans
-**High Priority Risks**:
-- **iOS 26 Delay Risk**: Fallback to iOS 17/18 native materials with equivalent visual appeal
-- **API Rate Limiting**: Multi-tier caching strategy and alternative API integration
-- **Community Moderation Scale**: Automated tools with human oversight and clear escalation paths
-- **International Complexity**: Phased rollout with cultural consultants and local testing
+### 10.4 Risk Assessment & Realistic Mitigation Plans
+**High Priority Risks & Mitigations**:
+- **API Rate Limiting**: Conservative 10 req/min limit, 5-minute stale data acceptance, single API source at a time
+- **Battery Drain**: HTTP polling only, 30-second minimum intervals, WebSocket only for active use
+- **Development Complexity**: 6-month MVP focused on core functionality only
+- **Internationalization Costs**: English-only for 6+ months, evaluate additional languages based on actual user demand
 
-**Medium Priority Risks**:
-- **Performance on Older Devices**: Progressive enhancement with feature detection
-- **Battery Drain**: Adaptive refresh rates and intelligent background processing
-- **Data Privacy Regulations**: Built-in compliance frameworks and regular audits
+**Medium Priority Risks & Mitigations**:
+- **RTL Implementation Complexity**: Not included in initial phases, requires dedicated specialist evaluation
+- **Cultural Adaptation Costs**: Limited to basic number formatting, no cultural color adaptations initially
+- **Maintenance Overhead**: Start with 1 language, add others only with dedicated maintenance resources
+- **Community Moderation Scale**: Simple forums with basic automated filtering, human review for reports only
 
 ## 11. Security & Privacy
 - **Data Protection**: Local data encryption using SwiftData security features with Keychain integration for sensitive data
