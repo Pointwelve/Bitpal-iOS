@@ -448,12 +448,13 @@ enum CryptoAPIEndpoint: APIEndpoint {
                 URLQueryItem(name: "market", value: "cadli"),
                 URLQueryItem(name: "instruments", value: instruments.joined(separator: ","))
             ]
-        case .priceHistorical(let symbol, let currency, _, _, let limit):
+        case .priceHistorical(let symbol, let currency, _, let period, let limit):
             let instrument = "\(symbol)-\(currency)"
             return [
                 URLQueryItem(name: "market", value: "cadli"),
                 URLQueryItem(name: "instrument", value: instrument),
-                URLQueryItem(name: "limit", value: String(limit))
+                URLQueryItem(name: "limit", value: String(limit)),
+                URLQueryItem(name: "aggregate", value: String(period.aggregateValue))
             ]
         case .topCoins(let limit, let currency):
             return [

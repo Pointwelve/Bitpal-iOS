@@ -45,20 +45,23 @@ struct ChartConfiguration {
     static func optimizedDataPoints(for period: String, chartType: ChartDisplayType) -> Int {
         let baseCount: Int
         switch period {
-        case "1H":
-            baseCount = chartType == .candlestick ? 60 : 120    // 1-minute intervals
+        case "15m":
+            baseCount = chartType == .candlestick ? 45 : 60     // Consistent candle count with 1D
+        case "1h":
+            baseCount = chartType == .candlestick ? 45 : 70     // Consistent candle count with 1D
+        case "4h":
+            baseCount = chartType == .candlestick ? 48 : 80     // Consistent candle count with 1D
         case "1D":
             baseCount = chartType == .candlestick ? 48 : 96     // 30-minute intervals
         case "1W":
             baseCount = chartType == .candlestick ? 56 : 112    // 3-hour intervals
-        case "1M":
-            baseCount = chartType == .candlestick ? 60 : 120    // 12-hour intervals
-        case "6M":
-            baseCount = chartType == .candlestick ? 60 : 90     // 3-day intervals
         case "1Y":
             baseCount = chartType == .candlestick ? 52 : 80     // Weekly intervals
-        case "ALL":
-            baseCount = chartType == .candlestick ? 40 : 60     // Monthly intervals
+        case "YTD":
+            // Calculate based on days since January 1st
+            let daysYTD = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+            let ytdCount = min(60, max(30, daysYTD / 2)) // 2-day intervals, capped at 60
+            baseCount = chartType == .candlestick ? ytdCount : ytdCount * 2
         default:
             baseCount = chartType == .candlestick ? maxCandlestickPoints : maxDataPoints
         }
@@ -67,11 +70,11 @@ struct ChartConfiguration {
     
     static func decimationStrategy(for period: String) -> DecimationStrategy {
         switch period {
-        case "1H", "1D":
+        case "15m", "1h", "4h", "1D":
             return .largestTriangleThreeBuckets  // High precision for short periods
-        case "1W", "1M":
+        case "1W":
             return .largestTriangleThreeBuckets  // Balanced approach
-        case "6M", "1Y", "ALL":
+        case "1Y", "YTD":
             return .uniform                      // Simple uniform for long periods
         default:
             return .largestTriangleThreeBuckets
