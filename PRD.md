@@ -1,10 +1,10 @@
 # Product Requirements Document (PRD)
 
 ## 1. Product Overview
-- **Product Name**: Bitpal iOS - Cryptocurrency Portfolio Tracker
-- **Product Positioning**: A comprehensive real-time cryptocurrency portfolio tracking and social investment platform for iOS, combining professional-grade analytics with community-driven insights to empower informed crypto investment decisions.
-- **Target Users**: Cryptocurrency investors, traders, and enthusiasts who require real-time market monitoring, portfolio tracking, intelligent alert systems, and community-powered investment insights
-- **Core Problem**: Users need a unified platform to track their cryptocurrency investments across multiple exchanges, receive timely price alerts, make informed decisions through comprehensive analysis, AND learn from a community of fellow crypto investors to improve their investment strategies.
+- **Product Name**: Bitpal iOS - Advanced Cryptocurrency Portfolio Tracker
+- **Product Positioning**: A next-generation cryptocurrency portfolio tracker for iOS, enhanced with AI-powered insights, DeFi protocol integration, social trading features, and comprehensive multi-chain asset management to provide the most intelligent portfolio tracking experience.
+- **Target Users**: Cryptocurrency investors, DeFi participants, portfolio managers, and social traders who need comprehensive portfolio tracking with AI insights, cross-chain visibility, and community-driven investment intelligence.
+- **Core Problem**: Users need a unified portfolio tracker that not only monitors traditional crypto assets but also tracks DeFi positions, provides AI-powered portfolio optimization suggestions, enables learning from successful traders, and manages assets across multiple blockchain networks - all while maintaining focus on portfolio performance and analysis.
 
 ## 2. User Analysis
 | User Type | Characteristics | Core Needs | Use Case |
@@ -21,10 +21,15 @@
 | Watchlist | Home | Real-time price monitoring with customizable currency list | Track favorite cryptocurrencies with live price updates | App launch/Tab navigation | P0 |
 | Currency Detail | Feature | Detailed analytics with interactive charts and market data | In-depth analysis of specific cryptocurrency performance | Watchlist item tap | P0 |
 | Add Currency | Flow | Search and discover new cryptocurrencies to track | Expand portfolio monitoring capabilities | Watchlist add button | P0 |
-| Portfolio | Feature | Holdings tracking with transaction history management | Monitor investment performance and profit/loss | Tab navigation | P1 |
+| Portfolio | Feature | Holdings tracking with transaction history management | Monitor investment performance and profit/loss | Tab navigation | P0 |
+| AI Insights | Feature | AI-powered portfolio analysis and optimization recommendations | Get intelligent suggestions for portfolio rebalancing and opportunities | Tab navigation | P1 |
+| DeFi Tracker | Feature | Cross-chain DeFi protocol position tracking and yield monitoring | Track staking, liquidity pools, and DeFi investments across chains | Portfolio integration/Tab navigation | P1 |
+| Copy Trading | Feature | Social trading with top performer following and strategy copying | Learn from and copy successful traders' portfolio strategies | Community/Tab navigation | P1 |
 | Alerts | Feature | Price alert creation and management interface | Never miss important price movements with custom notifications | Tab navigation | P0 |
 | Charts | Feature | Advanced technical analysis with multiple chart types | Professional trading analysis with technical indicators | Currency detail/Tab navigation | P1 |
 | Community | Feature | Social investment platform with discussions and portfolio sharing | Learn from other investors, share insights, and get portfolio feedback | Tab navigation | P1 |
+| Multi-Chain Wallet | Feature | Cross-chain asset visibility and management interface | Track assets across Ethereum, Solana, BSC, Polygon, and other chains | Portfolio integration | P1 |
+| NFT Gallery | Feature | NFT collection tracking with floor price monitoring | Monitor NFT portfolio value and marketplace trends | Portfolio integration | P2 |
 | Settings | Feature | App configuration, preferences, and account management | Customize app behavior and manage user preferences | Tab navigation | P2 |
 
 ### 3.2 iPad-Specific Layout Enhancements
@@ -82,7 +87,52 @@
 - **Navigation Logic**: Alert creation flow, alert editing screens, return to Watchlist or Currency Detail
 - **iPad Enhancements**: Multi-column alert management interface, bulk alert editing capabilities, enhanced threshold configuration with precise number input, keyboard shortcuts for quick alert creation
 
-#### Page 6: Community
+#### Page 6: AI Insights
+- **Page Goal**: Provide users with AI-powered portfolio analysis, optimization recommendations, and market intelligence to improve investment decisions
+- **Core Functions**: Portfolio analysis with AI recommendations, market sentiment analysis, automated rebalancing suggestions, risk assessment, opportunity identification
+- **Business Logic**: Machine learning algorithms analyze portfolio composition, market trends, and user behavior to generate personalized insights, risk scoring based on volatility and correlation analysis
+- **Page Elements**: Portfolio health score, AI-generated recommendations cards, rebalancing suggestions, risk analysis charts, market sentiment indicators, opportunity alerts
+- **Interaction Logic**: Tap recommendations for detailed explanations, accept/dismiss rebalancing suggestions, customize AI preferences, view historical AI performance
+- **Navigation Logic**: Navigate to specific asset details, portfolio rebalancing interface, educational content about recommendations
+- **iPad Enhancements**: Multi-column layout with portfolio analysis + recommendations side-by-side, enhanced data visualization, Apple Pencil annotation for saving insights
+
+#### Page 7: DeFi Tracker
+- **Page Goal**: Enable users to track their DeFi positions across multiple protocols and chains with yield monitoring and protocol analytics
+- **Core Functions**: Cross-chain DeFi position tracking, yield farming monitoring, liquidity pool analytics, staking rewards calculation, protocol risk assessment
+- **Business Logic**: Integration with major DeFi protocols via APIs and on-chain data, yield calculations with impermanent loss tracking, protocol security scoring
+- **Page Elements**: DeFi portfolio overview, protocol position cards, yield analytics charts, risk indicators, APY comparisons, transaction history
+- **Interaction Logic**: Connect wallet addresses, toggle between different protocols, drill-down into specific positions, manage protocol notifications
+- **Navigation Logic**: Navigate to protocol-specific analytics, yield comparison tools, transaction details, risk assessment pages
+- **iPad Enhancements**: Multi-protocol dashboard with simultaneous protocol monitoring, enhanced yield analytics with larger charts, drag-and-drop for position management
+
+#### Page 8: Copy Trading
+- **Page Goal**: Connect users with successful traders to learn from their strategies and optionally copy their portfolio allocations
+- **Core Functions**: Top trader discovery, strategy analysis, portfolio copying interface, performance tracking, trader following system
+- **Business Logic**: Trader ranking algorithm based on performance metrics, anonymized portfolio sharing, copy trading with customizable allocation limits
+- **Page Elements**: Top traders leaderboard, strategy performance charts, copy trading interface, followed traders list, portfolio comparison tools
+- **Interaction Logic**: Follow/unfollow traders, copy portfolio allocations, customize copy parameters, track copy performance, communicate with traders
+- **Navigation Logic**: Navigate to trader profiles, detailed strategy analysis, copy trading setup, performance comparison views
+- **iPad Enhancements**: Side-by-side trader comparison, enhanced performance analytics, multi-trader monitoring dashboard, Apple Pencil for strategy annotation
+
+#### Page 9: Multi-Chain Wallet
+- **Page Goal**: Provide comprehensive visibility and management of assets across multiple blockchain networks
+- **Core Functions**: Multi-chain asset aggregation, cross-chain transaction tracking, chain-specific portfolio analytics, network switching interface
+- **Business Logic**: Integration with Ethereum, Solana, BSC, Polygon, Avalanche, and other major chains, wallet connectivity management, cross-chain balance reconciliation
+- **Page Elements**: Chain selector, aggregated portfolio view, chain-specific asset lists, transaction history per chain, network status indicators
+- **Interaction Logic**: Switch between chains, connect multiple wallets, filter assets by chain, manage chain-specific settings
+- **Navigation Logic**: Navigate to chain-specific portfolios, cross-chain transaction details, wallet management, network configuration
+- **iPad Enhancements**: Multi-chain sidebar navigation, simultaneous chain monitoring, enhanced transaction visualization, drag-and-drop for cross-chain management
+
+#### Page 10: NFT Gallery
+- **Page Goal**: Track NFT collection value and marketplace trends with comprehensive collection analytics
+- **Core Functions**: NFT collection tracking, floor price monitoring, marketplace analytics, collection performance analysis, rarity ranking
+- **Business Logic**: Integration with major NFT marketplaces (OpenSea, Blur, Magic Eden), floor price tracking algorithms, rarity score calculations
+- **Page Elements**: NFT collection grid, floor price charts, marketplace activity feed, collection statistics, rarity indicators
+- **Interaction Logic**: Browse NFT collections, filter by collection/rarity, view detailed NFT analytics, set floor price alerts
+- **Navigation Logic**: Navigate to individual NFT details, marketplace links, collection analytics, price history views
+- **iPad Enhancements**: Large gallery view with detailed metadata, enhanced filtering options, collection comparison tools, Apple Pencil for collection annotations
+
+#### Page 11: Community
 - **Page Goal**: Create a social investment platform where users can learn from each other, share insights, and improve their crypto investment strategies through community interaction
 - **Core Functions**: Cryptocurrency discussion forums, anonymized portfolio sharing, community feed with investment insights, user following system, investment idea discovery
 - **Business Logic**: User-generated content moderation, anonymized data sharing (no actual amounts), reputation system for quality contributors, trending topics algorithm
@@ -108,6 +158,21 @@
 
 - As a crypto enthusiast, I want to discover trending cryptocurrencies so that I can stay informed about emerging market opportunities.
 - Business Rules: Trending algorithm based on volume and price movement, updated hourly, integrated with CoinDesk API for discovery
+
+- As a portfolio manager, I want AI-powered insights to optimize my portfolio allocation so that I can improve my investment performance with data-driven recommendations.
+- Business Rules: AI algorithms analyze portfolio composition, risk metrics, and market trends to suggest rebalancing strategies, recommendations updated daily, user can accept/dismiss suggestions
+
+- As a DeFi investor, I want to track my positions across multiple protocols and chains so that I can monitor my yield farming and staking investments in one place.
+- Business Rules: Support for Ethereum, BSC, Polygon, Avalanche, and Solana DeFi protocols, yield calculations include impermanent loss tracking, protocol risk scores based on security audits
+
+- As a beginner trader, I want to copy successful investors' portfolio strategies so that I can learn from their expertise while managing my own risk tolerance.
+- Business Rules: Copy trading with customizable allocation limits, trader ranking based on risk-adjusted returns, anonymous portfolio copying with privacy controls
+
+- As a multi-chain investor, I want to view all my assets across different blockchain networks in one unified interface so that I can manage my entire crypto portfolio efficiently.
+- Business Rules: Support for 10+ major blockchains, automatic wallet balance synchronization, cross-chain transaction history aggregation
+
+- As an NFT collector, I want to track the value of my NFT collections and monitor floor price changes so that I can make informed decisions about my digital art investments.
+- Business Rules: Integration with major NFT marketplaces, floor price alerts, rarity score calculations, collection performance analytics
 
 - As a beginner investor, I want to share my portfolio anonymously and receive feedback from experienced investors so that I can improve my investment strategy.
 - Business Rules: Portfolio sharing is anonymous (no actual dollar amounts shown), users can choose privacy level, feedback system with reputation scoring
@@ -146,13 +211,28 @@
 1. User Launches App → 2. Views Watchlist with Real-time Prices → 3. Taps Currency for Details → 4. Analyzes Charts and Sets Alerts → 5. Returns to Watchlist or Explores Portfolio
 
 ### Page Flow Diagram:
-App Launch → Watchlist → Currency Detail → Alert Creation → Portfolio Management → Community → Settings Configuration
+App Launch → Watchlist → Currency Detail → Alert Creation → Portfolio Management → AI Insights → DeFi Tracker → Copy Trading → Community → Settings Configuration
 
 ### Alert Creation Flow:
 Watchlist/Currency Detail → Alert Creation Modal → Threshold Configuration → Notification Settings → Alert Confirmation → Return to Source
 
 ### Portfolio Management Flow:
-Portfolio Tab → Holdings Overview → Add Transaction → Transaction Details → Portfolio Update → Performance Analysis
+Portfolio Tab → Holdings Overview → Add Transaction → Transaction Details → Portfolio Update → Performance Analysis → AI Recommendations
+
+### AI-Powered Investment Flow:
+Portfolio Tab → AI Insights → Portfolio Analysis → Rebalancing Recommendations → Accept/Customize Suggestions → Execute Changes → Track Performance
+
+### DeFi Investment Flow:
+DeFi Tracker → Connect Wallets → Protocol Discovery → Position Analysis → Yield Monitoring → Risk Assessment → Optimize Allocations
+
+### Copy Trading Flow:
+Copy Trading Tab → Discover Top Traders → Analyze Strategies → Select Traders to Follow → Configure Copy Parameters → Monitor Copy Performance → Adjust Settings
+
+### Multi-Chain Portfolio Flow:
+Multi-Chain Wallet → Connect Wallets → Chain Selection → Asset Aggregation → Cross-Chain Analysis → Transaction Tracking → Portfolio Reconciliation
+
+### NFT Portfolio Flow:
+NFT Gallery → Collection Overview → Floor Price Monitoring → Rarity Analysis → Marketplace Integration → Value Tracking → Alert Management
 
 ### Social Investment Flow:
 Community Tab → Discussion Topics → Currency-Specific Discussions → Share Insights/Ask Questions → Portfolio Sharing → Follow Users → Discover Investment Ideas
@@ -173,16 +253,20 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 ## 6. Product Constraints
 - **Platform Requirements**: iOS 17.0+ and iPadOS 17.0+ for SwiftUI 5.0 features, SwiftData for persistence, modern async/await patterns, Universal app with optimized iPad experience, Phased internationalization starting with 5 core languages
 - **Feature Scope**: 
-  - In Scope: Real-time price tracking, portfolio management, alerts, basic charting, currency search, social investment community, discussion forums, portfolio sharing
-  - Out of Scope: Advanced trading execution, DeFi protocol integration, NFT tracking, direct messaging, premium social features (Phase 1)
+  - In Scope: Real-time price tracking, AI-powered portfolio optimization, multi-chain DeFi protocol integration, NFT portfolio tracking, copy trading, cross-chain wallet connectivity, advanced social features, discussion forums, portfolio sharing
+  - Out of Scope: Direct trading execution (buy/sell), automated trading bots, direct messaging, advanced trading tools (Phase 1), derivatives trading, margin/leverage trading
 - **Content Guidelines**: 
-  - Support 1000+ cryptocurrencies via CoinDesk API
+  - Support 1000+ cryptocurrencies via CoinDesk API, 500+ DeFi protocols across 10+ chains
   - Intelligent price updates: 30-second baseline, 10-second for active screens, 5-second for user interaction
-  - Historical data available for major cryptocurrencies (1+ years)
-  - Alert threshold precision to 8 decimal places
+  - Historical data available for major cryptocurrencies (1+ years), DeFi protocol data (6+ months)
+  - Alert threshold precision to 8 decimal places for prices, 0.01% precision for yields
+  - AI recommendation engine with 95%+ accuracy targeting, daily model retraining
   - Community content moderation with automated and manual review
   - Anonymous portfolio sharing with no actual dollar amounts displayed
   - User-generated content guidelines for discussion quality
+  - Copy trading with maximum 25% portfolio allocation limits for risk management
+  - NFT collection tracking for 50+ major marketplaces with real-time floor prices
+  - Multi-chain wallet support for 10+ major blockchains with real-time synchronization
   - **Localization Requirements (Conservative Phased Approach)**:
     - Phase 1: English only (6 months) - Focus on core functionality and performance
     - Phase 2: Add 3 major markets (Spanish, Japanese, German) (12 months) - Basic localization without cultural adaptation
@@ -222,10 +306,16 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - **Historical Data**: Chart data retrieval with intelligent caching strategy
 - **Search API**: Cryptocurrency discovery and metadata retrieval
 - **Rate Limiting**: Respect API rate limits with exponential backoff retry logic
-- **Community Backend API**: User-generated content, discussion forums, portfolio sharing
+- **AI/ML APIs**: Portfolio analysis engine, sentiment analysis, predictive modeling with cloud-based inference
+- **DeFi Protocol APIs**: Integration with major protocols (Uniswap, Aave, Compound, MakerDAO, etc.) via The Graph and direct protocol APIs
+- **Multi-Chain APIs**: Ethereum, Solana, BSC, Polygon, Avalanche, Arbitrum, and Optimism blockchain data via Infura, Alchemy, and QuickNode
+- **Wallet Integration APIs**: WalletConnect v2 protocol for secure wallet connectivity and transaction monitoring
+- **NFT Marketplace APIs**: OpenSea, Blur, Magic Eden, LooksRare APIs for NFT data, floor prices, and collection analytics
+- **Copy Trading APIs**: User strategy tracking, portfolio performance metrics, anonymized trading signal distribution
+- **Community Backend API**: User-generated content, discussion forums, portfolio sharing, copy trading coordination
 - **Content Moderation API**: Automated content filtering and manual review system
-- **User Management API**: Anonymous user system, reputation tracking, following relationships
-- **Notification Service**: Community notifications for discussions, portfolio feedback, and mentions
+- **User Management API**: Anonymous user system, reputation tracking, following relationships, copy trading permissions
+- **Notification Service**: Community notifications, AI insights, DeFi yield alerts, NFT floor price changes, copy trading updates
 - **Localization API Requirements**:
   - Multi-language cryptocurrency name and description lookup
   - Regional market data APIs for local cryptocurrency exchanges
@@ -327,28 +417,37 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - **Chart Rendering Optimization**: Level-of-detail rendering for complex datasets
 
 ### 10.3 Realistic Implementation Phases & Rollout Strategy
-**Phase 1 (MVP - 6 months)**:
+**Phase 1 (Enhanced MVP - 8 months)**:
 - Core watchlist functionality with 30-second HTTP polling updates
-- Basic portfolio tracking with manual transaction entry
+- Advanced portfolio tracking with transaction management
+- Basic AI insights with portfolio health scoring and simple recommendations
+- Multi-chain wallet connectivity (Ethereum, BSC, Polygon only)
+- Community features with discussion forums and portfolio sharing
 - iOS 17/18 native implementation only
-- English language only, 50 major cryptocurrencies (realistic cache limit)
-- Simple HTTP API integration, no WebSocket complexity
-- Target: <1.5s cold start, 25MB cache, basic charts only
+- English language only, 200 major cryptocurrencies with intelligent caching
+- Simple HTTP API integration with basic WebSocket for active sessions
+- Target: <1.5s cold start, 50MB cache (expanded for multi-chain data), enhanced charts
 
-**Phase 2 (Enhanced - 12 months)**:
-- Community features with simple discussion threads (max 1000 concurrent users)
-- Enhanced portfolio analytics and performance tracking
-- Improved caching and offline functionality
-- 200 cryptocurrencies support with intelligent caching
-- User testing and feedback collection
-- Advanced charts for iPhone 11+ devices
+**Phase 2 (AI-Powered - 15 months)**:
+- Full AI portfolio optimization with machine learning recommendations
+- DeFi protocol integration (top 20 protocols across 5 chains)
+- Copy trading platform with top trader discovery
+- NFT portfolio tracking (major marketplaces only)
+- Enhanced community features with gamification basics (badges, reputation)
+- 500 cryptocurrencies support with expanded DeFi protocol coverage
+- Advanced charts with technical indicators for iPhone 11+ devices
+- Multi-language support (Spanish, Japanese, German)
 
-**Phase 3 (Scalable - 18+ months)**:
-- Community scalability improvements (10K+ users with CDN and database optimization)
-- Evaluate additional languages based on user analytics
-- Advanced visual effects for iPhone 13+ devices
-- Consider iOS 26 features when available
-- Backend infrastructure scaling based on actual usage patterns
+**Phase 3 (Advanced Ecosystem - 24+ months)**:
+- Full automation features (rebalancing, DCA strategies, yield optimization)
+- Complete DeFi ecosystem integration (100+ protocols across 10+ chains)
+- Advanced NFT analytics with marketplace integration
+- Premium social features with expert verification and live events
+- Advanced gamification with competitions and achievement systems
+- Community scalability improvements (50K+ users with microservices architecture)
+- Advanced visual effects and Apple Pencil integration for iPhone 13+ and iPad Pro
+- Consider iOS 26/27 features and macOS Catalyst version
+- International expansion with RTL language support
 
 ### 10.4 Risk Assessment & Realistic Mitigation Plans
 **High Priority Risks & Mitigations**:
@@ -380,17 +479,36 @@ Community Tab → Multi-Pane Discussion View → Apple Pencil Diagram Creation �
 - **API Security**: Rate limiting, request validation, secure API key management
 - **Third-party Security**: Regular security audits of third-party dependencies and APIs
 
-## 12. Future Enhancements (Post-MVP)
-- **Advanced Technical Analysis**: RSI, MACD, Bollinger Bands indicators
-- **DeFi Integration**: DEX price tracking and liquidity pool monitoring  
-- **Enhanced Social Features**: Direct messaging, premium community features, expert investor verification
+## 12. Enhanced Social & Gamification Features
+- **Achievement System**: Unlock badges for portfolio milestones (first profit, diamond hands, early adopter), community contributions (helpful posts, quality insights), and learning objectives (completing educational content)
+- **Investment Challenges**: Monthly community challenges like "Best Risk-Adjusted Returns," "Most Diversified Portfolio," and "Best Market Timing" with leaderboards and rewards
+- **Community Reputation System**: User levels based on helpful contributions, accurate predictions, and positive community feedback with visual reputation indicators
+- **Portfolio Competitions**: Anonymous portfolio performance contests with seasonal themes (bull market specialist, bear market survivor, DeFi master)
+- **Educational Gamification**: Learning paths with progress tracking, quiz achievements, and certification badges for completing crypto investment courses
+- **Social Interaction Rewards**: Points for quality posts, helpful comments, successful portfolio sharing, and mentoring new investors
+- **Streak Tracking**: Daily check-in streaks, consecutive profitable trades tracking, and long-term holding achievements
+- **Community Challenges**: Group challenges like collective portfolio performance targets or charity fundraising through NFT auctions
+
+## 13. Advanced Trading & Automation Features (Future Phases)
+- **Smart Alert System**: AI-powered alerts that learn from user behavior and market patterns to reduce false positives
+- **Portfolio Rebalancing Automation**: Automated rebalancing based on AI recommendations with user-defined thresholds and risk parameters
+- **Copy Trading Automation**: Automated copying of top trader strategies with real-time position synchronization and risk management
+- **DCA (Dollar Cost Averaging) Strategies**: Automated DCA execution with AI-optimized timing based on market volatility
+- **Yield Optimization**: Automated DeFi yield farming strategy recommendations with risk-adjusted APY comparisons
+- **Market Sentiment Integration**: Real-time sentiment analysis from social media, news, and community discussions to inform trading decisions
+- **Predictive Analytics**: AI-powered price prediction models with confidence intervals and historical accuracy tracking
+- **Risk Management Tools**: Automated stop-loss suggestions, position sizing recommendations, and portfolio volatility monitoring
+- **Tax Optimization**: AI-powered tax-loss harvesting recommendations and capital gains optimization strategies
+
+## 14. Future Enhancements (Post-MVP)
+- **Advanced Technical Analysis**: RSI, MACD, Bollinger Bands indicators with AI-powered pattern recognition
+- **Enhanced Social Features**: Direct messaging, premium community features, expert investor verification, live streaming
 - **Advanced Portfolio Analytics**: AI-powered risk assessment and diversification analysis with community benchmarking
-- **Widget Extensions**: iOS widgets and Apple Watch complications
-- **Cross-Platform Sync**: Optional cloud sync for alerts and preferences
-- **Community Gamification**: Achievement systems, investment challenges, leaderboards
-- **AI-Powered Insights**: Sentiment analysis from community discussions, AI-generated investment summaries
-- **Premium Social Tiers**: Exclusive access to expert investor insights, advanced portfolio sharing features
-- **Live Community Events**: Virtual investment discussions, AMA sessions with crypto experts
+- **Widget Extensions**: iOS widgets and Apple Watch complications with real-time portfolio updates
+- **Cross-Platform Sync**: Optional cloud sync for alerts and preferences with end-to-end encryption
+- **AI-Powered News Integration**: Personalized news feed with AI-curated articles relevant to user's portfolio
+- **Premium Social Tiers**: Exclusive access to expert investor insights, advanced portfolio sharing features, private communities
+- **Live Community Events**: Virtual investment discussions, AMA sessions with crypto experts, educational webinars
 - **iPad Pro Enhancements**:
   - macOS Catalyst version for Mac compatibility
   - Advanced Apple Pencil features with haptic feedback
