@@ -96,6 +96,11 @@ struct ChartDataProcessor {
     static func optimizeData(_ data: [ChartData], for chartType: ChartDisplayType, period: String = "1D") -> [ChartData] {
         let targetCount = ChartConfiguration.optimizedDataPoints(for: period, chartType: chartType)
         
+        // Skip optimization for candlestick charts - just return latest points
+        if chartType == .candlestick {
+            return Array(data.suffix(targetCount))
+        }
+        
         guard data.count > targetCount else { return data }
         
         let strategy = ChartConfiguration.decimationStrategy(for: period)
