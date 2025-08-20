@@ -250,15 +250,15 @@ final class HistoricalDataService {
 extension ChartPeriod {
     var apiLimit: Int {
         switch self {
-        case .oneMinute: return 60
-        case .fiveMinutes: return 60
-        case .fifteenMinutes: return 96
-        case .thirtyMinutes: return 96
-        case .oneHour: return 60
-        case .fourHours: return 48
-        case .oneDay: return 48
-        case .oneWeek: return 168
-        case .oneMonth: return 30
+        case .oneMinute: return 90
+        case .fiveMinutes: return 90
+        case .fifteenMinutes: return 90
+        case .thirtyMinutes: return 90
+        case .oneHour: return 72
+        case .fourHours: return 84
+        case .oneDay: return 90
+        case .oneWeek: return 52
+        case .oneMonth: return 60
         }
     }
     

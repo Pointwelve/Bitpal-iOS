@@ -43,29 +43,34 @@ struct ChartConfiguration {
     
     // Period-specific optimization settings
     static func optimizedDataPoints(for period: String, chartType: ChartDisplayType) -> Int {
+        // Standardized candlestick count for better readability
+        if chartType == .candlestick {
+            return 40
+        }
+        
+        // Optimized data points for line/area charts for smooth visualization
         let baseCount: Int
         switch period {
         case "15m":
-            baseCount = chartType == .candlestick ? 45 : 60     // Consistent candle count with 1D
+            baseCount = 90    // 22.5 hours of 15-min data
         case "1h":
-            baseCount = chartType == .candlestick ? 45 : 70     // Consistent candle count with 1D
+            baseCount = 72    // 3 days of hourly data  
         case "4h":
-            baseCount = chartType == .candlestick ? 48 : 80     // Consistent candle count with 1D
+            baseCount = 84    // 14 days of 4-hour data
         case "1D":
-            baseCount = chartType == .candlestick ? 48 : 96     // 30-minute intervals
+            baseCount = 90    // 90 days of daily data
         case "1W":
-            baseCount = chartType == .candlestick ? 56 : 112    // 3-hour intervals
+            baseCount = 52    // 1 year of weekly data
         case "1Y":
-            baseCount = chartType == .candlestick ? 52 : 80     // Weekly intervals
+            baseCount = 60    // 5 years of monthly data
         case "YTD":
             // Calculate based on days since January 1st
             let daysYTD = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-            let ytdCount = min(60, max(30, daysYTD / 2)) // 2-day intervals, capped at 60
-            baseCount = chartType == .candlestick ? ytdCount : ytdCount * 2
+            baseCount = min(60, max(30, daysYTD / 2)) // 2-day intervals, capped at 60
         default:
-            baseCount = chartType == .candlestick ? maxCandlestickPoints : maxDataPoints
+            baseCount = maxDataPoints
         }
-        return min(baseCount, chartType == .candlestick ? maxCandlestickPoints : maxDataPoints)
+        return min(baseCount, maxDataPoints)
     }
     
     static func decimationStrategy(for period: String) -> DecimationStrategy {
