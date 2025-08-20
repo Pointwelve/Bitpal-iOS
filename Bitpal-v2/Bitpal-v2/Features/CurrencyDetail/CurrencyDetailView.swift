@@ -380,34 +380,7 @@ struct CurrencyDetailView: View {
     // MARK: - Dynamic Candlestick Width
     
     private func calculateCandlestickWidth() -> CGFloat {
-        let dataCount = optimizedChartData.count
-        let chartWidth: CGFloat = 350 // Approximate chart width
-        let period = selectedTimePeriod
-        
-        // Calculate width to prevent overlapping with consistent spacing
-        let baseWidth: CGFloat
-        switch period {
-        case "15m":
-            // ~45 candles: need smaller width to prevent overlap
-            baseWidth = max(4, min(6, chartWidth / CGFloat(max(dataCount, 45)) * 0.7))
-        case "1h":
-            // ~45 candles: balanced width with spacing
-            baseWidth = max(5, min(7, chartWidth / CGFloat(max(dataCount, 45)) * 0.75))
-        case "4h":
-            // ~45 candles: slightly wider for better visibility
-            baseWidth = max(6, min(8, chartWidth / CGFloat(max(dataCount, 45)) * 0.8))
-        case "1D":
-            // ~48 candles: consistent with other periods
-            baseWidth = max(6, min(8, chartWidth / CGFloat(max(dataCount, 48)) * 0.8))
-        case "1W":
-            baseWidth = max(8, min(12, chartWidth / CGFloat(dataCount) * 0.9))
-        case "1Y", "YTD":
-            baseWidth = max(10, min(16, chartWidth / CGFloat(dataCount) * 1.0))
-        default:
-            baseWidth = 7
-        }
-        
-        return baseWidth
+        return 7  // Standardized width for all periods
     }
     
     
