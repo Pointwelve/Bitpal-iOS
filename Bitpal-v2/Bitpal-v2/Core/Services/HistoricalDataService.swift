@@ -249,17 +249,7 @@ final class HistoricalDataService {
 
 extension ChartPeriod {
     var apiLimit: Int {
-        switch self {
-        case .oneMinute: return 90
-        case .fiveMinutes: return 90
-        case .fifteenMinutes: return 90
-        case .thirtyMinutes: return 90
-        case .oneHour: return 72
-        case .fourHours: return 84
-        case .oneDay: return 90
-        case .oneWeek: return 52
-        case .oneMonth: return 60
-        }
+        return 90  // Standardized for all periods
     }
     
     var cacheExpirationSeconds: Int {
