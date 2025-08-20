@@ -43,30 +43,13 @@ struct ChartConfiguration {
     
     // Period-specific optimization settings
     static func optimizedDataPoints(for period: String, chartType: ChartDisplayType) -> Int {
-        // Standardized candlestick count for better readability
+        // Two-tier standardization approach
         if chartType == .candlestick {
-            return 40
+            return 40  // Standardized candlestick count for readability
         }
         
-        // Optimized data points for line/area charts for smooth visualization
-        let baseCount: Int
-        switch period {
-        case "15m":
-            baseCount = 90    // 22.5 hours of 15-min data
-        case "1h":
-            baseCount = 72    // 3 days of hourly data  
-        case "4h":
-            baseCount = 84    // 14 days of 4-hour data
-        case "1D":
-            baseCount = 90    // 90 days of daily data
-        case "1W":
-            baseCount = 52    // 1 year of weekly data
-        case "1Y":
-            baseCount = 60    // 5 years of monthly data
-        default:
-            baseCount = maxDataPoints
-        }
-        return min(baseCount, maxDataPoints)
+        // Standardized line/area chart count for smooth visualization
+        return 90
     }
     
     static func decimationStrategy(for period: String) -> DecimationStrategy {
