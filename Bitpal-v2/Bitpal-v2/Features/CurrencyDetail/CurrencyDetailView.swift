@@ -472,7 +472,6 @@ struct CurrencyDetailView: View {
         case oneDay = "1D"
         case oneWeek = "1W"
         case oneYear = "1Y"
-        case yearToDate = "YTD"
     }
     
     // Legacy market stats grid - keeping for reference but not used in new design
@@ -671,7 +670,6 @@ struct CurrencyDetailView: View {
         case "1D": .oneDay
         case "1W": .oneWeek
         case "1Y": .oneMonth // Map to oneMonth until yearly data is available
-        case "YTD": .oneMonth // Map to oneMonth for year-to-date calculation
         default: .oneDay
         }
     }

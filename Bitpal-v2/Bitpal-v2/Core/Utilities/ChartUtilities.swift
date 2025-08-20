@@ -63,10 +63,6 @@ struct ChartConfiguration {
             baseCount = 52    // 1 year of weekly data
         case "1Y":
             baseCount = 60    // 5 years of monthly data
-        case "YTD":
-            // Calculate based on days since January 1st
-            let daysYTD = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-            baseCount = min(60, max(30, daysYTD / 2)) // 2-day intervals, capped at 60
         default:
             baseCount = maxDataPoints
         }
@@ -79,7 +75,7 @@ struct ChartConfiguration {
             return .largestTriangleThreeBuckets  // High precision for short periods
         case "1W":
             return .largestTriangleThreeBuckets  // Balanced approach
-        case "1Y", "YTD":
+        case "1Y":
             return .uniform                      // Simple uniform for long periods
         default:
             return .largestTriangleThreeBuckets
