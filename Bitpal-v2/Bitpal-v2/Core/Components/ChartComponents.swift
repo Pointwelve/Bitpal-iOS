@@ -192,9 +192,9 @@ struct ChartPeriodSelector: View {
     }
 }
 
-// MARK: - Modern Stat Card
+// MARK: - Legacy Stat Card
 
-struct ModernStatCard: View {
+struct LegacyStatCard: View {
     let title: String
     let value: String
     let colorScheme: ColorScheme

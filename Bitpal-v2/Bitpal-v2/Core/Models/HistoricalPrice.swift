@@ -182,6 +182,20 @@ enum ChartPeriod: String, CaseIterable, Codable, Sendable {
         case .oneMonth: return 24
         }
     }
+    
+    var aggregateValue: Int {
+        switch self {
+        case .oneMinute: return 1
+        case .fiveMinutes: return 5
+        case .fifteenMinutes: return 15
+        case .thirtyMinutes: return 30
+        case .oneHour: return 1
+        case .fourHours: return 4
+        case .oneDay: return 1
+        case .oneWeek: return 7       // Weekly candles (7 days aggregated)
+        case .oneMonth: return 30     // Monthly candles (30 days aggregated)
+        }
+    }
 }
 
 // Chart data structure for SwiftUI Charts

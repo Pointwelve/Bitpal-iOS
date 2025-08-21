@@ -43,35 +43,22 @@ struct ChartConfiguration {
     
     // Period-specific optimization settings
     static func optimizedDataPoints(for period: String, chartType: ChartDisplayType) -> Int {
-        let baseCount: Int
-        switch period {
-        case "1H":
-            baseCount = chartType == .candlestick ? 60 : 120    // 1-minute intervals
-        case "1D":
-            baseCount = chartType == .candlestick ? 48 : 96     // 30-minute intervals
-        case "1W":
-            baseCount = chartType == .candlestick ? 56 : 112    // 3-hour intervals
-        case "1M":
-            baseCount = chartType == .candlestick ? 60 : 120    // 12-hour intervals
-        case "6M":
-            baseCount = chartType == .candlestick ? 60 : 90     // 3-day intervals
-        case "1Y":
-            baseCount = chartType == .candlestick ? 52 : 80     // Weekly intervals
-        case "ALL":
-            baseCount = chartType == .candlestick ? 40 : 60     // Monthly intervals
-        default:
-            baseCount = chartType == .candlestick ? maxCandlestickPoints : maxDataPoints
+        // Two-tier standardization approach
+        if chartType == .candlestick {
+            return 40  // Standardized candlestick count for readability
         }
-        return min(baseCount, chartType == .candlestick ? maxCandlestickPoints : maxDataPoints)
+        
+        // Standardized line/area chart count for smooth visualization
+        return 90
     }
     
     static func decimationStrategy(for period: String) -> DecimationStrategy {
         switch period {
-        case "1H", "1D":
+        case "15m", "1h", "4h", "1D":
             return .largestTriangleThreeBuckets  // High precision for short periods
-        case "1W", "1M":
+        case "1W":
             return .largestTriangleThreeBuckets  // Balanced approach
-        case "6M", "1Y", "ALL":
+        case "1Y":
             return .uniform                      // Simple uniform for long periods
         default:
             return .largestTriangleThreeBuckets
@@ -92,6 +79,11 @@ struct ChartDataProcessor {
     
     static func optimizeData(_ data: [ChartData], for chartType: ChartDisplayType, period: String = "1D") -> [ChartData] {
         let targetCount = ChartConfiguration.optimizedDataPoints(for: period, chartType: chartType)
+        
+        // Skip optimization for candlestick charts - just return latest points
+        if chartType == .candlestick {
+            return Array(data.suffix(targetCount))
+        }
         
         guard data.count > targetCount else { return data }
         
