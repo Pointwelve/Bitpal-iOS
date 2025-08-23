@@ -106,45 +106,6 @@ struct PriceChangeBadge: View {
 
 // MARK: - Sparkline View (Removed for cleaner design)
 
-// MARK: - Quick Actions Bar
-
-struct QuickActionsBar: View {
-    let currencyPair: CurrencyPair
-    let onToggleWatchlist: () -> Void
-    let onAddToPortfolio: () -> Void
-    let onShare: () -> Void
-    
-    @State private var isInWatchlist = false
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            QuickActionButton(
-                icon: isInWatchlist ? "star.fill" : "star",
-                title: "Watch",
-                isSelected: isInWatchlist,
-                action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isInWatchlist.toggle()
-                    }
-                    onToggleWatchlist()
-                }
-            )
-            
-            QuickActionButton(
-                icon: "briefcase",
-                title: "Portfolio",
-                action: onAddToPortfolio
-            )
-            
-            QuickActionButton(
-                icon: "square.and.arrow.up",
-                title: "Share",
-                action: onShare
-            )
-        }
-        .padding(.horizontal, 20)
-    }
-}
 
 struct QuickActionButton: View {
     let icon: String

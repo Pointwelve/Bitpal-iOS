@@ -76,7 +76,6 @@ struct CurrencyDetailView: View {
                 ScrollView {
                     LazyVStack(spacing: Constants.sectionSpacing) {
                         modernPriceSection
-                        quickActionsSection
                         enhancedChartSection
                         horizontalStatsSection
                         Spacer(minLength: Constants.bottomSpacing)
@@ -128,14 +127,6 @@ struct CurrencyDetailView: View {
         .padding(.horizontal, Constants.horizontalPadding)
     }
     
-    private var quickActionsSection: some View {
-        QuickActionsBar(
-            currencyPair: currencyPair,
-            onToggleWatchlist: { /* Toggle watchlist */ },
-            onAddToPortfolio: { /* Add to portfolio */ },
-            onShare: { /* Share functionality */ }
-        )
-    }
     
     private var horizontalStatsSection: some View {
         HorizontalStatCards(currencyPair: currencyPair)
