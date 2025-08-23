@@ -89,6 +89,40 @@ struct CurrencyFormatter {
         return formatter.string(from: NSNumber(value: value / 100)) ?? "\(String(format: "%.2f", value))%"
     }
     
+    // MARK: - Compact Currency Formatting
+    
+    static func formatCompactCurrency(_ value: Double, code: String = "USD") -> String {
+        let absValue = abs(value)
+        let sign = value < 0 ? "-" : ""
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = code
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 0
+        
+        if absValue >= 1_000_000_000_000 { // Trillion
+            let compactValue = absValue / 1_000_000_000_000
+            let formattedNumber = String(format: "%.2f", compactValue).replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
+            return "\(sign)$\(formattedNumber)T"
+        } else if absValue >= 1_000_000_000 { // Billion
+            let compactValue = absValue / 1_000_000_000
+            let formattedNumber = String(format: "%.2f", compactValue).replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
+            return "\(sign)$\(formattedNumber)B"
+        } else if absValue >= 1_000_000 { // Million
+            let compactValue = absValue / 1_000_000
+            let formattedNumber = String(format: "%.2f", compactValue).replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
+            return "\(sign)$\(formattedNumber)M"
+        } else if absValue >= 1_000 { // Thousand
+            let compactValue = absValue / 1_000
+            let formattedNumber = String(format: "%.1f", compactValue).replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
+            return "\(sign)$\(formattedNumber)K"
+        } else {
+            // Use regular formatter for values under 1K
+            return formatter.string(from: NSNumber(value: value)) ?? "\(sign)$\(value)"
+        }
+    }
+    
     // MARK: - Price Change Formatting
     
     static func formatPriceChange(_ value: Double, withSign: Bool = true) -> String {

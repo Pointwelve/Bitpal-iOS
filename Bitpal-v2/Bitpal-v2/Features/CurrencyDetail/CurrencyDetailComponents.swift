@@ -149,7 +149,7 @@ struct VerticalStatCards: View {
             ),
             StatItem(
                 title: "24h Volume",
-                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.volume24h),
+                value: CurrencyFormatter.formatCompactCurrency(currencyPair.volume24h),
                 icon: "arrow.up.arrow.down"
             ),
             StatItem(
@@ -179,7 +179,7 @@ struct VerticalStatCards: View {
     
     private func formatMarketCap() -> String {
         if currencyPair.marketCap > 0 {
-            return CurrencyFormatter.formatCurrencyEnhanced(currencyPair.marketCap)
+            return CurrencyFormatter.formatCompactCurrency(currencyPair.marketCap)
         }
         return "N/A"
     }
