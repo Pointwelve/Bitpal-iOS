@@ -77,7 +77,7 @@ struct CurrencyDetailView: View {
                     LazyVStack(spacing: Constants.sectionSpacing) {
                         modernPriceSection
                         enhancedChartSection
-                        horizontalStatsSection
+                        verticalStatsSection
                         Spacer(minLength: Constants.bottomSpacing)
                     }
                 }
@@ -128,8 +128,8 @@ struct CurrencyDetailView: View {
     }
     
     
-    private var horizontalStatsSection: some View {
-        HorizontalStatCards(currencyPair: currencyPair)
+    private var verticalStatsSection: some View {
+        VerticalStatCards(currencyPair: currencyPair)
     }
     
     
@@ -580,12 +580,31 @@ struct CurrencyDetailView: View {
     
     private func loadInitialData() async {
         await loadChartData()
+        await loadMetadata()
         // Start preloading other periods in background
         await preloadOtherPeriods()
     }
     
     private func refreshData() async {
         await loadChartData(forceRefresh: true)
+        await loadMetadata()
+    }
+    
+    private func loadMetadata() async {
+        guard let baseSymbol = currencyPair.baseCurrency?.symbol else { return }
+        
+        do {
+            let response = try await APIClient.shared.fetchAssetMetadata(for: [baseSymbol])
+            if let metadata = response.data[baseSymbol] {
+                // Update the currency pair with metadata
+                // Note: This would ideally be done through the service layer
+                // but for now we'll update the model directly
+                currencyPair.updateWithMetadata(metadata)
+                print("✅ Updated metadata for \(baseSymbol): supply=\(metadata.supplyCirculating ?? 0)")
+            }
+        } catch {
+            print("⚠️ Failed to load metadata for \(baseSymbol): \(error)")
+        }
     }
     
     private func loadChartData(forceRefresh: Bool = false) async {

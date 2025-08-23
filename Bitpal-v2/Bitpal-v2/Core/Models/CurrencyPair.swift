@@ -20,6 +20,10 @@ final class CurrencyPair {
     var low24h: Double
     var open24h: Double
     var marketCap: Double
+    var circulatingSupply: Double?
+    var totalSupply: Double?
+    var maxSupply: Double?
+    var marketCapRank: Int?
     var bid: Double?
     var ask: Double?
     var lastUpdated: Date
@@ -54,6 +58,10 @@ final class CurrencyPair {
         self.low24h = 0.0
         self.open24h = 0.0
         self.marketCap = 0.0
+        self.circulatingSupply = nil
+        self.totalSupply = nil
+        self.maxSupply = nil
+        self.marketCapRank = nil
         let now = Date()
         self.lastUpdated = now
         self.createdAt = now
@@ -79,6 +87,10 @@ final class CurrencyPair {
         self.low24h = 0.0
         self.open24h = 0.0
         self.marketCap = 0.0
+        self.circulatingSupply = nil
+        self.totalSupply = nil
+        self.maxSupply = nil
+        self.marketCapRank = nil
         let now = Date()
         self.lastUpdated = now
         self.createdAt = now
@@ -167,6 +179,29 @@ extension CurrencyPair {
         if change != 0 {
             self.open24h = price - change
         }
+    }
+    
+    func updateWithMetadata(_ metadata: CoinDeskAssetMetadata) {
+        if let supply = metadata.supplyCirculating {
+            self.circulatingSupply = supply
+        }
+        if let supply = metadata.supplyTotal {
+            self.totalSupply = supply
+        }
+        if let supply = metadata.supplyMax {
+            self.maxSupply = supply
+        }
+        if let rank = metadata.topListBaseRank?.circulatingMktCapUsd {
+            self.marketCapRank = rank
+        }
+        if let marketCap = metadata.circulatingMktCapUsd {
+            self.marketCap = marketCap
+        }
+        if let volume = metadata.spotMoving24HourQuoteVolumeUsd {
+            self.volume24h = volume
+        }
+        
+        self.lastModified = Date()
     }
 }
 
@@ -285,6 +320,7 @@ extension CurrencyPair: Codable {
     private enum CodingKeys: String, CodingKey {
         case id, sortOrder, currentPrice, priceChange24h, priceChangePercent24h
         case volume24h, high24h, low24h, open24h, marketCap, bid, ask
+        case circulatingSupply, totalSupply, maxSupply, marketCapRank
         case lastUpdated, createdAt, lastModified, isDeleted
     }
     
@@ -311,6 +347,10 @@ extension CurrencyPair: Codable {
         self.low24h = try container.decode(Double.self, forKey: .low24h)
         self.open24h = try container.decode(Double.self, forKey: .open24h)
         self.marketCap = try container.decode(Double.self, forKey: .marketCap)
+        self.circulatingSupply = try container.decodeIfPresent(Double.self, forKey: .circulatingSupply)
+        self.totalSupply = try container.decodeIfPresent(Double.self, forKey: .totalSupply)
+        self.maxSupply = try container.decodeIfPresent(Double.self, forKey: .maxSupply)
+        self.marketCapRank = try container.decodeIfPresent(Int.self, forKey: .marketCapRank)
         self.bid = try container.decodeIfPresent(Double.self, forKey: .bid)
         self.ask = try container.decodeIfPresent(Double.self, forKey: .ask)
         self.lastUpdated = try container.decode(Date.self, forKey: .lastUpdated)
@@ -337,6 +377,10 @@ extension CurrencyPair: Codable {
         try container.encode(low24h, forKey: .low24h)
         try container.encode(open24h, forKey: .open24h)
         try container.encode(marketCap, forKey: .marketCap)
+        try container.encodeIfPresent(circulatingSupply, forKey: .circulatingSupply)
+        try container.encodeIfPresent(totalSupply, forKey: .totalSupply)
+        try container.encodeIfPresent(maxSupply, forKey: .maxSupply)
+        try container.encodeIfPresent(marketCapRank, forKey: .marketCapRank)
         try container.encodeIfPresent(bid, forKey: .bid)
         try container.encodeIfPresent(ask, forKey: .ask)
         try container.encode(lastUpdated, forKey: .lastUpdated)

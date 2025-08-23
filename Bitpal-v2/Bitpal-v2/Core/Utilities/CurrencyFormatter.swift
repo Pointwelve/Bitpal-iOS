@@ -96,3 +96,16 @@ struct CurrencyFormatter {
         return prefix + formatCurrencyEnhanced(abs(value))
     }
 }
+
+// MARK: - NumberFormatter Extensions
+
+extension NumberFormatter {
+    static let supplyFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = true
+        formatter.maximumFractionDigits = 0
+        formatter.roundingMode = .halfUp
+        return formatter
+    }()
+}

@@ -132,6 +132,12 @@ actor APIClient {
             return .unknown(error)
         }
     }
+    
+    // MARK: - Convenience Methods
+    
+    func fetchAssetMetadata(for symbols: [String], quoteAsset: String = "USD", assetLanguage: String = "en-US") async throws -> CoinDeskAssetMetadataResponse {
+        return try await request(CryptoAPIEndpoint.assetMetadata(symbols: symbols, quoteAsset: quoteAsset, assetLanguage: assetLanguage))
+    }
 }
 
 enum HTTPMethod: String, Sendable {
@@ -215,6 +221,7 @@ enum CryptoAPIEndpoint: APIEndpoint {
     case miningStats(symbol: String)
     case news(categories: [String]?, excludeCategories: [String]?, sources: [String]?, lang: String?)
     case rateLimit
+    case assetMetadata(symbols: [String], quoteAsset: String = "USD", assetLanguage: String = "en-US")
     
     // Portfolio & User Data
     case portfolios
@@ -325,6 +332,8 @@ enum CryptoAPIEndpoint: APIEndpoint {
             return "/v2/news"
         case .rateLimit:
             return "/stats/rate/limit"
+        case .assetMetadata:
+            return "/asset/v2/metadata"
             
         // Portfolio & User Data
         case .portfolios:
@@ -548,6 +557,13 @@ enum CryptoAPIEndpoint: APIEndpoint {
                 URLQueryItem(name: "market", value: "cadli"),
                 URLQueryItem(name: "instrument", value: instrument),
                 URLQueryItem(name: "limit", value: String(limit))
+            ]
+        case .assetMetadata(let symbols, let quoteAsset, let assetLanguage):
+            return [
+                URLQueryItem(name: "assets", value: symbols.joined(separator: ",")),
+                URLQueryItem(name: "asset_lookup_priority", value: "SYMBOL"),
+                URLQueryItem(name: "quote_asset", value: quoteAsset),
+                URLQueryItem(name: "asset_language", value: assetLanguage)
             ]
         default:
             return nil

@@ -135,57 +135,79 @@ struct QuickActionButton: View {
     }
 }
 
-// MARK: - Horizontal Stat Cards
+// MARK: - Vertical Stat Cards
 
-struct HorizontalStatCards: View {
+struct VerticalStatCards: View {
     let currencyPair: CurrencyPair
     
     private var stats: [StatItem] {
         [
             StatItem(
                 title: "Market Cap",
-                value: "41,375.00 BTC",
+                value: formatMarketCap(),
                 icon: "chart.pie"
             ),
             StatItem(
                 title: "24h Volume",
-                value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
+                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.volume24h),
                 icon: "arrow.up.arrow.down"
             ),
             StatItem(
                 title: "Circulating Supply",
-                value: "17.332.275",
+                value: formatCirculatingSupply(),
                 icon: "circle.grid.2x2"
             ),
             StatItem(
                 title: "24h High",
-                value: CurrencyFormatter.formatCurrencyEnhanced(11669.59),
+                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.high24h),
                 icon: "arrow.up.circle",
                 isPositive: true
             ),
             StatItem(
                 title: "24h Low",
-                value: CurrencyFormatter.formatCurrencyEnhanced(8669.59),
+                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.low24h),
                 icon: "arrow.down.circle",
                 isPositive: false
             ),
             StatItem(
-                title: "All Time High",
-                value: CurrencyFormatter.formatCurrencyEnhanced(69000.00),
-                icon: "crown"
+                title: "Market Cap Rank",
+                value: formatMarketCapRank(),
+                icon: "trophy"
             )
         ]
     }
     
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
-                ForEach(stats, id: \.title) { stat in
-                    ModernStatCard(stat: stat)
-                }
-            }
-            .padding(.horizontal, 20)
+    private func formatMarketCap() -> String {
+        if currencyPair.marketCap > 0 {
+            return CurrencyFormatter.formatCurrencyEnhanced(currencyPair.marketCap)
         }
+        return "N/A"
+    }
+    
+    private func formatCirculatingSupply() -> String {
+        if let supply = currencyPair.circulatingSupply, supply > 0 {
+            return NumberFormatter.supplyFormatter.string(from: NSNumber(value: supply)) ?? "N/A"
+        }
+        return "N/A"
+    }
+    
+    private func formatMarketCapRank() -> String {
+        if let rank = currencyPair.marketCapRank, rank > 0 {
+            return "#\(rank)"
+        }
+        return "N/A"
+    }
+    
+    var body: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 12),
+            GridItem(.flexible(), spacing: 12)
+        ], spacing: 16) {
+            ForEach(stats, id: \.title) { stat in
+                ModernStatCard(stat: stat)
+            }
+        }
+        .padding(.horizontal, 20)
     }
 }
 
@@ -228,7 +250,7 @@ struct ModernStatCard: View {
                     .lineLimit(1)
             }
         }
-        .frame(width: 140, height: 80)
+        .frame(maxWidth: .infinity, minHeight: 80)
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
