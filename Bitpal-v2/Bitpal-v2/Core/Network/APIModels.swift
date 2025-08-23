@@ -54,22 +54,6 @@ struct UpdateTransactionRequest: Codable {
     let txHash: String?
 }
 
-// MARK: - Alert API Models
-
-struct APICreateAlertRequest: Codable {
-    let currencyPairId: String
-    let comparison: String
-    let targetPrice: Double
-    let message: String?
-    let isEnabled: Bool
-}
-
-struct APIUpdateAlertRequest: Codable {
-    let comparison: String?
-    let targetPrice: Double?
-    let message: String?
-    let isEnabled: Bool?
-}
 
 // MARK: - User API Models
 

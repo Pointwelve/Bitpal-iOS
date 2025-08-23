@@ -14,7 +14,6 @@ final class UserPreferences: Codable {
     var currency: String
     var theme: String
     var notificationsEnabled: Bool
-    var priceAlertsEnabled: Bool
     var newsAlertsEnabled: Bool
     var biometricAuthEnabled: Bool
     var defaultChartPeriod: String
@@ -26,7 +25,6 @@ final class UserPreferences: Codable {
         currency: String = "USD",
         theme: String = "system",
         notificationsEnabled: Bool = true,
-        priceAlertsEnabled: Bool = true,
         newsAlertsEnabled: Bool = false,
         biometricAuthEnabled: Bool = false,
         defaultChartPeriod: String = "1d",
@@ -36,7 +34,6 @@ final class UserPreferences: Codable {
         self.currency = currency
         self.theme = theme
         self.notificationsEnabled = notificationsEnabled
-        self.priceAlertsEnabled = priceAlertsEnabled
         self.newsAlertsEnabled = newsAlertsEnabled
         self.biometricAuthEnabled = biometricAuthEnabled
         self.defaultChartPeriod = defaultChartPeriod
@@ -51,7 +48,6 @@ final class UserPreferences: Codable {
         self.currency = try container.decode(String.self, forKey: .currency)
         self.theme = try container.decode(String.self, forKey: .theme)
         self.notificationsEnabled = try container.decode(Bool.self, forKey: .notificationsEnabled)
-        self.priceAlertsEnabled = try container.decode(Bool.self, forKey: .priceAlertsEnabled)
         self.newsAlertsEnabled = try container.decode(Bool.self, forKey: .newsAlertsEnabled)
         self.biometricAuthEnabled = try container.decode(Bool.self, forKey: .biometricAuthEnabled)
         self.defaultChartPeriod = try container.decode(String.self, forKey: .defaultChartPeriod)
@@ -66,7 +62,6 @@ final class UserPreferences: Codable {
         try container.encode(currency, forKey: .currency)
         try container.encode(theme, forKey: .theme)
         try container.encode(notificationsEnabled, forKey: .notificationsEnabled)
-        try container.encode(priceAlertsEnabled, forKey: .priceAlertsEnabled)
         try container.encode(newsAlertsEnabled, forKey: .newsAlertsEnabled)
         try container.encode(biometricAuthEnabled, forKey: .biometricAuthEnabled)
         try container.encode(defaultChartPeriod, forKey: .defaultChartPeriod)
@@ -76,7 +71,7 @@ final class UserPreferences: Codable {
     }
     
     private enum CodingKeys: String, CodingKey {
-        case id, currency, theme, notificationsEnabled, priceAlertsEnabled
+        case id, currency, theme, notificationsEnabled
         case newsAlertsEnabled, biometricAuthEnabled, defaultChartPeriod
         case refreshIntervalSeconds, createdAt, lastModified
     }

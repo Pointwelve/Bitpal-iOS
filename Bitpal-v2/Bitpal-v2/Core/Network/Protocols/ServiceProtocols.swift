@@ -45,20 +45,6 @@ protocol HistoricalDataServiceProtocol: AnyObject {
     func cacheData(_ data: [ChartData], for pair: CurrencyPair, period: ChartPeriod)
 }
 
-// MARK: - Alert Service Protocol
-
-protocol AlertServiceProtocol: AnyObject {
-    var alerts: [Alert] { get }
-    var isLoading: Bool { get }
-    
-    func setModelContext(_ context: ModelContext)
-    func loadAlerts() async
-    func createAlert(_ alert: Alert) async throws
-    func updateAlert(_ alert: Alert) async throws
-    func deleteAlert(_ alert: Alert) async throws
-    func checkAlerts(with streamPrice: StreamPrice) async
-    func scheduleAlertCheck()
-}
 
 // MARK: - Currency Search Service Protocol
 
@@ -172,7 +158,6 @@ struct PerformanceMetrics {
 protocol ServiceFactoryProtocol {
     func makePriceStreamService() -> PriceStreamServiceProtocol
     func makeHistoricalDataService() -> HistoricalDataServiceProtocol
-    func makeAlertService() -> AlertServiceProtocol
     func makeCurrencySearchService() -> CurrencySearchServiceProtocol
     func makeTechnicalAnalysisService() -> TechnicalAnalysisServiceProtocol
     func makePortfolioService() -> PortfolioServiceProtocol

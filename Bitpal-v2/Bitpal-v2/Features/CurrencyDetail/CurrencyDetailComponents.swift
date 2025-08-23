@@ -110,7 +110,6 @@ struct PriceChangeBadge: View {
 
 struct QuickActionsBar: View {
     let currencyPair: CurrencyPair
-    let onAddAlert: () -> Void
     let onToggleWatchlist: () -> Void
     let onAddToPortfolio: () -> Void
     let onShare: () -> Void
@@ -119,12 +118,6 @@ struct QuickActionsBar: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            QuickActionButton(
-                icon: "bell",
-                title: "Alert",
-                action: onAddAlert
-            )
-            
             QuickActionButton(
                 icon: isInWatchlist ? "star.fill" : "star",
                 title: "Watch",
@@ -372,63 +365,3 @@ struct EnhancedChartHeader: View {
     }
 }
 
-// MARK: - Price Alerts Section
-
-struct PriceAlertsSection: View {
-    let currencyPair: CurrencyPair
-    let onAddAlert: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Price Alerts")
-                        .font(.system(size: 20, weight: .semibold))
-                    
-                    Text("Get notified when price reaches your target")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Button(action: onAddAlert) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color.blue))
-                }
-            }
-            
-            // Placeholder for active alerts
-            AlertPlaceholderView()
-        }
-        .padding(.horizontal, 20)
-    }
-}
-
-struct AlertPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bell.badge")
-                .font(.system(size: 32))
-                .foregroundColor(.secondary)
-            
-            Text("No active alerts")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Text("Set price alerts to stay informed about market movements")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemGray6).opacity(0.3))
-        )
-    }
-}

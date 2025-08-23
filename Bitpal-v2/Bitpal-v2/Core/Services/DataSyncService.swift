@@ -152,7 +152,6 @@ final class DataSyncService: ReactiveService {
             Currency.self,
             Exchange.self,
             CurrencyPair.self,
-            Alert.self,
             Portfolio.self,
             Holding.self,
             Transaction.self,
@@ -447,17 +446,6 @@ extension CurrencyPair: SyncableEntity {
     }
 }
 
-extension Alert: SyncableEntity {
-    var syncId: String { id }
-    
-    func updateFrom(_ other: Alert) {
-        self.comparison = other.comparison
-        self.targetPrice = other.targetPrice
-        self.isEnabled = other.isEnabled
-        self.customMessage = other.customMessage
-        self.lastModified = other.lastModified
-    }
-}
 
 extension Portfolio: SyncableEntity {
     var syncId: String { id }
@@ -503,7 +491,6 @@ extension UserPreferences: SyncableEntity {
         self.theme = other.theme
         self.currency = other.currency
         self.notificationsEnabled = other.notificationsEnabled
-        self.priceAlertsEnabled = other.priceAlertsEnabled
         self.newsAlertsEnabled = other.newsAlertsEnabled
         self.biometricAuthEnabled = other.biometricAuthEnabled
         self.defaultChartPeriod = other.defaultChartPeriod

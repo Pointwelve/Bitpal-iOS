@@ -231,13 +231,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
     case updateTransaction(portfolioId: String, transactionId: String, UpdateTransactionRequest)
     case deleteTransaction(portfolioId: String, transactionId: String)
     
-    // Alerts
-    case alerts
-    case alert(String)
-    case createAlert(APICreateAlertRequest)
-    case updateAlert(String, APIUpdateAlertRequest)
-    case deleteAlert(String)
-    case alertHistory(String)
     
     // User & Settings
     case userProfile
@@ -361,19 +354,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
         case .deleteTransaction(let portfolioId, let transactionId):
             return "/api/v1/portfolios/\(portfolioId)/transactions/\(transactionId)"
             
-        // Alerts
-        case .alerts:
-            return "/api/v1/alerts"
-        case .alert(let id):
-            return "/api/v1/alerts/\(id)"
-        case .createAlert:
-            return "/api/v1/alerts"
-        case .updateAlert(let id, _):
-            return "/api/v1/alerts/\(id)"
-        case .deleteAlert(let id):
-            return "/api/v1/alerts/\(id)"
-        case .alertHistory(let id):
-            return "/api/v1/alerts/\(id)/history"
             
         // User & Settings
         case .userProfile:
@@ -444,13 +424,13 @@ enum CryptoAPIEndpoint: APIEndpoint {
     
     var method: HTTPMethod {
         switch self {
-        case .createPortfolio, .createHolding, .createTransaction, .createAlert, .createWatchlist,
+        case .createPortfolio, .createHolding, .createTransaction, .createWatchlist,
              .syncOperation, .restore, .addToWatchlist:
             return .POST
-        case .updatePortfolio, .updateHolding, .updateTransaction, .updateAlert, .updateUserProfile,
+        case .updatePortfolio, .updateHolding, .updateTransaction, .updateUserProfile,
              .updateUserPreferences, .updateWatchlist:
             return .PUT
-        case .deletePortfolio, .deleteHolding, .deleteTransaction, .deleteAlert, .deleteWatchlist,
+        case .deletePortfolio, .deleteHolding, .deleteTransaction, .deleteWatchlist,
              .removeFromWatchlist:
             return .DELETE
         default:
@@ -587,10 +567,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
         case .createTransaction(_, let request):
             return try? request.asDictionary()
         case .updateTransaction(_, _, let request):
-            return try? request.asDictionary()
-        case .createAlert(let request):
-            return try? request.asDictionary()
-        case .updateAlert(_, let request):
             return try? request.asDictionary()
         case .updateUserProfile(let request):
             return try? request.asDictionary()

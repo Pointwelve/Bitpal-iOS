@@ -20,7 +20,6 @@ struct CurrencyDetailView: View {
     @State private var chartData: [ChartData] = []
     @State private var selectedPeriod: ChartPeriod = .oneDay
     @State private var isLoadingChart = false
-    @State private var showingCreateAlert = false
     @State private var showingMarketAnalysis = false
     @State private var selectedTimePeriod = "1D"
     @State private var chartType: ChartDisplayType = .line
@@ -80,16 +79,12 @@ struct CurrencyDetailView: View {
                         quickActionsSection
                         enhancedChartSection
                         horizontalStatsSection
-                        priceAlertsSection
                         Spacer(minLength: Constants.bottomSpacing)
                     }
                 }
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showingCreateAlert) {
-            CreateAlertView()
-        }
         .task {
             lastKnownPrice = getCurrentPrice()
             print("🚀 CurrencyDetailView task started for: \(streamKey)")
@@ -136,7 +131,6 @@ struct CurrencyDetailView: View {
     private var quickActionsSection: some View {
         QuickActionsBar(
             currencyPair: currencyPair,
-            onAddAlert: { showingCreateAlert = true },
             onToggleWatchlist: { /* Toggle watchlist */ },
             onAddToPortfolio: { /* Add to portfolio */ },
             onShare: { /* Share functionality */ }
@@ -147,12 +141,6 @@ struct CurrencyDetailView: View {
         HorizontalStatCards(currencyPair: currencyPair)
     }
     
-    private var priceAlertsSection: some View {
-        PriceAlertsSection(
-            currencyPair: currencyPair,
-            onAddAlert: { showingCreateAlert = true }
-        )
-    }
     
     // MARK: - Legacy Components (keeping for chart functionality)
     

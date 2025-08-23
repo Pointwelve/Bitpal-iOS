@@ -31,8 +31,6 @@ final class CurrencyPair {
     @Relationship(deleteRule: .nullify) var quoteCurrency: Currency?
     @Relationship(deleteRule: .nullify) var exchange: Exchange?
     
-    @Relationship(deleteRule: .cascade, inverse: \Alert.currencyPair) 
-    var alerts: [Alert] = []
     
     @Relationship(deleteRule: .cascade, inverse: \HistoricalPrice.currencyPair) 
     var priceHistory: [HistoricalPrice] = []
@@ -324,7 +322,6 @@ extension CurrencyPair: Codable {
         self.baseCurrency = nil
         self.quoteCurrency = nil
         self.exchange = nil
-        self.alerts = []
         self.priceHistory = []
     }
     

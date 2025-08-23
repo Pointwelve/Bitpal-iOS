@@ -24,7 +24,6 @@ final class AppCoordinator {
     
     // Core Services - initialized on demand for better performance
     private var _priceStreamService: PriceStreamService?
-    private var _alertService: AlertService?
     private var _currencySearchService: CurrencySearchService?
     private var _technicalAnalysisService: TechnicalAnalysisService?
     private var _historicalDataService: HistoricalDataService?
@@ -36,15 +35,6 @@ final class AppCoordinator {
         }
         let service = PriceStreamService.shared
         _priceStreamService = service
-        return service
-    }
-    
-    var alertService: AlertService {
-        if let service = _alertService {
-            return service
-        }
-        let service = AlertService.shared
-        _alertService = service
         return service
     }
     
@@ -148,10 +138,6 @@ final class AppCoordinator {
             }
             
             group.addTask {
-                await self.initializeAlertService(context: context)
-            }
-            
-            group.addTask {
                 await self.initializeTechnicalAnalysisService(context: context)
             }
             
@@ -172,11 +158,6 @@ final class AppCoordinator {
         logger.debug("PriceStreamService initialized")
     }
     
-    private func initializeAlertService(context: ModelContext) async {
-        alertService.setModelContext(context)
-        logger.debug("AlertService initialized")
-    }
-    
     private func initializeTechnicalAnalysisService(context: ModelContext) async {
         technicalAnalysisService.setModelContext(context)
         logger.debug("TechnicalAnalysisService initialized")
@@ -194,8 +175,6 @@ final class AppCoordinator {
             CurrencyPair.self,
             Currency.self,
             Exchange.self,
-            Alert.self,
-            AlertList.self,
             HistoricalPrice.self,
             Configuration.self,
             Watchlist.self
