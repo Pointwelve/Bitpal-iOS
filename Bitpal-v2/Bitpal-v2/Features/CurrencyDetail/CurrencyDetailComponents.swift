@@ -143,6 +143,11 @@ struct VerticalStatCards: View {
     private var stats: [StatItem] {
         [
             StatItem(
+                title: "Market Cap Rank",
+                value: formatMarketCapRank(),
+                icon: "trophy"
+            ),
+            StatItem(
                 title: "Market Cap",
                 value: formatMarketCap(),
                 icon: "chart.pie"
@@ -168,11 +173,6 @@ struct VerticalStatCards: View {
                 value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.low24h),
                 icon: "arrow.down.circle",
                 isPositive: false
-            ),
-            StatItem(
-                title: "Market Cap Rank",
-                value: formatMarketCapRank(),
-                icon: "trophy"
             )
         ]
     }
