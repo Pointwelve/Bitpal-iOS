@@ -13,27 +13,21 @@ struct CurrencySearchView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var searchText = ""
+    @State private var searchService = CurrencySearchService.shared
     
-    // Mock currencies for now - in real implementation this would come from the search service
-    private let sampleCurrencies = [
-        Currency.bitcoin(),
-        Currency.ethereum(),
-        Currency.usd(),
-        Currency(id: "bnb", name: "Binance Coin", symbol: "BNB"),
-        Currency(id: "ada", name: "Cardano", symbol: "ADA"),
-        Currency(id: "sol", name: "Solana", symbol: "SOL"),
-        Currency(id: "matic", name: "Polygon", symbol: "MATIC"),
-        Currency(id: "dot", name: "Polkadot", symbol: "DOT")
-    ]
-    
-    private var filteredCurrencies: [Currency] {
-        if searchText.isEmpty {
-            return sampleCurrencies
-        } else {
-            return sampleCurrencies.filter { currency in
-                currency.name.localizedCaseInsensitiveContains(searchText) ||
-                currency.symbol.localizedCaseInsensitiveContains(searchText)
-            }
+    private var displayedCurrencies: [Currency] {
+        // Convert AvailableCurrency to Currency for display
+        let availableCurrencies = searchText.isEmpty ? 
+            searchService.getTopCurrencies() : 
+            searchService.searchResults
+            
+        return availableCurrencies.map { availableCurrency in
+            Currency(
+                id: availableCurrency.id,
+                name: availableCurrency.name,
+                symbol: availableCurrency.symbol,
+                displaySymbol: availableCurrency.displaySymbol
+            )
         }
     }
     
@@ -43,9 +37,12 @@ struct CurrencySearchView: View {
                 // Search Bar
                 CurrencySearchBar(text: $searchText)
                     .padding(.horizontal)
+                    .onChange(of: searchText) { oldValue, newValue in
+                        searchService.searchCurrencies(newValue)
+                    }
                 
                 // Currency List
-                List(filteredCurrencies, id: \.id) { currency in
+                List(displayedCurrencies, id: \.id) { currency in
                     CurrencySelectionRow(currency: currency) {
                         selectedCurrency = currency
                         dismiss()
