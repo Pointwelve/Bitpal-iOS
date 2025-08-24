@@ -165,14 +165,12 @@ struct VerticalStatCards: View {
             StatItem(
                 title: "24h High",
                 value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.high24h),
-                icon: "arrow.up.circle",
-                isPositive: true
+                icon: "arrow.up.circle"
             ),
             StatItem(
                 title: "24h Low",
                 value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.low24h),
-                icon: "arrow.down.circle",
-                isPositive: false
+                icon: "arrow.down.circle"
             )
         ]
     }
@@ -215,7 +213,6 @@ struct StatItem {
     let title: String
     let value: String
     let icon: String
-    var isPositive: Bool? = nil
 }
 
 struct ModernStatCard: View {
@@ -230,12 +227,6 @@ struct ModernStatCard: View {
                     .foregroundColor(.secondary)
                 
                 Spacer()
-                
-                if let isPositive = stat.isPositive {
-                    Circle()
-                        .fill(isPositive ? Color.green : Color.red)
-                        .frame(width: 6, height: 6)
-                }
             }
             
             VStack(alignment: .leading, spacing: 4) {
