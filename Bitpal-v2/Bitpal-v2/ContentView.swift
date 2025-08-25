@@ -26,14 +26,12 @@ final class ContentViewModel {
     
     enum Tab: Int, CaseIterable {
         case watchlist = 0
-        case alerts = 1
-        case portfolio = 2
-        case settings = 3
+        case portfolio = 1
+        case settings = 2
         
         var title: String {
             switch self {
             case .watchlist: return "Watchlist"
-            case .alerts: return "Alerts"
             case .portfolio: return "Portfolio"
             case .settings: return "Settings"
             }
@@ -42,7 +40,6 @@ final class ContentViewModel {
         var iconName: String {
             switch self {
             case .watchlist: return "chart.line.uptrend.xyaxis"
-            case .alerts: return "bell"
             case .portfolio: return "briefcase"
             case .settings: return "gear"
             }
@@ -51,7 +48,6 @@ final class ContentViewModel {
         var accessibilityLabel: String {
             switch self {
             case .watchlist: return "Watchlist tab"
-            case .alerts: return "Alerts tab"
             case .portfolio: return "Portfolio tab"
             case .settings: return "Settings tab"
             }
@@ -292,10 +288,6 @@ struct ContentView: View {
             LazyView {
                 WatchlistView()
             }
-        case .alerts:
-            LazyView {
-                AlertsView()
-            }
         case .portfolio:
             LazyView {
                 PortfolioView()
@@ -455,12 +447,6 @@ struct SettingsView: View {
                     set: { prefs.notificationsEnabled = $0 }
                 ))
                 
-                Toggle("Price Alerts", isOn: createBinding(
-                    get: { prefs.priceAlertsEnabled },
-                    set: { prefs.priceAlertsEnabled = $0 }
-                ))
-                .disabled(!prefs.notificationsEnabled)
-                
                 Toggle("News Alerts", isOn: createBinding(
                     get: { prefs.newsAlertsEnabled },
                     set: { prefs.newsAlertsEnabled = $0 }
@@ -540,7 +526,6 @@ struct SettingsRow: View {
             Currency.self,
             Exchange.self,
             CurrencyPair.self,
-            Alert.self,
             HistoricalPrice.self,
             Watchlist.self,
             Configuration.self,

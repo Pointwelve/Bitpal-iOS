@@ -106,52 +106,6 @@ struct PriceChangeBadge: View {
 
 // MARK: - Sparkline View (Removed for cleaner design)
 
-// MARK: - Quick Actions Bar
-
-struct QuickActionsBar: View {
-    let currencyPair: CurrencyPair
-    let onAddAlert: () -> Void
-    let onToggleWatchlist: () -> Void
-    let onAddToPortfolio: () -> Void
-    let onShare: () -> Void
-    
-    @State private var isInWatchlist = false
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            QuickActionButton(
-                icon: "bell",
-                title: "Alert",
-                action: onAddAlert
-            )
-            
-            QuickActionButton(
-                icon: isInWatchlist ? "star.fill" : "star",
-                title: "Watch",
-                isSelected: isInWatchlist,
-                action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isInWatchlist.toggle()
-                    }
-                    onToggleWatchlist()
-                }
-            )
-            
-            QuickActionButton(
-                icon: "briefcase",
-                title: "Portfolio",
-                action: onAddToPortfolio
-            )
-            
-            QuickActionButton(
-                icon: "square.and.arrow.up",
-                title: "Share",
-                action: onShare
-            )
-        }
-        .padding(.horizontal, 20)
-    }
-}
 
 struct QuickActionButton: View {
     let icon: String
@@ -181,57 +135,77 @@ struct QuickActionButton: View {
     }
 }
 
-// MARK: - Horizontal Stat Cards
+// MARK: - Vertical Stat Cards
 
-struct HorizontalStatCards: View {
+struct VerticalStatCards: View {
     let currencyPair: CurrencyPair
     
     private var stats: [StatItem] {
         [
             StatItem(
+                title: "Market Cap Rank",
+                value: formatMarketCapRank(),
+                icon: "trophy"
+            ),
+            StatItem(
                 title: "Market Cap",
-                value: "41,375.00 BTC",
+                value: formatMarketCap(),
                 icon: "chart.pie"
             ),
             StatItem(
                 title: "24h Volume",
-                value: CurrencyFormatter.formatCurrencyEnhanced(98669.59),
+                value: CurrencyFormatter.formatCompactCurrency(currencyPair.volume24h),
                 icon: "arrow.up.arrow.down"
             ),
             StatItem(
                 title: "Circulating Supply",
-                value: "17.332.275",
+                value: formatCirculatingSupply(),
                 icon: "circle.grid.2x2"
             ),
             StatItem(
                 title: "24h High",
-                value: CurrencyFormatter.formatCurrencyEnhanced(11669.59),
-                icon: "arrow.up.circle",
-                isPositive: true
+                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.high24h),
+                icon: "arrow.up.circle"
             ),
             StatItem(
                 title: "24h Low",
-                value: CurrencyFormatter.formatCurrencyEnhanced(8669.59),
-                icon: "arrow.down.circle",
-                isPositive: false
-            ),
-            StatItem(
-                title: "All Time High",
-                value: CurrencyFormatter.formatCurrencyEnhanced(69000.00),
-                icon: "crown"
+                value: CurrencyFormatter.formatCurrencyEnhanced(currencyPair.low24h),
+                icon: "arrow.down.circle"
             )
         ]
     }
     
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
-                ForEach(stats, id: \.title) { stat in
-                    ModernStatCard(stat: stat)
-                }
-            }
-            .padding(.horizontal, 20)
+    private func formatMarketCap() -> String {
+        if currencyPair.marketCap > 0 {
+            return CurrencyFormatter.formatCompactCurrency(currencyPair.marketCap)
         }
+        return "N/A"
+    }
+    
+    private func formatCirculatingSupply() -> String {
+        if let supply = currencyPair.circulatingSupply, supply > 0 {
+            return NumberFormatter.supplyFormatter.string(from: NSNumber(value: supply)) ?? "N/A"
+        }
+        return "N/A"
+    }
+    
+    private func formatMarketCapRank() -> String {
+        if let rank = currencyPair.marketCapRank, rank > 0 {
+            return "#\(rank)"
+        }
+        return "N/A"
+    }
+    
+    var body: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 12),
+            GridItem(.flexible(), spacing: 12)
+        ], spacing: 16) {
+            ForEach(stats, id: \.title) { stat in
+                ModernStatCard(stat: stat)
+            }
+        }
+        .padding(.horizontal, 20)
     }
 }
 
@@ -239,7 +213,6 @@ struct StatItem {
     let title: String
     let value: String
     let icon: String
-    var isPositive: Bool? = nil
 }
 
 struct ModernStatCard: View {
@@ -254,12 +227,6 @@ struct ModernStatCard: View {
                     .foregroundColor(.secondary)
                 
                 Spacer()
-                
-                if let isPositive = stat.isPositive {
-                    Circle()
-                        .fill(isPositive ? Color.green : Color.red)
-                        .frame(width: 6, height: 6)
-                }
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -274,7 +241,7 @@ struct ModernStatCard: View {
                     .lineLimit(1)
             }
         }
-        .frame(width: 140, height: 80)
+        .frame(maxWidth: .infinity, minHeight: 80)
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
@@ -372,63 +339,3 @@ struct EnhancedChartHeader: View {
     }
 }
 
-// MARK: - Price Alerts Section
-
-struct PriceAlertsSection: View {
-    let currencyPair: CurrencyPair
-    let onAddAlert: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Price Alerts")
-                        .font(.system(size: 20, weight: .semibold))
-                    
-                    Text("Get notified when price reaches your target")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Button(action: onAddAlert) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color.blue))
-                }
-            }
-            
-            // Placeholder for active alerts
-            AlertPlaceholderView()
-        }
-        .padding(.horizontal, 20)
-    }
-}
-
-struct AlertPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bell.badge")
-                .font(.system(size: 32))
-                .foregroundColor(.secondary)
-            
-            Text("No active alerts")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Text("Set price alerts to stay informed about market movements")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemGray6).opacity(0.3))
-        )
-    }
-}

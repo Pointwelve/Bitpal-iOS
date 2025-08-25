@@ -110,10 +110,6 @@ final class PriceStreamService {
         // Add to pending batch updates instead of immediate processing
         pendingUpdates[key] = streamPrice
         
-        // Check alerts immediately (critical for user notifications)
-        Task {
-            await AlertService.shared.checkAlerts(with: streamPrice)
-        }
     }
     
     private func startBatchUpdateTimer() {

@@ -20,7 +20,6 @@ struct BitpalApp: App {
                 ContentView()
                     .environment(appCoordinator)
                     .environment(appCoordinator.priceStreamService)
-                    .environment(appCoordinator.alertService)
                     .environment(appCoordinator.currencySearchService)
                     .environment(appCoordinator.technicalAnalysisService)
                     .environment(appCoordinator.historicalDataService)

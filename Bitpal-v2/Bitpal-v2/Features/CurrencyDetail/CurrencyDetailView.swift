@@ -20,7 +20,6 @@ struct CurrencyDetailView: View {
     @State private var chartData: [ChartData] = []
     @State private var selectedPeriod: ChartPeriod = .oneDay
     @State private var isLoadingChart = false
-    @State private var showingCreateAlert = false
     @State private var showingMarketAnalysis = false
     @State private var selectedTimePeriod = "1D"
     @State private var chartType: ChartDisplayType = .line
@@ -77,19 +76,14 @@ struct CurrencyDetailView: View {
                 ScrollView {
                     LazyVStack(spacing: Constants.sectionSpacing) {
                         modernPriceSection
-                        quickActionsSection
                         enhancedChartSection
-                        horizontalStatsSection
-                        priceAlertsSection
+                        verticalStatsSection
                         Spacer(minLength: Constants.bottomSpacing)
                     }
                 }
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showingCreateAlert) {
-            CreateAlertView()
-        }
         .task {
             lastKnownPrice = getCurrentPrice()
             print("🚀 CurrencyDetailView task started for: \(streamKey)")
@@ -133,26 +127,11 @@ struct CurrencyDetailView: View {
         .padding(.horizontal, Constants.horizontalPadding)
     }
     
-    private var quickActionsSection: some View {
-        QuickActionsBar(
-            currencyPair: currencyPair,
-            onAddAlert: { showingCreateAlert = true },
-            onToggleWatchlist: { /* Toggle watchlist */ },
-            onAddToPortfolio: { /* Add to portfolio */ },
-            onShare: { /* Share functionality */ }
-        )
+    
+    private var verticalStatsSection: some View {
+        VerticalStatCards(currencyPair: currencyPair)
     }
     
-    private var horizontalStatsSection: some View {
-        HorizontalStatCards(currencyPair: currencyPair)
-    }
-    
-    private var priceAlertsSection: some View {
-        PriceAlertsSection(
-            currencyPair: currencyPair,
-            onAddAlert: { showingCreateAlert = true }
-        )
-    }
     
     // MARK: - Legacy Components (keeping for chart functionality)
     
@@ -601,12 +580,31 @@ struct CurrencyDetailView: View {
     
     private func loadInitialData() async {
         await loadChartData()
+        await loadMetadata()
         // Start preloading other periods in background
         await preloadOtherPeriods()
     }
     
     private func refreshData() async {
         await loadChartData(forceRefresh: true)
+        await loadMetadata()
+    }
+    
+    private func loadMetadata() async {
+        guard let baseSymbol = currencyPair.baseCurrency?.symbol else { return }
+        
+        do {
+            let response = try await APIClient.shared.fetchAssetMetadata(for: [baseSymbol])
+            if let metadata = response.data[baseSymbol] {
+                // Update the currency pair with metadata
+                // Note: This would ideally be done through the service layer
+                // but for now we'll update the model directly
+                currencyPair.updateWithMetadata(metadata)
+                print("✅ Updated metadata for \(baseSymbol): supply=\(metadata.supplyCirculating ?? 0)")
+            }
+        } catch {
+            print("⚠️ Failed to load metadata for \(baseSymbol): \(error)")
+        }
     }
     
     private func loadChartData(forceRefresh: Bool = false) async {

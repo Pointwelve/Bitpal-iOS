@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 import Observation
 
+
 @MainActor
 @Observable
 final class AddCurrencyViewModel {
@@ -58,28 +59,28 @@ final class AddCurrencyViewModel {
         isLoading = true
         errorMessage = nil
         
-        // For now, use a predefined list of popular currencies
-        // In a real app, you'd fetch from the API
-        availableCurrencies = [
-            AvailableCurrency(id: "btc", name: "Bitcoin", symbol: "BTC", displaySymbol: "₿"),
-            AvailableCurrency(id: "eth", name: "Ethereum", symbol: "ETH", displaySymbol: "Ξ"),
-            AvailableCurrency(id: "ada", name: "Cardano", symbol: "ADA"),
-            AvailableCurrency(id: "dot", name: "Polkadot", symbol: "DOT"),
-            AvailableCurrency(id: "ltc", name: "Litecoin", symbol: "LTC"),
-            AvailableCurrency(id: "link", name: "Chainlink", symbol: "LINK"),
-            AvailableCurrency(id: "xrp", name: "XRP", symbol: "XRP"),
-            AvailableCurrency(id: "bch", name: "Bitcoin Cash", symbol: "BCH"),
-            AvailableCurrency(id: "xlm", name: "Stellar", symbol: "XLM"),
-            AvailableCurrency(id: "uni", name: "Uniswap", symbol: "UNI"),
-            AvailableCurrency(id: "doge", name: "Dogecoin", symbol: "DOGE"),
-            AvailableCurrency(id: "matic", name: "Polygon", symbol: "MATIC"),
-            AvailableCurrency(id: "sol", name: "Solana", symbol: "SOL"),
-            AvailableCurrency(id: "avax", name: "Avalanche", symbol: "AVAX"),
-            AvailableCurrency(id: "atom", name: "Cosmos", symbol: "ATOM")
-        ]
+        do {
+            // Fetch from CoinDesk API using the search service
+            let searchService = CurrencySearchService.shared
+            await searchService.loadInitialData()
+            
+            // Get top currencies from the API
+            availableCurrencies = searchService.getTopCurrencies()
+            
+            if availableCurrencies.isEmpty {
+                throw NetworkError.noData
+            }
+            
+        } catch {
+            errorMessage = "Failed to load currencies: \(error.localizedDescription)"
+            
+            // Leave availableCurrencies empty so UI can show error state
+            availableCurrencies = []
+        }
         
         isLoading = false
     }
+    
     
     func addCurrencyPair(_ availableCurrency: AvailableCurrency) {
         guard let context = modelContext else { 

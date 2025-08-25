@@ -132,6 +132,12 @@ actor APIClient {
             return .unknown(error)
         }
     }
+    
+    // MARK: - Convenience Methods
+    
+    func fetchAssetMetadata(for symbols: [String], quoteAsset: String = "USD", assetLanguage: String = "en-US") async throws -> CoinDeskAssetMetadataResponse {
+        return try await request(CryptoAPIEndpoint.assetMetadata(symbols: symbols, quoteAsset: quoteAsset, assetLanguage: assetLanguage))
+    }
 }
 
 enum HTTPMethod: String, Sendable {
@@ -215,6 +221,7 @@ enum CryptoAPIEndpoint: APIEndpoint {
     case miningStats(symbol: String)
     case news(categories: [String]?, excludeCategories: [String]?, sources: [String]?, lang: String?)
     case rateLimit
+    case assetMetadata(symbols: [String], quoteAsset: String = "USD", assetLanguage: String = "en-US")
     
     // Portfolio & User Data
     case portfolios
@@ -231,13 +238,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
     case updateTransaction(portfolioId: String, transactionId: String, UpdateTransactionRequest)
     case deleteTransaction(portfolioId: String, transactionId: String)
     
-    // Alerts
-    case alerts
-    case alert(String)
-    case createAlert(APICreateAlertRequest)
-    case updateAlert(String, APIUpdateAlertRequest)
-    case deleteAlert(String)
-    case alertHistory(String)
     
     // User & Settings
     case userProfile
@@ -332,6 +332,8 @@ enum CryptoAPIEndpoint: APIEndpoint {
             return "/v2/news"
         case .rateLimit:
             return "/stats/rate/limit"
+        case .assetMetadata:
+            return "/asset/v2/metadata"
             
         // Portfolio & User Data
         case .portfolios:
@@ -361,19 +363,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
         case .deleteTransaction(let portfolioId, let transactionId):
             return "/api/v1/portfolios/\(portfolioId)/transactions/\(transactionId)"
             
-        // Alerts
-        case .alerts:
-            return "/api/v1/alerts"
-        case .alert(let id):
-            return "/api/v1/alerts/\(id)"
-        case .createAlert:
-            return "/api/v1/alerts"
-        case .updateAlert(let id, _):
-            return "/api/v1/alerts/\(id)"
-        case .deleteAlert(let id):
-            return "/api/v1/alerts/\(id)"
-        case .alertHistory(let id):
-            return "/api/v1/alerts/\(id)/history"
             
         // User & Settings
         case .userProfile:
@@ -444,13 +433,13 @@ enum CryptoAPIEndpoint: APIEndpoint {
     
     var method: HTTPMethod {
         switch self {
-        case .createPortfolio, .createHolding, .createTransaction, .createAlert, .createWatchlist,
+        case .createPortfolio, .createHolding, .createTransaction, .createWatchlist,
              .syncOperation, .restore, .addToWatchlist:
             return .POST
-        case .updatePortfolio, .updateHolding, .updateTransaction, .updateAlert, .updateUserProfile,
+        case .updatePortfolio, .updateHolding, .updateTransaction, .updateUserProfile,
              .updateUserPreferences, .updateWatchlist:
             return .PUT
-        case .deletePortfolio, .deleteHolding, .deleteTransaction, .deleteAlert, .deleteWatchlist,
+        case .deletePortfolio, .deleteHolding, .deleteTransaction, .deleteWatchlist,
              .removeFromWatchlist:
             return .DELETE
         default:
@@ -569,6 +558,13 @@ enum CryptoAPIEndpoint: APIEndpoint {
                 URLQueryItem(name: "instrument", value: instrument),
                 URLQueryItem(name: "limit", value: String(limit))
             ]
+        case .assetMetadata(let symbols, let quoteAsset, let assetLanguage):
+            return [
+                URLQueryItem(name: "assets", value: symbols.joined(separator: ",")),
+                URLQueryItem(name: "asset_lookup_priority", value: "SYMBOL"),
+                URLQueryItem(name: "quote_asset", value: quoteAsset),
+                URLQueryItem(name: "asset_language", value: assetLanguage)
+            ]
         default:
             return nil
         }
@@ -587,10 +583,6 @@ enum CryptoAPIEndpoint: APIEndpoint {
         case .createTransaction(_, let request):
             return try? request.asDictionary()
         case .updateTransaction(_, _, let request):
-            return try? request.asDictionary()
-        case .createAlert(let request):
-            return try? request.asDictionary()
-        case .updateAlert(_, let request):
             return try? request.asDictionary()
         case .updateUserProfile(let request):
             return try? request.asDictionary()
