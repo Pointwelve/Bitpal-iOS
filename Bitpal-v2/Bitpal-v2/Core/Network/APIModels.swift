@@ -54,22 +54,6 @@ struct UpdateTransactionRequest: Codable {
     let txHash: String?
 }
 
-// MARK: - Alert API Models
-
-struct APICreateAlertRequest: Codable {
-    let currencyPairId: String
-    let comparison: String
-    let targetPrice: Double
-    let message: String?
-    let isEnabled: Bool
-}
-
-struct APIUpdateAlertRequest: Codable {
-    let comparison: String?
-    let targetPrice: Double?
-    let message: String?
-    let isEnabled: Bool?
-}
 
 // MARK: - User API Models
 
@@ -654,6 +638,92 @@ struct CoinDeskError: Codable {
         case type
         case message
         case otherInfo = "other_info"
+    }
+}
+
+// MARK: - CoinDesk Asset Metadata API Models
+
+struct CoinDeskAssetMetadataResponse: Codable {
+    let data: [String: CoinDeskAssetMetadata]
+    let warn: [String: String]?
+    let err: [String: String]?
+    
+    private enum CodingKeys: String, CodingKey {
+        case data = "Data"
+        case warn = "Warn"
+        case err = "Err"
+    }
+}
+
+struct CoinDeskAssetMetadata: Codable {
+    let id: Int
+    let symbol: String
+    let name: String
+    let logoUrl: String?
+    let assetDescription: String?
+    let assetDescriptionSummary: String?
+    let launchDate: Int?
+    let priceUsd: Double?
+    let priceUsdLastUpdateTs: Int?
+    let circulatingMktCapUsd: Double?
+    let totalMktCapUsd: Double?
+    let supplyMax: Double?
+    let supplyIssued: Double?
+    let supplyTotal: Double?
+    let supplyCirculating: Double?
+    let supplyFuture: Double?
+    let supplyLocked: Double?
+    let supplyBurnt: Double?
+    let supplyStaked: Double?
+    let spotMoving24HourQuoteVolumeUsd: Double?
+    let spotMoving24HourChangeUsd: Double?
+    let spotMoving24HourChangePercentageUsd: Double?
+    let topListBaseRank: CoinDeskTopListBaseRank?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "ID"
+        case symbol = "SYMBOL"
+        case name = "NAME"
+        case logoUrl = "LOGO_URL"
+        case assetDescription = "ASSET_DESCRIPTION"
+        case assetDescriptionSummary = "ASSET_DESCRIPTION_SUMMARY"
+        case launchDate = "LAUNCH_DATE"
+        case priceUsd = "PRICE_USD"
+        case priceUsdLastUpdateTs = "PRICE_USD_LAST_UPDATE_TS"
+        case circulatingMktCapUsd = "CIRCULATING_MKT_CAP_USD"
+        case totalMktCapUsd = "TOTAL_MKT_CAP_USD"
+        case supplyMax = "SUPPLY_MAX"
+        case supplyIssued = "SUPPLY_ISSUED"
+        case supplyTotal = "SUPPLY_TOTAL"
+        case supplyCirculating = "SUPPLY_CIRCULATING"
+        case supplyFuture = "SUPPLY_FUTURE"
+        case supplyLocked = "SUPPLY_LOCKED"
+        case supplyBurnt = "SUPPLY_BURNT"
+        case supplyStaked = "SUPPLY_STAKED"
+        case spotMoving24HourQuoteVolumeUsd = "SPOT_MOVING_24_HOUR_QUOTE_VOLUME_USD"
+        case spotMoving24HourChangeUsd = "SPOT_MOVING_24_HOUR_CHANGE_USD"
+        case spotMoving24HourChangePercentageUsd = "SPOT_MOVING_24_HOUR_CHANGE_PERCENTAGE_USD"
+        case topListBaseRank = "TOPLIST_BASE_RANK"
+    }
+}
+
+struct CoinDeskTopListBaseRank: Codable {
+    let circulatingMktCapUsd: Int?
+    let totalMktCapUsd: Int?
+    let createdOn: Int?
+    let launchDate: Int?
+    let spotMoving24HourQuoteVolumeUsd: Int?
+    let spotMoving7DayQuoteVolumeUsd: Int?
+    let spotMoving30DayQuoteVolumeUsd: Int?
+    
+    private enum CodingKeys: String, CodingKey {
+        case circulatingMktCapUsd = "CIRCULATING_MKT_CAP_USD"
+        case totalMktCapUsd = "TOTAL_MKT_CAP_USD"
+        case createdOn = "CREATED_ON"
+        case launchDate = "LAUNCH_DATE"
+        case spotMoving24HourQuoteVolumeUsd = "SPOT_MOVING_24_HOUR_QUOTE_VOLUME_USD"
+        case spotMoving7DayQuoteVolumeUsd = "SPOT_MOVING_7_DAY_QUOTE_VOLUME_USD"
+        case spotMoving30DayQuoteVolumeUsd = "SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD"
     }
 }
 
