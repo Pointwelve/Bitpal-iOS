@@ -39,7 +39,7 @@ Users need to discover and add cryptocurrencies to their watchlist from CoinGeck
 
 1. **Given** user is on Watchlist tab, **When** they tap the "+" Add Coin button, **Then** a search sheet appears with a search field.
 
-2. **Given** search sheet is open, **When** user types "bit" into the search field, **Then** matching cryptocurrencies appear below (Bitcoin, Bitcoin Cash, etc.) within 1 second.
+2. **Given** search sheet is open, **When** user types "ethereum" into the search field, **Then** the official Ethereum (ETH) appears at the top of results, without meme coins or exchange-specific variants, within 1 second.
 
 3. **Given** search results are displayed, **When** user taps on "Bitcoin", **Then** Bitcoin is added to their watchlist and the sheet dismisses.
 
@@ -93,6 +93,7 @@ Users need to clean up their watchlist by removing coins they no longer want to 
 - What happens when user adds 1000+ coins? LazyVStack ensures smooth scrolling; warn user if approaching reasonable limits (100-200 coins).
 - What happens during 30-second automatic update if user is scrolling? Updates queue until scrolling stops to avoid UI disruption.
 - What happens if CoinGecko API rate limit is hit? Back off exponentially and show last cached data.
+- What happens when user searches "Ethereum" and CoinGecko returns 100+ results including meme coins and exchange variants? Use CoinGecko's native relevance ranking, filter exchange-specific variants, and deduplicate by coin ID to show only the official aggregated Ethereum (ETH) at the top.
 
 ### Phase Scope Validation
 
@@ -136,6 +137,9 @@ Users need to clean up their watchlist by removing coins they no longer want to 
 - **FR-012**: System MUST prevent duplicate coins in watchlist (show error if user tries to add existing coin)
 - **FR-013**: System MUST use Liquid Glass design language (translucent materials, system colors, iOS 26 standards)
 - **FR-014**: System MUST use Decimal type for all price values (NOT Double/Float)
+- **FR-015**: System MUST use CoinGecko's native search relevance ranking to prioritize official coins over meme coins (e.g., "Ethereum" search returns ETH first, not meme tokens)
+- **FR-016**: System MUST display only CoinGecko aggregated coin data in search results, filtering out exchange-specific variants (e.g., show "Ethereum" once, not "Ethereum (Binance)", "Ethereum (Coinbase)", etc.)
+- **FR-017**: System MUST deduplicate search results by coin ID to prevent duplicate entries from different platforms or exchanges
 
 ### Key Entities
 
