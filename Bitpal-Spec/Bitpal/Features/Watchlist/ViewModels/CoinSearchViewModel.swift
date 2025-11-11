@@ -59,7 +59,7 @@ final class CoinSearchViewModel {
     }
 
     /// Perform search with debounce (300ms)
-    /// FR-015, FR-016, FR-017: Use CoinGecko markets API with relevance ranking, filter variants, deduplicate
+    /// FR-015, FR-016, FR-017: Intelligent ranking, filter variants, deduplicate
     @MainActor
     func performSearch() {
         // Cancel previous search task
@@ -77,31 +77,59 @@ final class CoinSearchViewModel {
 
             guard !Task.isCancelled else { return }
 
-            await executeSearch(query: searchQuery)
+            await filterResults(query: searchQuery)
         }
     }
 
-    /// Execute search using new searchCoins API with relevance ranking and filtering
+    /// Filter and rank results with intelligent algorithm (FR-015, FR-016, FR-017)
     @MainActor
-    private func executeSearch(query: String) async {
-        isLoading = true
-        errorMessage = nil
+    private func filterResults(query: String) {
+        let lowercasedQuery = query.lowercased()
 
-        do {
-            // Use new searchCoins method (FR-015: relevance ranking, FR-016: filter variants)
-            let results = try await coinGeckoService.searchCoins(query: query, limit: 50)
-
-            // FR-017: Deduplicate by coin ID (though searchCoins already handles this)
-            searchResults = deduplicateResults(results)
-
-            Logger.logic.info("CoinSearchViewModel: Found \(self.searchResults.count) results for '\(query)'")
-            isLoading = false
-        } catch {
-            Logger.error.error("CoinSearchViewModel: Search failed: \(error.localizedDescription)")
-            errorMessage = "Search failed. Please try again."
-            searchResults = []
-            isLoading = false
+        // Filter coins matching query
+        let matches = allCoins.filter { coin in
+            coin.name.lowercased().contains(lowercasedQuery) ||
+            coin.symbol.lowercased().contains(lowercasedQuery) ||
+            coin.id.lowercased().contains(lowercasedQuery)
         }
+
+        // FR-016: Filter out exchange-specific variants (coins with parentheses)
+        let filteredMatches = matches.filter { coin in
+            !coin.name.contains("(") && !coin.name.contains(")")
+        }
+
+        // FR-017: Deduplicate by coin ID
+        let deduplicated = deduplicateResults(filteredMatches)
+
+        // FR-015: Intelligent ranking - prioritize exact matches and "starts with"
+        let ranked = deduplicated.sorted { coin1, coin2 in
+            let name1 = coin1.name.lowercased()
+            let symbol1 = coin1.symbol.lowercased()
+            let name2 = coin2.name.lowercased()
+            let symbol2 = coin2.symbol.lowercased()
+
+            // Priority 1: Exact matches (highest priority)
+            let isExact1 = name1 == lowercasedQuery || symbol1 == lowercasedQuery
+            let isExact2 = name2 == lowercasedQuery || symbol2 == lowercasedQuery
+            if isExact1 != isExact2 {
+                return isExact1
+            }
+
+            // Priority 2: Starts with query
+            let startsWith1 = name1.hasPrefix(lowercasedQuery) || symbol1.hasPrefix(lowercasedQuery)
+            let startsWith2 = name2.hasPrefix(lowercasedQuery) || symbol2.hasPrefix(lowercasedQuery)
+            if startsWith1 != startsWith2 {
+                return startsWith1
+            }
+
+            // Priority 3: Alphabetical by name
+            return name1 < name2
+        }
+
+        // Limit to top 50 results
+        searchResults = Array(ranked.prefix(50))
+
+        Logger.logic.debug("CoinSearchViewModel: Found \(self.searchResults.count) results for '\(query)'")
     }
 
     /// Deduplicate search results by coin ID (FR-017)
