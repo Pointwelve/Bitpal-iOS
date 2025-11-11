@@ -145,6 +145,12 @@ final class CoinSearchViewModel {
         do {
             let marketData = try await coinGeckoService.fetchMarketData(coinIds: coinIds)
 
+            // Debug: Log market cap values
+            for coin in results.prefix(10) {
+                let mc = marketData[coin.id]?.marketCap
+                Logger.logic.debug("CoinSearchViewModel: \(coin.name) (\(coin.id)) - Market Cap: \(String(describing: mc))")
+            }
+
             // Sort by market cap (descending - high to low)
             let sorted = results.sorted { coin1, coin2 in
                 let marketCap1 = marketData[coin1.id]?.marketCap ?? 0

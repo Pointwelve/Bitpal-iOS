@@ -69,7 +69,7 @@ struct Coin: Identifiable, Codable, Equatable {
 
     // MARK: - Custom Decoding
 
-    /// Custom decoder to handle optional marketCap and convert Double to Decimal
+    /// Custom decoder to handle optional/null fields and convert Double to Decimal
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -78,13 +78,14 @@ struct Coin: Identifiable, Codable, Equatable {
         name = try container.decode(String.self, forKey: .name)
 
         // Decode financial values as Double first, then convert to Decimal
-        let priceDouble = try container.decode(Double.self, forKey: .currentPrice)
+        // Some coins might have null values, use 0 as fallback
+        let priceDouble = try container.decodeIfPresent(Double.self, forKey: .currentPrice) ?? 0
         currentPrice = Decimal(priceDouble)
 
-        let changeDouble = try container.decode(Double.self, forKey: .priceChange24h)
+        let changeDouble = try container.decodeIfPresent(Double.self, forKey: .priceChange24h) ?? 0
         priceChange24h = Decimal(changeDouble)
 
-        lastUpdated = try container.decode(Date.self, forKey: .lastUpdated)
+        lastUpdated = try container.decodeIfPresent(Date.self, forKey: .lastUpdated) ?? Date()
 
         // Market cap is optional and might be null
         if let marketCapDouble = try container.decodeIfPresent(Double.self, forKey: .marketCap) {
