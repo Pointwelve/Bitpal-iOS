@@ -34,6 +34,27 @@ struct Coin: Identifiable, Codable, Equatable {
     /// Used for sorting search results (FR-018)
     var marketCap: Decimal?
 
+    // MARK: - Initialization
+
+    /// Memberwise initializer for creating Coin instances
+    init(
+        id: String,
+        symbol: String,
+        name: String,
+        currentPrice: Decimal,
+        priceChange24h: Decimal,
+        lastUpdated: Date,
+        marketCap: Decimal? = nil
+    ) {
+        self.id = id
+        self.symbol = symbol
+        self.name = name
+        self.currentPrice = currentPrice
+        self.priceChange24h = priceChange24h
+        self.lastUpdated = lastUpdated
+        self.marketCap = marketCap
+    }
+
     // MARK: - CodingKeys
 
     enum CodingKeys: String, CodingKey {
