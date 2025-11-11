@@ -46,6 +46,33 @@ struct Coin: Identifiable, Codable, Equatable {
         case marketCap = "market_cap"
     }
 
+    // MARK: - Custom Decoding
+
+    /// Custom decoder to handle optional marketCap and convert Double to Decimal
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+        symbol = try container.decode(String.self, forKey: .symbol)
+        name = try container.decode(String.self, forKey: .name)
+
+        // Decode financial values as Double first, then convert to Decimal
+        let priceDouble = try container.decode(Double.self, forKey: .currentPrice)
+        currentPrice = Decimal(priceDouble)
+
+        let changeDouble = try container.decode(Double.self, forKey: .priceChange24h)
+        priceChange24h = Decimal(changeDouble)
+
+        lastUpdated = try container.decode(Date.self, forKey: .lastUpdated)
+
+        // Market cap is optional and might be null
+        if let marketCapDouble = try container.decodeIfPresent(Double.self, forKey: .marketCap) {
+            marketCap = Decimal(marketCapDouble)
+        } else {
+            marketCap = nil
+        }
+    }
+
     // MARK: - Equatable Conformance
 
     /// Two coins are equal if id matches and price data matches
