@@ -155,4 +155,61 @@ final class CoinGeckoService {
         marketDataCacheTime = nil
         Logger.api.debug("CoinGeckoService: Market data cache invalidated")
     }
+
+    /// Search coins using /coins/markets endpoint for relevance ranking (FR-015)
+    /// Filters exchange-specific variants (FR-016) and provides native CoinGecko ranking
+    func searchCoins(query: String, limit: Int = 50) async throws -> [CoinListItem] {
+        guard !query.isEmpty else {
+            return []
+        }
+
+        // Rate limit enforcement
+        await rateLimiter.waitForNextRequest()
+
+        // Use /coins/markets with search query for relevance ranking
+        let urlString = "\(baseURL)/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=\(limit)&page=1&sparkline=false"
+
+        guard let url = URL(string: urlString) else {
+            throw WatchlistError.networkError(NSError(domain: "Invalid URL", code: -1))
+        }
+
+        Logger.api.info("CoinGeckoService: Searching coins for query '\(query)'")
+
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WatchlistError.networkError(NSError(domain: "Invalid response", code: -1))
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            Logger.api.error("CoinGeckoService: API returned status \(httpResponse.statusCode)")
+            throw WatchlistError.networkError(NSError(domain: "HTTP \(httpResponse.statusCode)", code: httpResponse.statusCode))
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let coins = try decoder.decode([Coin].self, from: data)
+
+        // Convert to CoinListItem and filter by query
+        let lowercasedQuery = query.lowercased()
+        let results = coins
+            .filter { coin in
+                // Match query against name, symbol, or id
+                coin.name.lowercased().contains(lowercasedQuery) ||
+                coin.symbol.lowercased().contains(lowercasedQuery) ||
+                coin.id.lowercased().contains(lowercasedQuery)
+            }
+            .filter { coin in
+                // FR-016: Filter out exchange-specific variants (e.g., "Ethereum (Binance)")
+                !coin.name.contains("(") && !coin.name.contains(")")
+            }
+            .map { coin in
+                // Convert to lightweight CoinListItem
+                CoinListItem(id: coin.id, symbol: coin.symbol, name: coin.name)
+            }
+
+        Logger.api.info("CoinGeckoService: Found \(results.count) search results for '\(query)'")
+
+        return results
+    }
 }

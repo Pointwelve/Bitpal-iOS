@@ -59,7 +59,7 @@ final class CoinSearchViewModel {
     }
 
     /// Perform search with debounce (300ms)
-    /// Per Constitution Principle I: Efficient local search with cached data
+    /// FR-015, FR-016, FR-017: Use CoinGecko markets API with relevance ranking, filter variants, deduplicate
     @MainActor
     func performSearch() {
         // Cancel previous search task
@@ -77,21 +77,42 @@ final class CoinSearchViewModel {
 
             guard !Task.isCancelled else { return }
 
-            await filterResults(query: searchQuery)
+            await executeSearch(query: searchQuery)
         }
     }
 
-    /// Filter results based on search query (case-insensitive)
+    /// Execute search using new searchCoins API with relevance ranking and filtering
     @MainActor
-    private func filterResults(query: String) {
-        let lowercasedQuery = query.lowercased()
+    private func executeSearch(query: String) async {
+        isLoading = true
+        errorMessage = nil
 
-        searchResults = allCoins.filter { coin in
-            coin.name.lowercased().contains(lowercasedQuery) ||
-            coin.symbol.lowercased().contains(lowercasedQuery) ||
-            coin.id.lowercased().contains(lowercasedQuery)
+        do {
+            // Use new searchCoins method (FR-015: relevance ranking, FR-016: filter variants)
+            let results = try await coinGeckoService.searchCoins(query: query, limit: 50)
+
+            // FR-017: Deduplicate by coin ID (though searchCoins already handles this)
+            searchResults = deduplicateResults(results)
+
+            Logger.logic.info("CoinSearchViewModel: Found \(self.searchResults.count) results for '\(query)'")
+            isLoading = false
+        } catch {
+            Logger.error.error("CoinSearchViewModel: Search failed: \(error.localizedDescription)")
+            errorMessage = "Search failed. Please try again."
+            searchResults = []
+            isLoading = false
         }
+    }
 
-        Logger.logic.debug("CoinSearchViewModel: Found \(self.searchResults.count) results for '\(query)'")
+    /// Deduplicate search results by coin ID (FR-017)
+    private func deduplicateResults(_ results: [CoinListItem]) -> [CoinListItem] {
+        var seen = Set<String>()
+        return results.filter { coin in
+            if seen.contains(coin.id) {
+                return false
+            }
+            seen.insert(coin.id)
+            return true
+        }
     }
 }
