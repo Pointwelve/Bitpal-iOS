@@ -81,9 +81,9 @@ final class CoinSearchViewModel {
         }
     }
 
-    /// Filter and rank results with intelligent algorithm (FR-015, FR-016, FR-017)
+    /// Filter and rank results with intelligent algorithm (FR-015, FR-016, FR-017, FR-018)
     @MainActor
-    private func filterResults(query: String) {
+    private func filterResults(query: String) async {
         let lowercasedQuery = query.lowercased()
 
         // Filter coins matching query
@@ -126,10 +126,48 @@ final class CoinSearchViewModel {
             return name1 < name2
         }
 
+        // FR-018: Sort by market cap to prioritize established coins over meme tokens
+        let sortedByMarketCap = await sortByMarketCap(ranked)
+
         // Limit to top 50 results
-        searchResults = Array(ranked.prefix(50))
+        searchResults = Array(sortedByMarketCap.prefix(50))
 
         Logger.logic.debug("CoinSearchViewModel: Found \(self.searchResults.count) results for '\(query)'")
+    }
+
+    /// Sort results by market capitalization (FR-018)
+    @MainActor
+    private func sortByMarketCap(_ results: [CoinListItem]) async -> [CoinListItem] {
+        // Extract coin IDs
+        let coinIds = results.map { $0.id }
+
+        // Fetch market data for all results (batched API call)
+        do {
+            let marketData = try await coinGeckoService.fetchMarketData(coinIds: coinIds)
+
+            // Sort by market cap (descending - high to low)
+            let sorted = results.sorted { coin1, coin2 in
+                let marketCap1 = marketData[coin1.id]?.marketCap ?? 0
+                let marketCap2 = marketData[coin2.id]?.marketCap ?? 0
+
+                // Coins with market data come first, sorted by market cap
+                if marketCap1 > 0 && marketCap2 > 0 {
+                    return marketCap1 > marketCap2
+                }
+                if marketCap1 > 0 { return true }  // coin1 has data, coin2 doesn't
+                if marketCap2 > 0 { return false } // coin2 has data, coin1 doesn't
+
+                // Both have no market data - preserve original order
+                return false
+            }
+
+            Logger.logic.info("CoinSearchViewModel: Sorted \(results.count) results by market cap")
+            return sorted
+        } catch {
+            Logger.error.error("CoinSearchViewModel: Failed to fetch market data for sorting: \(error.localizedDescription)")
+            // Fallback: return original ranking if API fails
+            return results
+        }
     }
 
     /// Deduplicate search results by coin ID (FR-017)

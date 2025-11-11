@@ -30,6 +30,10 @@ struct Coin: Identifiable, Codable, Equatable {
     /// Timestamp of last price update from API
     var lastUpdated: Date
 
+    /// Market capitalization in USD (Decimal per Constitution)
+    /// Used for sorting search results (FR-018)
+    var marketCap: Decimal?
+
     // MARK: - CodingKeys
 
     enum CodingKeys: String, CodingKey {
@@ -39,6 +43,7 @@ struct Coin: Identifiable, Codable, Equatable {
         case currentPrice = "current_price"
         case priceChange24h = "price_change_percentage_24h"
         case lastUpdated = "last_updated"
+        case marketCap = "market_cap"
     }
 
     // MARK: - Equatable Conformance

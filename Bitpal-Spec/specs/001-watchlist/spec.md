@@ -94,6 +94,7 @@ Users need to clean up their watchlist by removing coins they no longer want to 
 - What happens during 30-second automatic update if user is scrolling? Updates queue until scrolling stops to avoid UI disruption.
 - What happens if CoinGecko API rate limit is hit? Back off exponentially and show last cached data.
 - What happens when user searches "Ethereum" and CoinGecko returns 100+ results including meme coins and exchange variants? Use CoinGecko's native relevance ranking, filter exchange-specific variants, and deduplicate by coin ID to show only the official aggregated Ethereum (ETH) at the top.
+- What happens when user searches "Solana" and meme coins have symbol "SOLANA" matching the query? Sort by market capitalization (descending) after intelligent ranking to ensure official Solana (SOL) with multi-billion market cap appears first, while meme coins with tiny/zero market caps sink to bottom.
 
 ### Phase Scope Validation
 
@@ -140,6 +141,7 @@ Users need to clean up their watchlist by removing coins they no longer want to 
 - **FR-015**: System MUST use CoinGecko's native search relevance ranking to prioritize official coins over meme coins (e.g., "Ethereum" search returns ETH first, not meme tokens)
 - **FR-016**: System MUST display only CoinGecko aggregated coin data in search results, filtering out exchange-specific variants (e.g., show "Ethereum" once, not "Ethereum (Binance)", "Ethereum (Coinbase)", etc.)
 - **FR-017**: System MUST deduplicate search results by coin ID to prevent duplicate entries from different platforms or exchanges
+- **FR-018**: System MUST sort search results by market capitalization (descending) after intelligent ranking to prioritize established coins over meme tokens with matching symbols
 
 ### Key Entities
 
