@@ -63,8 +63,9 @@ final class CoinModelTests: XCTestCase {
         XCTAssertEqual(coin.priceChange24h, Decimal(-3.456789))
     }
 
-    func testCoinJSONDecoding_missingFields_fails() {
-        // Given: JSON with missing required field (current_price)
+    func testCoinJSONDecoding_missingOptionalFields_usesDefaults() {
+        // Given: JSON with missing optional fields (current_price, market_cap)
+        // Decoder is lenient per commit "Make Coin decoder more lenient for null API values"
         let json = """
         {
             "id": "bitcoin",
@@ -75,12 +76,16 @@ final class CoinModelTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        // When/Then: Decoding should fail
+        // When: Decoding with missing fields
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        XCTAssertThrowsError(try decoder.decode(Coin.self, from: json)) { error in
-            XCTAssertTrue(error is DecodingError)
-        }
+        let coin = try? decoder.decode(Coin.self, from: json)
+
+        // Then: Should succeed with default values for missing fields
+        XCTAssertNotNil(coin)
+        XCTAssertEqual(coin?.id, "bitcoin")
+        XCTAssertEqual(coin?.currentPrice, 0) // Default when missing
+        XCTAssertEqual(coin?.marketCap, nil)  // Optional field
     }
 
     func testCoinEquality_sameData_equals() {

@@ -48,7 +48,6 @@ struct CoinRowView: View, Equatable {
                     PriceChangeLabel(priceChange: coin.priceChange24h)
                 }
             }
-            .padding(Spacing.medium)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(coin.name), \(Formatters.formatCurrency(coin.currentPrice)), \(Formatters.formatPercentage(coin.priceChange24h)) change")

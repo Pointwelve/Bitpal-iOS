@@ -24,6 +24,7 @@ struct LiquidGlassCard<Content: View>: View {
 
     var body: some View {
         content
+            .padding(Spacing.medium)
             .background(.ultraThinMaterial)
             .cornerRadius(Spacing.cornerRadius)
     }
@@ -41,7 +42,6 @@ struct LiquidGlassCard<Content: View>: View {
                     .font(Typography.priceDisplay)
                     .foregroundColor(Color.profitGreen)
             }
-            .padding(Spacing.medium)
         }
 
         LiquidGlassCard {
@@ -52,7 +52,6 @@ struct LiquidGlassCard<Content: View>: View {
                     .font(Typography.priceDisplay)
                     .foregroundColor(Color.lossRed)
             }
-            .padding(Spacing.medium)
         }
     }
     .padding(Spacing.medium)

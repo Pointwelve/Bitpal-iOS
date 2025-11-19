@@ -51,7 +51,8 @@ struct WatchlistView: View {
                                     }
                             }
                         }
-                        .padding(Spacing.medium)
+                        .padding(.horizontal, Spacing.medium)
+                        .padding(.vertical, Spacing.small)
                         .animation(.easeInOut(duration: 0.2), value: viewModel.sortOption)
                     }
                     .refreshable {

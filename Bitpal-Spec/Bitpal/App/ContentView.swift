@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Main app content view with tab navigation
-/// Per Constitution Principle V: Phase 1 scope includes Watchlist only
+/// Per Constitution Principle V: Phase 1 scope includes Watchlist and Manual Portfolio
 struct ContentView: View {
     var body: some View {
         TabView {
@@ -17,11 +17,10 @@ struct ContentView: View {
                     Label("Watchlist", systemImage: "star.fill")
                 }
 
-            // Phase 1: Portfolio tab placeholder (implementation in future phase)
-            // portfolioPlaceholder()
-            //     .tabItem {
-            //         Label("Portfolio", systemImage: "chart.pie.fill")
-            //     }
+            PortfolioView()
+                .tabItem {
+                    Label("Portfolio", systemImage: "chart.pie.fill")
+                }
         }
     }
 
