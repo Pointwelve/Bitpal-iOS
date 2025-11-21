@@ -33,6 +33,9 @@ final class CoinSearchViewModel {
     private var allCoins: [CoinListItem] = []
     private var searchTask: Task<Void, Never>?
 
+    /// Public access to loaded coin list (for T065: show owned coins directly)
+    var coinList: [CoinListItem] { allCoins }
+
     // MARK: - Initialization
 
     init(coinGeckoService: CoinGeckoService = .shared) {

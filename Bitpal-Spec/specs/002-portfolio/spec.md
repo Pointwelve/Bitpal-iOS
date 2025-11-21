@@ -187,6 +187,8 @@ Users need to correct mistakes or remove erroneous transactions to maintain accu
 - **FR-027**: System MUST show prominent "Add Your First Transaction" button in empty portfolio state
 - **FR-028**: System MUST allow coin selection from cached/recently used coins when network is unavailable for new searches
 - **FR-029**: System MUST display user's owned coins at the top of coin selection list when transaction type is "Sell"
+- **FR-030**: System MUST provide a "Sell All" button when transaction type is "Sell" that auto-fills the quantity with the user's total holdings for the selected coin
+- **FR-031**: System MUST display owned coins list directly in coin picker without requiring search when transaction type is "Sell"
 
 ### Key Entities
 

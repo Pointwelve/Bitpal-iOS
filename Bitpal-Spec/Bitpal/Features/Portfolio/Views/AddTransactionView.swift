@@ -141,6 +141,20 @@ struct AddTransactionView: View {
                     .frame(maxWidth: 150)
             }
 
+            // T064: Sell All button (FR-030)
+            if viewModel.transactionType == .sell && viewModel.currentHoldingQuantity > 0 {
+                Button {
+                    viewModel.amountString = "\(viewModel.currentHoldingQuantity)"
+                } label: {
+                    HStack {
+                        Text("Sell All")
+                        Spacer()
+                        Text("\(viewModel.currentHoldingQuantity)")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
             HStack {
                 Text("Price per Coin")
                 Spacer()

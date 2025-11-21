@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+// Enable UUID to work with .sheet(item:) pattern
+extension UUID: @retroactive Identifiable {
+    public var id: UUID { self }
+}
+
 /// Transaction history for a specific holding
 /// Per Constitution Principle II: Follows Liquid Glass design system
 struct TransactionHistoryView: View {
@@ -19,8 +24,7 @@ struct TransactionHistoryView: View {
     // T045: Query transactions filtered by coinId, sorted by date descending
     @Query private var transactions: [Transaction]
 
-    @State private var showEditSheet = false
-    @State private var selectedTransaction: Transaction?
+    @State private var selectedTransactionId: UUID?
     @State private var showDeleteConfirmation = false
     @State private var transactionToDelete: Transaction?
     @State private var errorMessage: String?
@@ -49,11 +53,18 @@ struct TransactionHistoryView: View {
         }
         .navigationTitle(coinName)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showEditSheet) {
-            if let transaction = selectedTransaction {
+        .sheet(item: $selectedTransactionId) { id in
+            // Re-fetch transaction from current @Query context using item-based sheet pattern
+            if let transaction = transactions.first(where: { $0.id == id }) {
                 EditTransactionView(transaction: transaction) {
-                    // Refresh handled by SwiftData
+                    selectedTransactionId = nil  // Dismiss sheet
                 }
+            } else {
+                ContentUnavailableView(
+                    "Transaction Not Found",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text("The transaction may have been deleted.")
+                )
             }
         }
         // T054: Delete confirmation alert
@@ -82,11 +93,10 @@ struct TransactionHistoryView: View {
         ScrollView {
             LazyVStack(spacing: Spacing.standard) {
                 ForEach(transactions) { transaction in
-                    // T052: Tap to open edit sheet
+                    // T052: Tap to open edit sheet (item-based sheet auto-presents)
                     TransactionRowView(transaction: transaction)
                         .onTapGesture {
-                            selectedTransaction = transaction
-                            showEditSheet = true
+                            selectedTransactionId = transaction.id
                         }
                         // T053: Swipe to delete
                         .contextMenu {

@@ -31,7 +31,12 @@ struct CoinPickerView: View {
                 LoadingView(message: "Loading cryptocurrencies...")
                     .frame(maxHeight: .infinity)
             } else if viewModel.searchQuery.isEmpty {
-                emptySearchState
+                // T065: Show owned coins directly without search (FR-031)
+                if !ownedCoinIds.isEmpty {
+                    ownedCoinsState
+                } else {
+                    emptySearchState
+                }
             } else if viewModel.searchResults.isEmpty {
                 noResultsState
             } else {
@@ -109,6 +114,49 @@ struct CoinPickerView: View {
         }
         .frame(maxHeight: .infinity)
         .padding(Spacing.xlarge)
+    }
+
+    /// T065: Show owned coins directly without search (FR-031)
+    private var ownedCoinsState: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.medium) {
+                // Section header
+                Text("Your Coins")
+                    .font(Typography.headline)
+                    .foregroundColor(.textPrimary)
+                    .padding(.horizontal, Spacing.medium)
+                    .padding(.top, Spacing.small)
+
+                // Owned coins list
+                LazyVStack(spacing: Spacing.small) {
+                    ForEach(ownedCoins) { coin in
+                        Button {
+                            onSelect(coin)
+                        } label: {
+                            CoinPickerRow(coin: coin, isOwned: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, Spacing.medium)
+
+                // Search prompt
+                VStack(spacing: Spacing.small) {
+                    Divider()
+                        .padding(.vertical, Spacing.medium)
+
+                    Text("Search for more coins above")
+                        .font(Typography.caption)
+                        .foregroundColor(.textSecondary)
+                }
+                .padding(.horizontal, Spacing.medium)
+            }
+        }
+    }
+
+    /// Get owned coins from the coin list
+    private var ownedCoins: [CoinListItem] {
+        viewModel.coinList.filter { ownedCoinIds.contains($0.id) }
     }
 
     private var noResultsState: some View {
