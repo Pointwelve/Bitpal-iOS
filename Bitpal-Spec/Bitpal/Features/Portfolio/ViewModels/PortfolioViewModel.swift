@@ -77,6 +77,12 @@ final class PortfolioViewModel {
         return ((totalValue / totalCost) - 1) * 100
     }
 
+    /// T031: Portfolio summary with unrealized and realized P&L
+    /// Per US2: Comprehensive financial picture
+    var portfolioSummary: PortfolioSummary {
+        computePortfolioSummary(holdings: holdings, closedPositions: closedPositions)
+    }
+
     /// Check if portfolio is empty (T039)
     /// Per FR-027: Show empty state with "Add Your First Transaction" button
     var isEmpty: Bool {

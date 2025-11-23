@@ -152,17 +152,17 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 
 ### ViewModel Enhancement
 
-- [ ] T031 [US2] Add `var portfolioSummary: PortfolioSummary` computed property to `Bitpal/Features/Portfolio/ViewModels/PortfolioViewModel.swift` that calls `computePortfolioSummary(holdings:closedPositions:)` with current holdings and closed positions arrays
+- [X] T031 [US2] Add `var portfolioSummary: PortfolioSummary` computed property to `Bitpal/Features/Portfolio/ViewModels/PortfolioViewModel.swift` that calls `computePortfolioSummary(holdings:closedPositions:)` with current holdings and closed positions arrays
 
 ### UI Components
 
-- [ ] T032 [P] [US2] Modify `Bitpal/Features/Portfolio/Views/PortfolioSummaryView.swift` to accept `PortfolioSummary` parameter instead of individual values
-- [ ] T033 [US2] Add "Unrealized P&L" row in PortfolioSummaryView with value from summary.unrealizedPnL, color coded (green if >= 0, red if < 0)
-- [ ] T034 [US2] Add "Realized P&L" row in PortfolioSummaryView as tappable Button with value from summary.realizedPnL, color coded (green if >= 0, red if < 0)
-- [ ] T035 [US2] Add Divider separator between Realized P&L and Total P&L rows
-- [ ] T036 [US2] Add "Total P&L" row in PortfolioSummaryView with value from summary.totalPnL, color coded (green if >= 0, red if < 0), bold font weight
-- [ ] T037 [US2] Update `Bitpal/Features/Portfolio/Views/PortfolioView.swift` to pass `viewModel.portfolioSummary` to PortfolioSummaryView
-- [ ] T038 [US2] Implement scroll-to-section functionality: add @State `closedPositionsSectionID` in PortfolioView, add `.id(closedPositionsSectionID)` modifier to ClosedPositionsSection, add `.scrollTo()` action on Realized P&L tap
+- [X] T032 [P] [US2] Modify `Bitpal/Features/Portfolio/Views/PortfolioSummaryView.swift` to accept `PortfolioSummary` parameter instead of individual values
+- [X] T033 [US2] Add "Unrealized P&L" row in PortfolioSummaryView with value from summary.unrealizedPnL, color coded (green if >= 0, red if < 0)
+- [X] T034 [US2] Add "Realized P&L" row in PortfolioSummaryView as tappable Button with value from summary.realizedPnL, color coded (green if >= 0, red if < 0)
+- [X] T035 [US2] Add Divider separator between Realized P&L and Total P&L rows
+- [X] T036 [US2] Add "Total P&L" row in PortfolioSummaryView with value from summary.totalPnL, color coded (green if >= 0, red if < 0), bold font weight
+- [X] T037 [US2] Update `Bitpal/Features/Portfolio/Views/PortfolioView.swift` to pass `viewModel.portfolioSummary` to PortfolioSummaryView
+- [X] T038 [US2] Implement scroll-to-section functionality: add @State `closedPositionsSectionID` in PortfolioView, add `.id(closedPositionsSectionID)` modifier to ClosedPositionsSection, add `.scrollTo()` action on Realized P&L tap
 
 ### Manual Testing
 

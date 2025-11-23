@@ -15,6 +15,7 @@ struct PortfolioView: View {
     @State private var viewModel = PortfolioViewModel()
     @State private var showAddTransaction = false
     @State private var showError = false
+    @State private var scrollProxy: ScrollViewProxy? // T038: For scroll-to-section
 
     var body: some View {
         NavigationStack {
@@ -77,74 +78,44 @@ struct PortfolioView: View {
     // MARK: - Portfolio Content
 
     private var portfolioContent: some View {
-        ScrollView {
-            LazyVStack(spacing: Spacing.standard) {
-                // Summary Card (T040)
-                summaryCard
-
-                // Last Updated Badge (T055)
-                if let lastUpdate = viewModel.lastUpdateTime {
-                    lastUpdatedBadge(lastUpdate)
-                }
-
-                // Holdings List
-                ForEach(viewModel.holdings) { holding in
-                    NavigationLink(destination: TransactionHistoryView(coinId: holding.id, coinName: holding.coin.name)) {
-                        HoldingRowView(holding: holding)
+        // T038: ScrollViewReader for scroll-to-section functionality
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: Spacing.standard) {
+                    // T037: New Portfolio Summary View with 4 P&L metrics
+                    PortfolioSummaryView(summary: viewModel.portfolioSummary) {
+                        // T038: Scroll to Closed Positions section on Realized P&L tap
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            proxy.scrollTo("closedPositionsSection", anchor: .top)
+                        }
                     }
-                    .buttonStyle(.plain)
-                }
 
-                // T024: Closed Positions Section (displayed below holdings)
-                // Per FR-002: Only show when closed positions exist
-                if !viewModel.closedPositions.isEmpty {
-                    ClosedPositionsSection(closedPositions: viewModel.closedPositions)
-                        .padding(.top, Spacing.medium)
+                    // Last Updated Badge (T055)
+                    if let lastUpdate = viewModel.lastUpdateTime {
+                        lastUpdatedBadge(lastUpdate)
+                    }
+
+                    // Holdings List
+                    ForEach(viewModel.holdings) { holding in
+                        NavigationLink(destination: TransactionHistoryView(coinId: holding.id, coinName: holding.coin.name)) {
+                            HoldingRowView(holding: holding)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // T024, T038: Closed Positions Section (displayed below holdings)
+                    // Per FR-002: Only show when closed positions exist
+                    if !viewModel.closedPositions.isEmpty {
+                        ClosedPositionsSection(closedPositions: viewModel.closedPositions)
+                            .padding(.top, Spacing.medium)
+                            .id("closedPositionsSection") // T038: ID for scrolling
+                    }
                 }
+                .padding(.horizontal, Spacing.medium)
+                .padding(.vertical, Spacing.small)
             }
-            .padding(.horizontal, Spacing.medium)
-            .padding(.vertical, Spacing.small)
-        }
-    }
-
-    // MARK: - Summary Card (T040)
-
-    /// Portfolio summary card showing total value and P&L
-    /// Per FR-012: Display portfolio summary
-    private var summaryCard: some View {
-        LiquidGlassCard {
-            VStack(spacing: Spacing.standard) {
-                // Total Value
-                VStack(spacing: Spacing.tiny) {
-                    Text("Total Value")
-                        .font(Typography.caption)
-                        .foregroundColor(.textSecondary)
-                    Text(Formatters.formatCurrency(viewModel.totalValue))
-                        .font(Typography.largeTitle)
-                        .fontWeight(.bold)
-                }
-
-                Divider()
-
-                // Total P&L
-                HStack {
-                    VStack(alignment: .leading, spacing: Spacing.tiny) {
-                        Text("Total P&L")
-                            .font(Typography.caption)
-                            .foregroundColor(.textSecondary)
-                        Text(formatProfitLoss(viewModel.totalProfitLoss))
-                            .font(Typography.title3)
-                            .foregroundColor(summaryProfitLossColor)
-                    }
-
-                    Spacer()
-
-                    // P&L Percentage
-                    Text(formatPercentage(viewModel.totalProfitLossPercentage))
-                        .font(Typography.title3)
-                        .foregroundColor(summaryProfitLossColor)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: viewModel.totalProfitLossPercentage) // T042
-                }
+            .onAppear {
+                scrollProxy = proxy
             }
         }
     }
@@ -199,33 +170,6 @@ struct PortfolioView: View {
         return formatter.localizedString(for: date, relativeTo: now)
     }
 
-    // MARK: - Helpers
-
-    private var summaryProfitLossColor: Color {
-        if viewModel.totalProfitLoss > 0 {
-            return .profitGreen
-        } else if viewModel.totalProfitLoss < 0 {
-            return .lossRed
-        } else {
-            return .textSecondary
-        }
-    }
-
-    private func formatProfitLoss(_ value: Decimal) -> String {
-        let prefix = value > 0 ? "+" : ""
-        return prefix + Formatters.formatCurrency(value)
-    }
-
-    private func formatPercentage(_ value: Decimal) -> String {
-        let prefix = value > 0 ? "+" : ""
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = 2
-        formatter.maximumFractionDigits = 2
-
-        let formatted = formatter.string(from: value as NSDecimalNumber) ?? "\(value)"
-        return "(\(prefix)\(formatted)%)"
-    }
 }
 
 #Preview {
