@@ -17,6 +17,7 @@ final class PortfolioViewModel {
     // MARK: - State
 
     var holdings: [Holding] = []
+    var closedPositions: [ClosedPosition] = [] // T017: Closed positions tracking
     var isLoading = false
     var errorMessage: String?
     var lastUpdateTime: Date?
@@ -123,9 +124,13 @@ final class PortfolioViewModel {
 
             // Compute holdings
             holdings = computeHoldings(transactions: transactions, currentPrices: prices)
+
+            // T018, T019: Compute closed positions
+            closedPositions = computeClosedPositions(transactions: transactions, currentPrices: prices)
+
             lastUpdateTime = Date()
 
-            Logger.logic.info("Loaded portfolio: \(self.holdings.count) holdings from \(transactions.count) transactions")
+            Logger.logic.info("Loaded portfolio: \(self.holdings.count) holdings, \(self.closedPositions.count) closed positions from \(transactions.count) transactions")
 
         } catch {
             Logger.error.error("Failed to load portfolio: \(error)")

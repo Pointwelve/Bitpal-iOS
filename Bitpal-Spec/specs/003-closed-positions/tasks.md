@@ -113,17 +113,17 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 
 ### ViewModel Integration
 
-- [ ] T017 [US1] Add `var closedPositions: [ClosedPosition] = []` property to `Bitpal/Features/Portfolio/ViewModels/PortfolioViewModel.swift`
-- [ ] T018 [US1] Add `@MainActor private func refreshClosedPositions() async` method to PortfolioViewModel that calls `computeClosedPositions()` with current transactions and coin prices
-- [ ] T019 [US1] Update existing `refresh()` method in PortfolioViewModel to call `await refreshClosedPositions()` after refreshing holdings
-- [ ] T020 [US1] Add cache invalidation - call `refreshClosedPositions()` when transactions are added/edited/deleted in PortfolioViewModel
+- [X] T017 [US1] Add `var closedPositions: [ClosedPosition] = []` property to `Bitpal/Features/Portfolio/ViewModels/PortfolioViewModel.swift`
+- [X] T018 [US1] Add `@MainActor private func refreshClosedPositions() async` method to PortfolioViewModel that calls `computeClosedPositions()` with current transactions and coin prices
+- [X] T019 [US1] Update existing `refresh()` method in PortfolioViewModel to call `await refreshClosedPositions()` after refreshing holdings
+- [X] T020 [US1] Add cache invalidation - call `refreshClosedPositions()` when transactions are added/edited/deleted in PortfolioViewModel
 
 ### UI Components
 
-- [ ] T021 [P] [US1] Create `Bitpal/Features/Portfolio/Views/ClosedPositionRowView.swift` with LiquidGlassCard displaying: coin name/symbol, close date, total quantity traded, avg cost price, avg sale price, realized P&L ($), realized P&L (%) with profit/loss color coding (green for gains, red for losses)
-- [ ] T022 [US1] Create `Bitpal/Features/Portfolio/Views/ClosedPositionsSection.swift` with collapsible section header, @State `isExpanded` boolean, computed `shouldCollapse` (count > 5), section header HStack with title, count badge, chevron icon, tap gesture to toggle expand/collapse with spring animation
-- [ ] T023 [US1] Add LazyVStack in ClosedPositionsSection displaying ClosedPositionRowView for each position (only when expanded or count <= 5)
-- [ ] T024 [US1] Integrate ClosedPositionsSection into `Bitpal/Features/Portfolio/Views/PortfolioView.swift` below holdings list, conditionally rendered only if `!viewModel.closedPositions.isEmpty`
+- [X] T021 [P] [US1] Create `Bitpal/Features/Portfolio/Views/ClosedPositionRowView.swift` with LiquidGlassCard displaying: coin name/symbol, close date, total quantity traded, avg cost price, avg sale price, realized P&L ($), realized P&L (%) with profit/loss color coding (green for gains, red for losses)
+- [X] T022 [US1] Create `Bitpal/Features/Portfolio/Views/ClosedPositionsSection.swift` with collapsible section header, @State `isExpanded` boolean, computed `shouldCollapse` (count > 5), section header HStack with title, count badge, chevron icon, tap gesture to toggle expand/collapse with spring animation
+- [X] T023 [US1] Add LazyVStack in ClosedPositionsSection displaying ClosedPositionRowView for each position (only when expanded or count <= 5)
+- [X] T024 [US1] Integrate ClosedPositionsSection into `Bitpal/Features/Portfolio/Views/PortfolioView.swift` below holdings list, conditionally rendered only if `!viewModel.closedPositions.isEmpty`
 
 ### Manual Testing
 

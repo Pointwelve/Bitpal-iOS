@@ -94,6 +94,13 @@ struct PortfolioView: View {
                     }
                     .buttonStyle(.plain)
                 }
+
+                // T024: Closed Positions Section (displayed below holdings)
+                // Per FR-002: Only show when closed positions exist
+                if !viewModel.closedPositions.isEmpty {
+                    ClosedPositionsSection(closedPositions: viewModel.closedPositions)
+                        .padding(.top, Spacing.medium)
+                }
             }
             .padding(.horizontal, Spacing.medium)
             .padding(.vertical, Spacing.small)
