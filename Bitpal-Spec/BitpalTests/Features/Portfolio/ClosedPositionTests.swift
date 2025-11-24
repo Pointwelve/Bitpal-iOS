@@ -459,4 +459,112 @@ final class ClosedPositionTests: XCTestCase {
         XCTAssertEqual(position.avgCostPrice, 0, "Cost should be zero for gifted coins")
         XCTAssertEqual(position.realizedPnL, 50000, "Entire sale revenue should be profit")
     }
+
+    // MARK: - FR-016, FR-017: Cycle Isolation Tests
+
+    /// T071: Test that closed cycle transactions are excluded from new holding calculations
+    /// Scenario: Buy 1 BTC @ $40k, Sell 1 BTC @ $50k (close), Buy 1 BTC @ $60k (reopen)
+    /// Expected: New holding shows avg cost = $60k (NOT blended with $40k from closed cycle)
+    func testClosedCycleTransactionsExcludedFromNewHolding() {
+        // Arrange
+        let bitcoin = mockCoin(id: "bitcoin")
+        let currentPrices = ["bitcoin": bitcoin]
+
+        // Cycle 1: Buy and sell (close position)
+        let buy1 = createTransaction(
+            coinId: "bitcoin",
+            type: .buy,
+            amount: 1.0,
+            pricePerCoin: 40000,
+            date: Date().addingTimeInterval(-172800)  // 2 days ago
+        )
+
+        let sell1 = createTransaction(
+            coinId: "bitcoin",
+            type: .sell,
+            amount: 1.0,
+            pricePerCoin: 50000,
+            date: Date().addingTimeInterval(-86400)  // 1 day ago (closes Cycle 1)
+        )
+
+        // Cycle 2: Buy again (reopen position)
+        let buy2 = createTransaction(
+            coinId: "bitcoin",
+            type: .buy,
+            amount: 1.0,
+            pricePerCoin: 60000,
+            date: Date()  // Today (Cycle 2 starts)
+        )
+
+        let transactions = [buy1, sell1, buy2]
+
+        // Act
+        let holdings = computeHoldings(
+            transactions: transactions,
+            currentPrices: currentPrices
+        )
+
+        // Assert
+        XCTAssertEqual(holdings.count, 1, "Should have 1 open holding")
+
+        guard let holding = holdings.first else {
+            XCTFail("No holding found")
+            return
+        }
+
+        XCTAssertEqual(holding.avgCost, 60000,
+                       "Average cost should be $60k (from Cycle 2 only), not blended with Cycle 1's $40k")
+        XCTAssertEqual(holding.totalAmount, 1.0,
+                       "Total amount should be 1.0 BTC from Cycle 2")
+    }
+
+    /// T072: Test that multiple cycles are properly isolated
+    /// Scenario: 3 complete buy/sell cycles, then 1 open position
+    /// Expected: Open holding only uses transactions from the 4th cycle
+    func testMultipleCyclesIsolation() {
+        // Arrange
+        let ethereum = mockCoin(id: "ethereum")
+        let currentPrices = ["ethereum": ethereum]
+
+        var transactions: [Transaction] = []
+
+        // Cycle 1: Buy 10 ETH @ $2000, Sell 10 ETH @ $2500
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 2000, date: Date().addingTimeInterval(-432000)))  // 5 days ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .sell, amount: 10.0, pricePerCoin: 2500, date: Date().addingTimeInterval(-345600)))  // 4 days ago
+
+        // Cycle 2: Buy 10 ETH @ $2200, Sell 10 ETH @ $2300
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 2200, date: Date().addingTimeInterval(-259200)))  // 3 days ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .sell, amount: 10.0, pricePerCoin: 2300, date: Date().addingTimeInterval(-172800)))  // 2 days ago
+
+        // Cycle 3: Buy 10 ETH @ $2400, Sell 10 ETH @ $2600
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 2400, date: Date().addingTimeInterval(-86400)))  // 1 day ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .sell, amount: 10.0, pricePerCoin: 2600, date: Date().addingTimeInterval(-43200)))  // 12 hours ago
+
+        // Cycle 4 (OPEN): Buy 10 ETH @ $3000
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 3000, date: Date()))  // Now
+
+        // Act
+        let holdings = computeHoldings(
+            transactions: transactions,
+            currentPrices: currentPrices
+        )
+        let closedPositions = computeClosedPositions(
+            transactions: transactions,
+            currentPrices: currentPrices
+        )
+
+        // Assert
+        XCTAssertEqual(closedPositions.count, 3, "Should have 3 closed positions")
+        XCTAssertEqual(holdings.count, 1, "Should have 1 open holding")
+
+        guard let holding = holdings.first else {
+            XCTFail("No holding found")
+            return
+        }
+
+        XCTAssertEqual(holding.avgCost, 3000,
+                       "Average cost should be $3000 (from Cycle 4 only), not blended with any previous cycles")
+        XCTAssertEqual(holding.totalAmount, 10.0,
+                       "Total amount should be 10.0 ETH from Cycle 4")
+    }
 }

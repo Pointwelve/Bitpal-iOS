@@ -13,34 +13,34 @@ extension UUID: @retroactive Identifiable {
     public var id: UUID { self }
 }
 
-/// Transaction history for a specific holding
+/// Transaction history for a specific holding or closed position
 /// Per Constitution Principle II: Follows Liquid Glass design system
+/// Per FR-017: Shows cycle-isolated transactions (not all transactions for coin)
 struct TransactionHistoryView: View {
     @Environment(\.modelContext) private var modelContext
 
     let coinId: String
     let coinName: String
 
-    // T045: Query transactions filtered by coinId, sorted by date descending
-    @Query private var transactions: [Transaction]
+    // FR-017: Cycle-filtered transactions passed from parent view
+    // Sorted by date descending for display
+    let transactions: [Transaction]
 
     @State private var selectedTransactionId: UUID?
     @State private var showDeleteConfirmation = false
     @State private var transactionToDelete: Transaction?
     @State private var errorMessage: String?
 
-    init(coinId: String, coinName: String) {
+    /// Initialize with cycle-filtered transactions
+    /// - Parameters:
+    ///   - coinId: CoinGecko coin ID
+    ///   - coinName: Display name for navigation title
+    ///   - transactions: Pre-filtered transactions for this specific cycle
+    init(coinId: String, coinName: String, transactions: [Transaction]) {
         self.coinId = coinId
         self.coinName = coinName
-
-        // Filter transactions for this coin and sort by date descending
-        let predicate = #Predicate<Transaction> { transaction in
-            transaction.coinId == coinId
-        }
-        _transactions = Query(
-            filter: predicate,
-            sort: [SortDescriptor(\Transaction.date, order: .reverse)]
-        )
+        // Sort transactions by date descending for display
+        self.transactions = transactions.sorted { $0.date > $1.date }
     }
 
     var body: some View {
@@ -410,6 +410,10 @@ struct EditTransactionView: View {
 
 #Preview {
     NavigationStack {
-        TransactionHistoryView(coinId: "bitcoin", coinName: "Bitcoin")
+        TransactionHistoryView(
+            coinId: "bitcoin",
+            coinName: "Bitcoin",
+            transactions: []  // Empty for preview
+        )
     }
 }

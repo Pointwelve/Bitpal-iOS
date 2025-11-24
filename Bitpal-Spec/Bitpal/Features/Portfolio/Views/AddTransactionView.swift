@@ -56,7 +56,7 @@ struct AddTransactionView: View {
                     }
                 }
             }
-            .navigationTitle(viewModel.selectedCoinId == nil ? "Add Transaction" : "Edit Transaction")
+            .navigationTitle("Add Transaction")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

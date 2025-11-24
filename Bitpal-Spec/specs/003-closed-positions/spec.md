@@ -71,11 +71,12 @@ Users want to see detailed breakdown of closed positions including transaction h
 ### Edge Cases
 
 - **Partial Sales**: What happens when user sells part of holdings? Position remains in active holdings, not moved to closed.
-- **Multiple Close/Reopen Cycles**: When user fully sells a coin (closes position), then buys it again later, each close/reopen cycle creates a separate closed position entry identified by the close date. This preserves complete trading history and allows users to track performance of individual trades over time. Example: Buy BTC on Jan 1, sell on Jan 15 (Cycle 1), buy again on Feb 1, sell on Feb 20 (Cycle 2) → Creates two separate closed position entries.
+- **Multiple Close/Reopen Cycles**: When user fully sells a coin (closes position), then buys it again later, each close/reopen cycle creates a separate closed position entry identified by the close date. This preserves complete trading history and allows users to track performance of individual trades over time. Example: Buy BTC on Jan 1, sell on Jan 15 (Cycle 1), buy again on Feb 1, sell on Feb 20 (Cycle 2) → Creates two separate closed position entries. **CRITICAL**: Cycles are isolated - new open holdings MUST NOT include transactions from closed cycles in their average cost or P&L calculations (FR-016). Transaction history views MUST show only the relevant cycle's transactions (FR-017).
 - **Fractional Amounts**: If buy/sell amounts don't exactly match due to decimals (e.g., buy 1.0 BTC, sell 0.999999 BTC), when is position considered "closed"? (Threshold: if remaining amount < 0.00000001, consider closed)
 - **Zero-Cost Positions**: If user receives coins as gifts (no cost basis), then sells, how to calculate P&L? (Use $0 cost basis - entire sale is profit)
 - **Transaction Deletions**: If user deletes a sell transaction that closed a position, position should move back to active holdings with recalculated amount.
 - **Collapse Threshold Boundary**: If user has exactly 5 closed positions, section displays expanded (shows all 5 entries). Collapse behavior only activates at 6+ closed positions.
+- **Only Closed Positions**: When user has closed all positions (no open holdings), the isEmpty check must consider both holdings AND closedPositions to prevent incorrect empty state display. The system must show Portfolio Summary + Closed Positions Section, not the "No Holdings Yet" empty state. Implementation: `isEmpty` returns `holdings.isEmpty && closedPositions.isEmpty`.
 
 ### Phase Scope Validation
 
@@ -105,13 +106,15 @@ Users want to see detailed breakdown of closed positions including transaction h
 - **FR-006**: System MUST hide "Closed Positions" section if no positions have been fully sold
 - **FR-007**: System MUST automatically move positions from active holdings to closed when final sell transaction brings balance to zero (or within tolerance)
 - **FR-008**: System MUST update portfolio summary to show: Total Value (open holdings only), Unrealized P&L (open), Realized P&L (closed), Total P&L (unrealized + realized)
-- **FR-009**: System MUST allow users to tap closed position to view transaction history (all buys/sells for that coin)
+- **FR-009**: System MUST allow users to tap closed position to view transaction history (all buys/sells for that specific cycle only, not all cycles for that coin)
 - **FR-010**: System MUST handle multiple close/reopen cycles by creating separate closed position entries for each cycle, where each cycle is identified by the close date (date of final sell transaction) and includes only transactions between the previous close and current close
 - **FR-011**: System MUST sort closed positions by close date (most recent first)
 - **FR-012**: System MUST recalculate closed positions if user deletes/edits transactions that affect closed status
 - **FR-013**: System MUST display Closed Positions section in collapsed state (header with count only) when user has more than 5 closed positions
 - **FR-014**: System MUST allow users to expand/collapse Closed Positions section by tapping the section header, toggling between header-only view and full list view
 - **FR-015**: System MUST persist the expanded/collapsed state of Closed Positions section during the current session (state resets to collapsed on app restart)
+- **FR-016**: System MUST exclude transactions from closed cycles when computing open holdings (average cost, total amount, profit/loss calculations must only use current cycle transactions)
+- **FR-017**: System MUST display cycle-isolated transaction history: closed positions show only that cycle's transactions, open holdings show only current cycle's transactions (not all historical transactions for that coin)
 
 ### Key Entities *(include if feature involves data)*
 

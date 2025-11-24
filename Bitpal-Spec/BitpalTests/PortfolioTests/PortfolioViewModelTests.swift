@@ -174,4 +174,100 @@ final class PortfolioViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.totalValue, 0)
         XCTAssertEqual(viewModel.totalProfitLoss, 0)
     }
+
+    // MARK: - T070: isEmpty Edge Cases
+
+    /// T070 Test 1: Empty portfolio (no holdings, no closed positions) → Should show empty state
+    func testIsEmpty_WhenNoHoldingsAndNoClosedPositions() {
+        let viewModel = PortfolioViewModel()
+        viewModel.holdings = []
+        viewModel.closedPositions = []
+
+        XCTAssertTrue(viewModel.isEmpty, "Portfolio should be empty when both holdings and closed positions are empty")
+    }
+
+    /// T070 Test 2: Only closed positions (no open holdings) → Should NOT show empty state (BUG FIX)
+    func testIsEmpty_WhenOnlyClosedPositions() {
+        let viewModel = PortfolioViewModel()
+        viewModel.holdings = []
+
+        // Create a closed position
+        let coin = Coin(
+            id: "bitcoin",
+            symbol: "btc",
+            name: "Bitcoin",
+            currentPrice: 50000,
+            priceChange24h: 0,
+            lastUpdated: Date(),
+            marketCap: nil
+        )
+        viewModel.closedPositions = [
+            ClosedPosition(
+                id: UUID(),
+                coinId: "bitcoin",
+                coin: coin,
+                totalQuantity: 1.0,
+                avgCostPrice: 40000,
+                avgSalePrice: 50000,
+                closedDate: Date(),
+                cycleTransactions: []
+            )
+        ]
+
+        XCTAssertFalse(viewModel.isEmpty, "Portfolio should NOT be empty when only closed positions exist (no open holdings)")
+    }
+
+    /// T070 Test 3: Only open holdings (no closed positions) → Should NOT show empty state
+    func testIsEmpty_WhenOnlyOpenHoldings() {
+        let viewModel = PortfolioViewModel()
+        viewModel.closedPositions = []
+
+        let coin = Coin(
+            id: "bitcoin",
+            symbol: "btc",
+            name: "Bitcoin",
+            currentPrice: 50000,
+            priceChange24h: 0,
+            lastUpdated: Date(),
+            marketCap: nil
+        )
+        viewModel.holdings = [
+            Holding(id: "bitcoin", coin: coin, totalAmount: 1, avgCost: 40000, currentValue: 50000)
+        ]
+
+        XCTAssertFalse(viewModel.isEmpty, "Portfolio should NOT be empty when only open holdings exist (no closed positions)")
+    }
+
+    /// T070 Test 4: Both open holdings and closed positions → Should NOT show empty state
+    func testIsEmpty_WhenBothHoldingsAndClosedPositions() {
+        let viewModel = PortfolioViewModel()
+
+        let coin = Coin(
+            id: "bitcoin",
+            symbol: "btc",
+            name: "Bitcoin",
+            currentPrice: 50000,
+            priceChange24h: 0,
+            lastUpdated: Date(),
+            marketCap: nil
+        )
+
+        viewModel.holdings = [
+            Holding(id: "bitcoin", coin: coin, totalAmount: 1, avgCost: 40000, currentValue: 50000)
+        ]
+        viewModel.closedPositions = [
+            ClosedPosition(
+                id: UUID(),
+                coinId: "ethereum",
+                coin: coin,
+                totalQuantity: 10.0,
+                avgCostPrice: 2500,
+                avgSalePrice: 3000,
+                closedDate: Date(),
+                cycleTransactions: []
+            )
+        ]
+
+        XCTAssertFalse(viewModel.isEmpty, "Portfolio should NOT be empty when both holdings and closed positions exist")
+    }
 }

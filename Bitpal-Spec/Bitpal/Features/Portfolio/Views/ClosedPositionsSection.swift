@@ -13,6 +13,9 @@ import SwiftUI
 /// Per FR-004: Collapsed when > 5 positions, tap to expand/collapse
 struct ClosedPositionsSection: View {
     let closedPositions: [ClosedPosition]
+
+    /// FR-015: Expanded/collapsed state persists during current session only
+    /// State resets to collapsed (false) on app restart
     @State private var isExpanded = false
 
     /// Check if section should collapse (> 5 positions)
@@ -71,13 +74,18 @@ struct ClosedPositionsSection: View {
 
     /// List of closed positions
     /// Per Constitution Principle I: Uses LazyVStack for performance
+    /// T043-T045: Tap to view transaction history (FR-009, FR-017)
     private var positionsList: some View {
         LazyVStack(spacing: Spacing.small) {
             ForEach(closedPositions) { position in
-                ClosedPositionRowView(closedPosition: position)
-                    .onTapGesture {
-                        // TODO: T043-T048 - Navigate to transaction history
-                    }
+                NavigationLink(destination: TransactionHistoryView(
+                    coinId: position.coinId,
+                    coinName: position.coin.name,
+                    transactions: position.cycleTransactions  // FR-017: Cycle-isolated transactions
+                )) {
+                    ClosedPositionRowView(closedPosition: position)
+                }
+                .buttonStyle(.plain)  // Preserve card styling
             }
         }
     }

@@ -66,31 +66,31 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 
 ### Tests (Write FIRST - Constitution Principle IV)
 
-- [ ] T001 [P] Create unit test file `BitpalTests/Features/Portfolio/ClosedPositionTests.swift` with test class structure
-- [ ] T002 [P] Write test `testSingleCycleDetection()` - Buy 1 BTC @ $40k, Sell 1 BTC @ $50k, expect 1 closed position with $10k profit
-- [ ] T003 [P] Write test `testMultipleCyclesForSameCoin()` - Two buy/sell cycles, expect 2 separate ClosedPosition entries
-- [ ] T004 [P] Write test `testFractionalAmountsWithinTolerance()` - Buy 1.0 BTC, Sell 0.999999999 BTC, expect position closes (within 0.00000001 tolerance)
-- [ ] T005 [P] Write test `testFractionalAmountsOutsideTolerance()` - Buy 1.0 BTC, Sell 0.99 BTC, expect position stays open
-- [ ] T006 [P] Write test `testWeightedAverageCostCalculation()` - Multiple buys at different prices, verify correct weighted average
-- [ ] T007 [P] Write test `testWeightedAverageSaleCalculation()` - Multiple sells at different prices, verify correct weighted average
-- [ ] T008 [P] Write test `testProfitableClosedPosition()` - Sale price > cost price, verify positive realized P&L
-- [ ] T009 [P] Write test `testLossClosedPosition()` - Sale price < cost price, verify negative realized P&L
-- [ ] T010 [P] Write test `testZeroCostPosition()` - Gifted coins (cost = 0), then sell, verify entire sale is profit
+- [X] T001 [P] Create unit test file `BitpalTests/Features/Portfolio/ClosedPositionTests.swift` with test class structure
+- [X] T002 [P] Write test `testSingleCycleDetection()` - Buy 1 BTC @ $40k, Sell 1 BTC @ $50k, expect 1 closed position with $10k profit
+- [X] T003 [P] Write test `testMultipleCyclesForSameCoin()` - Two buy/sell cycles, expect 2 separate ClosedPosition entries
+- [X] T004 [P] Write test `testFractionalAmountsWithinTolerance()` - Buy 1.0 BTC, Sell 0.999999999 BTC, expect position closes (within 0.00000001 tolerance)
+- [X] T005 [P] Write test `testFractionalAmountsOutsideTolerance()` - Buy 1.0 BTC, Sell 0.99 BTC, expect position stays open
+- [X] T006 [P] Write test `testWeightedAverageCostCalculation()` - Multiple buys at different prices, verify correct weighted average
+- [X] T007 [P] Write test `testWeightedAverageSaleCalculation()` - Multiple sells at different prices, verify correct weighted average
+- [X] T008 [P] Write test `testProfitableClosedPosition()` - Sale price > cost price, verify positive realized P&L
+- [X] T009 [P] Write test `testLossClosedPosition()` - Sale price < cost price, verify negative realized P&L
+- [X] T010 [P] Write test `testZeroCostPosition()` - Gifted coins (cost = 0), then sell, verify entire sale is profit
 
 ### Core Models
 
-- [ ] T011 Create `Bitpal/Features/Portfolio/Models/ClosedPosition.swift` with struct definition (id, coinId, coin, totalQuantity, avgCostPrice, avgSalePrice, closedDate, cycleTransactions, realizedPnL computed property, realizedPnLPercentage computed property)
-- [ ] T012 Create `Bitpal/Features/Portfolio/Models/PortfolioSummary.swift` with struct definition (totalValue, unrealizedPnL, realizedPnL, totalOpenCost, totalClosedCost, totalPnL computed property, totalPnLPercentage computed property)
+- [X] T011 Create `Bitpal/Features/Portfolio/Models/ClosedPosition.swift` with struct definition (id, coinId, coin, totalQuantity, avgCostPrice, avgSalePrice, closedDate, cycleTransactions, realizedPnL computed property, realizedPnLPercentage computed property)
+- [X] T012 Create `Bitpal/Features/Portfolio/Models/PortfolioSummary.swift` with struct definition (totalValue, unrealizedPnL, realizedPnL, totalOpenCost, totalClosedCost, totalPnL computed property, totalPnLPercentage computed property)
 
 ### Core Computation Functions
 
-- [ ] T013 Implement `computeClosedPositions(transactions:currentPrices:) -> [ClosedPosition]` function in `Bitpal/Features/Portfolio/Models/ClosedPosition.swift` following algorithm from data-model.md (group by coinId, sort chronologically, track running balance, detect cycle closures with 0.00000001 tolerance)
-- [ ] T014 Implement `computeCycleMetrics(coinId:coin:transactions:closeDate:) -> ClosedPosition?` private helper function in `ClosedPosition.swift` (calculate weighted averages, validate cycle, return ClosedPosition)
-- [ ] T015 Implement `computePortfolioSummary(holdings:closedPositions:) -> PortfolioSummary` function in `PortfolioSummary.swift` (aggregate metrics from open holdings and closed positions)
+- [X] T013 Implement `computeClosedPositions(transactions:currentPrices:) -> [ClosedPosition]` function in `Bitpal/Features/Portfolio/Models/ClosedPosition.swift` following algorithm from data-model.md (group by coinId, sort chronologically, track running balance, detect cycle closures with 0.00000001 tolerance)
+- [X] T014 Implement `computeCycleMetrics(coinId:coin:transactions:closeDate:) -> ClosedPosition?` private helper function in `ClosedPosition.swift` (calculate weighted averages, validate cycle, return ClosedPosition)
+- [X] T015 Implement `computePortfolioSummary(holdings:closedPositions:) -> PortfolioSummary` function in `PortfolioSummary.swift` (aggregate metrics from open holdings and closed positions)
 
 ### Verify Tests Pass
 
-- [ ] T016 Run all unit tests (`⌘ + U`) and verify all 10 tests pass - if any fail, fix computation logic before proceeding
+- [X] T016 Run all unit tests (`⌘ + U`) and verify all 10 tests pass - if any fail, fix computation logic before proceeding
 
 **Checkpoint**: Foundation ready - all tests pass, core models and computation logic verified. User story implementation can now begin.
 
@@ -188,15 +188,15 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 
 ### UI Integration
 
-- [ ] T043 [US3] Make ClosedPositionRowView in `Bitpal/Features/Portfolio/Views/ClosedPositionRowView.swift` tappable by wrapping in Button
-- [ ] T044 [US3] Add navigation to `TransactionHistoryView` on closed position tap in `ClosedPositionsSection.swift` using NavigationLink, passing closed position's coinId and coin name
-- [ ] T045 [US3] Update `Bitpal/Features/Portfolio/Views/TransactionHistoryView.swift` @Query to filter transactions by coinId (already implemented - verify it works for closed positions)
+- [X] T043 [US3] Make ClosedPositionRowView in `Bitpal/Features/Portfolio/Views/ClosedPositionRowView.swift` tappable by wrapping in Button
+- [X] T044 [US3] Add navigation to `TransactionHistoryView` on closed position tap in `ClosedPositionsSection.swift` using NavigationLink, passing closed position's coinId and coin name
+- [X] T045 [US3] Update `Bitpal/Features/Portfolio/Views/TransactionHistoryView.swift` @Query to filter transactions by coinId (already implemented - verify it works for closed positions)
 
 ### Manual Testing
 
-- [ ] T046 [US3] Manual test: Tap closed position row, verify TransactionHistoryView opens with correct coin name
-- [ ] T047 [US3] Manual test: Verify transaction history shows all buys/sells for that cycle in chronological order
-- [ ] T048 [US3] Manual test: Verify transaction details match closed position metrics (quantity, avg prices)
+- [X] T046 [US3] Manual test: Tap closed position row, verify TransactionHistoryView opens with correct coin name
+- [X] T047 [US3] Manual test: Verify transaction history shows all buys/sells for that cycle in chronological order
+- [X] T048 [US3] Manual test: Verify transaction details match closed position metrics (quantity, avg prices)
 
 **Checkpoint**: User Story 3 complete. Users can drill down into closed position details via transaction history.
 
@@ -213,6 +213,15 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 - [ ] T051 Create exactly 6 closed positions, verify section collapses (header with count)
 - [ ] T052 Test multiple close/reopen cycles for same coin (e.g., buy/sell BTC twice), verify 2 separate ClosedPosition entries appear
 - [ ] T053 Test zero-cost position (manually set transaction pricePerCoin to 0 for buy, then sell), verify entire sale revenue shows as realized profit
+
+### Edge Case Bug Fixes
+
+- [X] T070 [BUG] Fix isEmpty computed property in `Bitpal/Features/Portfolio/ViewModels/PortfolioViewModel.swift` to account for closed positions - Change `holdings.isEmpty` to `holdings.isEmpty && closedPositions.isEmpty` to prevent "No Holdings Yet" empty state from showing when user has only closed positions (no open holdings)
+- [X] T071 [BUG] Fix `computeHoldings()` in `Bitpal/Features/Portfolio/Models/Holding.swift` to exclude transactions from closed cycles (FR-016) - Add `filterOpenCycleTransactions()` helper function that identifies the last cycle closure and returns only transactions after that point
+- [X] T072 [BUG] Update `TransactionHistoryView` in `Bitpal/Features/Portfolio/Views/TransactionHistoryView.swift` to accept cycle-filtered transactions as parameter instead of using @Query (FR-017) - Change initializer to `init(coinId: String, coinName: String, transactions: [Transaction])`
+- [X] T073 [BUG] Update call sites to pass cycle-filtered transactions: (a) `ClosedPositionsSection.swift` passes `position.cycleTransactions`, (b) `PortfolioView.swift` adds `getOpenCycleTransactions(for:)` helper and passes filtered transactions to TransactionHistoryView
+- [X] T074 [BUG] Add unit tests for cycle isolation: `testClosedCycleTransactionsExcludedFromNewHolding()` verifies FR-016, `testMultipleCyclesIsolation()` verifies multiple cycle scenarios
+- [X] T075 [BUG] Update spec.md to clarify FR-009 (cycle-specific history), add FR-016 (exclude closed cycles from holdings), add FR-017 (cycle-isolated transaction history), update Multiple Close/Reopen Cycles edge case with CRITICAL note
 
 ### Performance Profiling
 

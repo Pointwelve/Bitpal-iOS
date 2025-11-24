@@ -17,6 +17,10 @@ struct PortfolioView: View {
     @State private var showError = false
     @State private var scrollProxy: ScrollViewProxy? // T038: For scroll-to-section
 
+    // FR-017: Query all transactions for cycle filtering
+    @Query(sort: \Transaction.date, order: .reverse)
+    private var allTransactions: [Transaction]
+
     var body: some View {
         NavigationStack {
             contentView
@@ -97,7 +101,11 @@ struct PortfolioView: View {
 
                     // Holdings List
                     ForEach(viewModel.holdings) { holding in
-                        NavigationLink(destination: TransactionHistoryView(coinId: holding.id, coinName: holding.coin.name)) {
+                        NavigationLink(destination: TransactionHistoryView(
+                            coinId: holding.id,
+                            coinName: holding.coin.name,
+                            transactions: getOpenCycleTransactions(for: holding.id)  // FR-017: Cycle-isolated transactions
+                        )) {
                             HoldingRowView(holding: holding)
                         }
                         .buttonStyle(.plain)
@@ -168,6 +176,53 @@ struct PortfolioView: View {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
         return formatter.localizedString(for: date, relativeTo: now)
+    }
+
+    // MARK: - FR-017: Open Cycle Transaction Filtering
+
+    /// Get open cycle transactions for a specific coin
+    /// FR-017: Transaction history must show only current cycle transactions
+    /// - Parameter coinId: The coin to get transactions for
+    /// - Returns: Transactions from the current open cycle only (after last close)
+    private func getOpenCycleTransactions(for coinId: String) -> [Transaction] {
+        // Filter transactions for this coin
+        let coinTransactions = allTransactions.filter { $0.coinId == coinId }
+
+        // Sort by date (chronological order)
+        let sortedTxs = coinTransactions.sorted { $0.date < $1.date }
+
+        // Track running balance and find last cycle closure index
+        var runningBalance: Decimal = 0
+        var lastClosureIndex: Int? = nil
+
+        for (index, tx) in sortedTxs.enumerated() {
+            // Update running balance
+            switch tx.type {
+            case .buy:
+                runningBalance += tx.amount
+            case .sell:
+                runningBalance -= tx.amount
+            }
+
+            // Check if cycle closed (balance within tolerance of zero)
+            if abs(runningBalance) < 0.00000001 {
+                lastClosureIndex = index
+                runningBalance = 0
+            }
+        }
+
+        // If no cycle closures found, all transactions are from open cycle
+        guard let closureIndex = lastClosureIndex else {
+            return sortedTxs
+        }
+
+        // Return only transactions after the last closure
+        let openCycleStart = closureIndex + 1
+        guard openCycleStart < sortedTxs.count else {
+            return []  // No open cycle transactions exist
+        }
+
+        return Array(sortedTxs[openCycleStart...])
     }
 
 }

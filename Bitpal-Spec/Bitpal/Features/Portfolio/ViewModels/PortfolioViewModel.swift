@@ -83,10 +83,11 @@ final class PortfolioViewModel {
         computePortfolioSummary(holdings: holdings, closedPositions: closedPositions)
     }
 
-    /// Check if portfolio is empty (T039)
+    /// Check if portfolio is empty (T039, T070: Fixed to account for closed positions)
     /// Per FR-027: Show empty state with "Add Your First Transaction" button
+    /// T070: Must check both holdings AND closedPositions to prevent empty state when user has only closed positions
     var isEmpty: Bool {
-        holdings.isEmpty
+        holdings.isEmpty && closedPositions.isEmpty
     }
 
     // MARK: - Configuration

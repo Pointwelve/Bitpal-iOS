@@ -44,6 +44,7 @@ struct Holding: Identifiable, Equatable {
 /// Compute holdings from transactions and current prices
 /// Per Constitution Principle IV: Follows standard accounting principles
 /// Per SC-005: Must complete in <100ms for 50 holdings, 500 transactions
+/// Per FR-016: Excludes transactions from closed cycles
 func computeHoldings(
     transactions: [Transaction],
     currentPrices: [String: Coin]
@@ -54,14 +55,20 @@ func computeHoldings(
     return grouped.compactMap { (coinId, txs) -> Holding? in
         guard let coin = currentPrices[coinId] else { return nil }
 
+        // FR-016: Filter out transactions from closed cycles
+        let openCycleTxs = filterOpenCycleTransactions(txs)
+
+        // If no open cycle transactions, no holding exists
+        guard !openCycleTxs.isEmpty else { return nil }
+
         var totalAmount: Decimal = 0
         var totalCost: Decimal = 0
 
-        // First pass: calculate weighted average cost from all buys
+        // First pass: calculate weighted average cost from all buys (open cycle only)
         var totalBuyAmount: Decimal = 0
         var totalBuyCost: Decimal = 0
 
-        for tx in txs {
+        for tx in openCycleTxs {
             switch tx.type {
             case .buy:
                 totalBuyAmount += tx.amount
@@ -75,7 +82,7 @@ func computeHoldings(
         let avgCost: Decimal = totalBuyAmount > 0 ? totalBuyCost / totalBuyAmount : 0
 
         // Second pass: calculate net holdings
-        for tx in txs {
+        for tx in openCycleTxs {
             switch tx.type {
             case .buy:
                 totalAmount += tx.amount
@@ -99,4 +106,48 @@ func computeHoldings(
             currentValue: currentValue
         )
     }
+}
+
+/// Filters transactions to include only those from the current open cycle.
+/// Excludes transactions from completed (closed) cycles.
+/// Per FR-016: Holdings must not include closed cycle data
+/// - Parameter transactions: All transactions for a specific coin
+/// - Returns: Only transactions from the current open cycle (after last close)
+private func filterOpenCycleTransactions(_ transactions: [Transaction]) -> [Transaction] {
+    // Sort transactions by date (chronological order)
+    let sortedTxs = transactions.sorted { $0.date < $1.date }
+
+    // Track running balance and find last cycle closure index
+    var runningBalance: Decimal = 0
+    var lastClosureIndex: Int? = nil
+
+    for (index, tx) in sortedTxs.enumerated() {
+        // Update running balance
+        switch tx.type {
+        case .buy:
+            runningBalance += tx.amount
+        case .sell:
+            runningBalance -= tx.amount
+        }
+
+        // Check if cycle closed (balance within tolerance of zero)
+        if abs(runningBalance) < 0.00000001 {
+            lastClosureIndex = index
+            runningBalance = 0
+        }
+    }
+
+    // If no cycle closures found, all transactions are from open cycle
+    guard let closureIndex = lastClosureIndex else {
+        return sortedTxs
+    }
+
+    // Return only transactions after the last closure
+    // closureIndex + 1 because we want transactions AFTER the closing sell
+    let openCycleStart = closureIndex + 1
+    guard openCycleStart < sortedTxs.count else {
+        return []  // No open cycle transactions exist
+    }
+
+    return Array(sortedTxs[openCycleStart...])
 }
