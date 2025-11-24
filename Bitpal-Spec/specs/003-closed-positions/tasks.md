@@ -223,6 +223,17 @@ This feature extends the existing Portfolio feature (002-portfolio). All infrast
 - [X] T074 [BUG] Add unit tests for cycle isolation: `testClosedCycleTransactionsExcludedFromNewHolding()` verifies FR-016, `testMultipleCyclesIsolation()` verifies multiple cycle scenarios
 - [X] T075 [BUG] Update spec.md to clarify FR-009 (cycle-specific history), add FR-016 (exclude closed cycles from holdings), add FR-017 (cycle-isolated transaction history), update Multiple Close/Reopen Cycles edge case with CRITICAL note
 
+### Portfolio Enhancements: Sorting & Grouping
+
+- [X] T076 [ENHANCEMENT] Update spec.md to add FR-018 (holdings sorted by value), FR-019 (closed positions grouped by coin), FR-020 (aggregated group metrics), FR-021 (tap group to navigate), FR-022 (groups sorted by most recent close date) and add ClosedPositionGroup entity definition
+- [X] T077 [ENHANCEMENT] Sort open holdings by currentValue descending in `PortfolioViewModel.swift` line 136 (after computeHoldings call) - FR-018
+- [X] T078 [ENHANCEMENT] Create `ClosedPositionGroup.swift` model in `Bitpal/Features/Portfolio/Models/` with properties: id, coinId, coin, cycleCount, totalRealizedPnL, totalRealizedPnLPercentage, mostRecentCloseDate, closedPositions array - FR-019, FR-020
+- [X] T079 [ENHANCEMENT] Add `computeClosedPositionGroups(closedPositions:)` function in `ClosedPositionGroup.swift` that groups by coinId, aggregates metrics, and sorts by mostRecentCloseDate descending - FR-022
+- [X] T080 [ENHANCEMENT] Create `CoinClosedPositionsView.swift` in `Bitpal/Features/Portfolio/Views/` that accepts coinId, coinName, closedPositions array and displays list of all cycles for that coin with summary header - FR-021
+- [X] T081 [ENHANCEMENT] Update `ClosedPositionsSection.swift` to accept closedPositionGroups parameter instead of closedPositions, create ClosedPositionGroupRowView to display aggregated metrics, and update NavigationLink to navigate to CoinClosedPositionsView - FR-019, FR-020, FR-021
+- [X] T082 [ENHANCEMENT] Add closedPositionGroups property to PortfolioViewModel, compute it after closedPositions in loadPortfolioWithPrices(), and update PortfolioView.swift to pass closedPositionGroups to ClosedPositionsSection
+- [X] T083 [ENHANCEMENT] Add unit tests to ClosedPositionTests.swift: testClosedPositionsGroupedByCoin() verifies grouping by coin, testGroupAggregatedMetrics() verifies total P&L calculations, testGroupsSortedByMostRecentCloseDate() verifies sort order - All tests passing (77 total)
+
 ### Performance Profiling
 
 - [ ] T054 Create 100 test transactions (50 closed cycles) and profile `computeClosedPositions()` execution time with Xcode Instruments Time Profiler - verify < 100ms (Constitution Principle I target from plan.md Assumption #7)

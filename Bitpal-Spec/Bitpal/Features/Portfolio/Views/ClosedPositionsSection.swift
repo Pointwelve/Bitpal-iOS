@@ -4,24 +4,26 @@
 //
 //  Created by Claude Code via /speckit.implement on 2025-11-23.
 //  Closed Positions feature (003-closed-positions) - T022, T023
+//  Updated 2025-11-24 for grouping feature - FR-019, FR-020, FR-021
 //
 
 import SwiftUI
 
-/// Collapsible section displaying closed trading positions
+/// Collapsible section displaying closed trading positions grouped by coin
 /// Per Constitution Principle II: Uses spring animations and Liquid Glass design
-/// Per FR-004: Collapsed when > 5 positions, tap to expand/collapse
+/// Per FR-019: Groups closed positions by coin
+/// Per FR-022: Sorts groups by most recent close date
 struct ClosedPositionsSection: View {
-    let closedPositions: [ClosedPosition]
+    let closedPositionGroups: [ClosedPositionGroup]
 
     /// FR-015: Expanded/collapsed state persists during current session only
     /// State resets to collapsed (false) on app restart
     @State private var isExpanded = false
 
-    /// Check if section should collapse (> 5 positions)
-    /// Per FR-004: Collapse threshold
+    /// Check if section should collapse (> 5 groups)
+    /// Per FR-004: Collapse threshold (now applies to groups, not individual positions)
     var shouldCollapse: Bool {
-        closedPositions.count > 5
+        closedPositionGroups.count > 5
     }
 
     var body: some View {
@@ -53,7 +55,7 @@ struct ClosedPositionsSection: View {
                     .foregroundColor(.textPrimary)
 
                 if shouldCollapse {
-                    Text("(\(closedPositions.count))")
+                    Text("(\(closedPositionGroups.count))")
                         .font(Typography.title3)
                         .foregroundColor(.textSecondary)
                 }
@@ -72,18 +74,18 @@ struct ClosedPositionsSection: View {
         .disabled(!shouldCollapse) // Only tappable if collapsible
     }
 
-    /// List of closed positions
+    /// List of closed position groups
     /// Per Constitution Principle I: Uses LazyVStack for performance
-    /// T043-T045: Tap to view transaction history (FR-009, FR-017)
+    /// Per FR-021: Tap group to navigate to coin-specific cycle list
     private var positionsList: some View {
         LazyVStack(spacing: Spacing.small) {
-            ForEach(closedPositions) { position in
-                NavigationLink(destination: TransactionHistoryView(
-                    coinId: position.coinId,
-                    coinName: position.coin.name,
-                    transactions: position.cycleTransactions  // FR-017: Cycle-isolated transactions
+            ForEach(closedPositionGroups) { group in
+                NavigationLink(destination: CoinClosedPositionsView(
+                    coinId: group.coinId,
+                    coinName: group.coin.name,
+                    closedPositions: group.closedPositions
                 )) {
-                    ClosedPositionRowView(closedPosition: position)
+                    ClosedPositionGroupRowView(group: group)
                 }
                 .buttonStyle(.plain)  // Preserve card styling
             }
@@ -91,8 +93,99 @@ struct ClosedPositionsSection: View {
     }
 }
 
-#Preview("Few Positions") {
-    let coin = Coin(
+// MARK: - Closed Position Group Row View
+
+/// Row view for displaying aggregated closed position group
+/// Per FR-020: Shows cycle count and total realized P&L
+struct ClosedPositionGroupRowView: View, Equatable {
+    let group: ClosedPositionGroup
+
+    static func == (lhs: ClosedPositionGroupRowView, rhs: ClosedPositionGroupRowView) -> Bool {
+        lhs.group == rhs.group
+    }
+
+    var body: some View {
+        LiquidGlassCard {
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                // Header: Coin name, symbol, and cycle count
+                HStack {
+                    VStack(alignment: .leading, spacing: Spacing.tiny) {
+                        Text(group.coin.name)
+                            .font(Typography.headline)
+                        Text(group.coin.symbol.uppercased())
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                    }
+                    Spacer()
+                    Text("\(group.cycleCount) cycle\(group.cycleCount == 1 ? "" : "s")")
+                        .font(Typography.caption)
+                        .foregroundColor(.textSecondary)
+                }
+
+                Divider()
+
+                // Aggregated metrics
+                HStack {
+                    VStack(alignment: .leading, spacing: Spacing.tiny) {
+                        Text("Total Realized P&L")
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                        Text(formatProfitLoss(group.totalRealizedPnL))
+                            .font(Typography.body)
+                            .fontWeight(.medium)
+                            .foregroundColor(profitLossColor)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: Spacing.tiny) {
+                        Text("Return")
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                        Text(formatPercentage(group.totalRealizedPnLPercentage))
+                            .font(Typography.body)
+                            .fontWeight(.medium)
+                            .foregroundColor(profitLossColor)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    /// Color for P&L display
+    private var profitLossColor: Color {
+        if group.totalRealizedPnL > 0 {
+            return .profitGreen
+        } else if group.totalRealizedPnL < 0 {
+            return .lossRed
+        } else {
+            return .textSecondary
+        }
+    }
+
+    /// Format P&L with sign
+    private func formatProfitLoss(_ value: Decimal) -> String {
+        let prefix = value > 0 ? "+" : ""
+        return prefix + Formatters.formatCurrency(value)
+    }
+
+    /// Format percentage with 2 decimal places
+    private func formatPercentage(_ value: Decimal) -> String {
+        let prefix = value > 0 ? "+" : ""
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+
+        let formatted = formatter.string(from: value as NSDecimalNumber) ?? "\(value)"
+        return "\(prefix)\(formatted)%"
+    }
+}
+
+#Preview("Few Groups") {
+    let coin1 = Coin(
         id: "bitcoin",
         symbol: "btc",
         name: "Bitcoin",
@@ -102,51 +195,80 @@ struct ClosedPositionsSection: View {
         marketCap: nil
     )
 
-    let positions = (1...3).map { index in
+    let coin2 = Coin(
+        id: "ethereum",
+        symbol: "eth",
+        name: "Ethereum",
+        currentPrice: 3000,
+        priceChange24h: 1.5,
+        lastUpdated: Date(),
+        marketCap: nil
+    )
+
+    let positions1 = (1...2).map { index in
         ClosedPosition(
             id: UUID(),
             coinId: "bitcoin",
-            coin: coin,
+            coin: coin1,
             totalQuantity: Decimal(string: "1.0")!,
-            avgCostPrice: 40000 + Decimal(index * 1000),
-            avgSalePrice: 50000 + Decimal(index * 1000),
+            avgCostPrice: 40000,
+            avgSalePrice: 50000,
             closedDate: Date().addingTimeInterval(-Double(index * 86400)),
             cycleTransactions: []
         )
     }
 
+    let positions2 = [
+        ClosedPosition(
+            id: UUID(),
+            coinId: "ethereum",
+            coin: coin2,
+            totalQuantity: Decimal(string: "10.0")!,
+            avgCostPrice: 2000,
+            avgSalePrice: 3000,
+            closedDate: Date().addingTimeInterval(-172800),
+            cycleTransactions: []
+        )
+    ]
+
+    let groups = computeClosedPositionGroups(closedPositions: positions1 + positions2)
+
     return ScrollView {
-        ClosedPositionsSection(closedPositions: positions)
+        ClosedPositionsSection(closedPositionGroups: groups)
             .padding()
     }
 }
 
-#Preview("Many Positions - Collapsed") {
-    let coin = Coin(
-        id: "bitcoin",
-        symbol: "btc",
-        name: "Bitcoin",
-        currentPrice: 50000,
-        priceChange24h: 2.5,
-        lastUpdated: Date(),
-        marketCap: nil
-    )
+#Preview("Many Groups - Collapsed") {
+    let coins = [
+        Coin(id: "bitcoin", symbol: "btc", name: "Bitcoin", currentPrice: 50000, priceChange24h: 2.5, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "ethereum", symbol: "eth", name: "Ethereum", currentPrice: 3000, priceChange24h: 1.5, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "cardano", symbol: "ada", name: "Cardano", currentPrice: 0.5, priceChange24h: -0.5, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "solana", symbol: "sol", name: "Solana", currentPrice: 100, priceChange24h: 3.0, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "polkadot", symbol: "dot", name: "Polkadot", currentPrice: 7, priceChange24h: 0.8, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "chainlink", symbol: "link", name: "Chainlink", currentPrice: 15, priceChange24h: 1.2, lastUpdated: Date(), marketCap: nil),
+        Coin(id: "avalanche", symbol: "avax", name: "Avalanche", currentPrice: 35, priceChange24h: 2.1, lastUpdated: Date(), marketCap: nil)
+    ]
 
-    let positions = (1...10).map { index in
-        ClosedPosition(
+    var allPositions: [ClosedPosition] = []
+    for (index, coin) in coins.enumerated() {
+        let position = ClosedPosition(
             id: UUID(),
-            coinId: "bitcoin",
+            coinId: coin.id,
             coin: coin,
             totalQuantity: Decimal(string: "1.0")!,
-            avgCostPrice: 40000 + Decimal(index * 1000),
-            avgSalePrice: 50000 + Decimal(index * 1000),
+            avgCostPrice: coin.currentPrice * 0.8,
+            avgSalePrice: coin.currentPrice,
             closedDate: Date().addingTimeInterval(-Double(index * 86400)),
             cycleTransactions: []
         )
+        allPositions.append(position)
     }
 
+    let groups = computeClosedPositionGroups(closedPositions: allPositions)
+
     return ScrollView {
-        ClosedPositionsSection(closedPositions: positions)
+        ClosedPositionsSection(closedPositionGroups: groups)
             .padding()
     }
 }

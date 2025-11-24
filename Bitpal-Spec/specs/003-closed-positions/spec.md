@@ -115,6 +115,11 @@ Users want to see detailed breakdown of closed positions including transaction h
 - **FR-015**: System MUST persist the expanded/collapsed state of Closed Positions section during the current session (state resets to collapsed on app restart)
 - **FR-016**: System MUST exclude transactions from closed cycles when computing open holdings (average cost, total amount, profit/loss calculations must only use current cycle transactions)
 - **FR-017**: System MUST display cycle-isolated transaction history: closed positions show only that cycle's transactions, open holdings show only current cycle's transactions (not all historical transactions for that coin)
+- **FR-018**: System MUST sort open holdings by current value (highest value first) in Portfolio view
+- **FR-019**: System MUST group closed positions by coin (multiple cycles of same coin grouped together under single coin entry)
+- **FR-020**: System MUST display aggregated metrics for grouped closed positions: cycle count, total realized P&L ($), total realized P&L (%)
+- **FR-021**: System MUST allow users to tap grouped closed position to navigate to coin-specific cycle list view showing all cycles for that coin
+- **FR-022**: System MUST sort closed position groups by most recent close date (group with most recently closed cycle appears first)
 
 ### Key Entities *(include if feature involves data)*
 
@@ -125,6 +130,12 @@ Users want to see detailed breakdown of closed positions including transaction h
   - Relationships: References Transaction records via coinId, grouped by cycle (transactions between previous close and current close)
   - Calculation: Group transactions by coinId and cycle boundary, filter where SUM(buy amounts) ≈ SUM(sell amounts), compute weighted averages and P&L per cycle
   - Multiple cycles: If same coin is bought/sold multiple times, each complete cycle creates a separate ClosedPosition entry
+
+- **ClosedPositionGroup (Computed Model - NOT stored)**:
+  - Represents aggregated view of all closed cycles for a specific coin (FR-019, FR-020)
+  - Attributes: coinId, coin (Coin details), cycleCount (number of closed cycles), totalRealizedPnL (sum of all cycle P&Ls), totalRealizedPnLPercentage (weighted average %), mostRecentCloseDate (date of most recent cycle close), closedPositions (array of ClosedPosition for this coin)
+  - Calculation: Group ClosedPosition entries by coinId, aggregate metrics, sort by mostRecentCloseDate descending (FR-022)
+  - Purpose: Provides grouped view for UI navigation - tap group to see individual cycles (FR-021)
 
 - **PortfolioSummary (Enhanced)**:
   - Existing entity extended with new attributes:

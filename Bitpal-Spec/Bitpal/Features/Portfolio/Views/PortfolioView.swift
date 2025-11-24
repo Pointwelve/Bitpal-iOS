@@ -113,8 +113,9 @@ struct PortfolioView: View {
 
                     // T024, T038: Closed Positions Section (displayed below holdings)
                     // Per FR-002: Only show when closed positions exist
-                    if !viewModel.closedPositions.isEmpty {
-                        ClosedPositionsSection(closedPositions: viewModel.closedPositions)
+                    // FR-019: Display grouped closed positions
+                    if !viewModel.closedPositionGroups.isEmpty {
+                        ClosedPositionsSection(closedPositionGroups: viewModel.closedPositionGroups)
                             .padding(.top, Spacing.medium)
                             .id("closedPositionsSection") // T038: ID for scrolling
                     }

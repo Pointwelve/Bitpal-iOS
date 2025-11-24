@@ -567,4 +567,129 @@ final class ClosedPositionTests: XCTestCase {
         XCTAssertEqual(holding.totalAmount, 10.0,
                        "Total amount should be 10.0 ETH from Cycle 4")
     }
+
+    // MARK: - Grouping Tests (FR-019, FR-020, FR-022)
+
+    /// T076: Test that closed positions are grouped by coin
+    /// Scenario: Multiple cycles for Bitcoin and Ethereum
+    /// Expected: 2 groups (Bitcoin, Ethereum), each with correct cycle counts
+    func testClosedPositionsGroupedByCoin() {
+        // Arrange
+        let bitcoin = mockCoin(id: "bitcoin")
+        let ethereum = mockCoin(id: "ethereum")
+        let currentPrices = ["bitcoin": bitcoin, "ethereum": ethereum]
+
+        var transactions: [Transaction] = []
+
+        // Bitcoin Cycle 1: Buy 1 BTC @ $40k, Sell 1 BTC @ $50k
+        transactions.append(createTransaction(coinId: "bitcoin", type: .buy, amount: 1.0, pricePerCoin: 40000, date: Date().addingTimeInterval(-432000)))  // 5 days ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .sell, amount: 1.0, pricePerCoin: 50000, date: Date().addingTimeInterval(-345600)))  // 4 days ago
+
+        // Ethereum Cycle 1: Buy 10 ETH @ $2000, Sell 10 ETH @ $2500
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 2000, date: Date().addingTimeInterval(-259200)))  // 3 days ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .sell, amount: 10.0, pricePerCoin: 2500, date: Date().addingTimeInterval(-172800)))  // 2 days ago
+
+        // Bitcoin Cycle 2: Buy 0.5 BTC @ $45k, Sell 0.5 BTC @ $48k
+        transactions.append(createTransaction(coinId: "bitcoin", type: .buy, amount: 0.5, pricePerCoin: 45000, date: Date().addingTimeInterval(-86400)))  // 1 day ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .sell, amount: 0.5, pricePerCoin: 48000, date: Date()))  // Now
+
+        // Act
+        let closedPositions = computeClosedPositions(transactions: transactions, currentPrices: currentPrices)
+        let groups = computeClosedPositionGroups(closedPositions: closedPositions)
+
+        // Assert
+        XCTAssertEqual(groups.count, 2, "Should have 2 groups (Bitcoin, Ethereum)")
+
+        // Find Bitcoin group
+        guard let btcGroup = groups.first(where: { $0.coinId == "bitcoin" }) else {
+            XCTFail("Bitcoin group not found")
+            return
+        }
+        XCTAssertEqual(btcGroup.cycleCount, 2, "Bitcoin should have 2 cycles")
+        XCTAssertEqual(btcGroup.closedPositions.count, 2, "Bitcoin group should contain 2 closed positions")
+
+        // Find Ethereum group
+        guard let ethGroup = groups.first(where: { $0.coinId == "ethereum" }) else {
+            XCTFail("Ethereum group not found")
+            return
+        }
+        XCTAssertEqual(ethGroup.cycleCount, 1, "Ethereum should have 1 cycle")
+        XCTAssertEqual(ethGroup.closedPositions.count, 1, "Ethereum group should contain 1 closed position")
+    }
+
+    /// T077: Test aggregated metrics for grouped positions
+    /// Scenario: Bitcoin with 2 profitable cycles
+    /// Expected: Total P&L = sum of both cycles, percentage calculated correctly
+    func testGroupAggregatedMetrics() {
+        // Arrange
+        let bitcoin = mockCoin(id: "bitcoin")
+        let currentPrices = ["bitcoin": bitcoin]
+
+        var transactions: [Transaction] = []
+
+        // Cycle 1: Buy 1 BTC @ $40k, Sell 1 BTC @ $50k (+$10k, +25%)
+        transactions.append(createTransaction(coinId: "bitcoin", type: .buy, amount: 1.0, pricePerCoin: 40000, date: Date().addingTimeInterval(-259200)))  // 3 days ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .sell, amount: 1.0, pricePerCoin: 50000, date: Date().addingTimeInterval(-172800)))  // 2 days ago
+
+        // Cycle 2: Buy 2 BTC @ $45k, Sell 2 BTC @ $48k (+$6k, +6.67%)
+        transactions.append(createTransaction(coinId: "bitcoin", type: .buy, amount: 2.0, pricePerCoin: 45000, date: Date().addingTimeInterval(-86400)))  // 1 day ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .sell, amount: 2.0, pricePerCoin: 48000, date: Date()))  // Now
+
+        // Act
+        let closedPositions = computeClosedPositions(transactions: transactions, currentPrices: currentPrices)
+        let groups = computeClosedPositionGroups(closedPositions: closedPositions)
+
+        // Assert
+        XCTAssertEqual(groups.count, 1, "Should have 1 group (Bitcoin)")
+
+        guard let btcGroup = groups.first else {
+            XCTFail("Bitcoin group not found")
+            return
+        }
+
+        // Total P&L: $10k + $6k = $16k
+        XCTAssertEqual(btcGroup.totalRealizedPnL, 16000, accuracy: 0.01, "Total P&L should be $16,000")
+
+        // Weighted average percentage: (50k + 96k) / (40k + 90k) - 1 = 146k/130k - 1 ≈ 12.31%
+        let expectedPercentage: Decimal = ((146000 / 130000) - 1) * 100
+        XCTAssertEqual(btcGroup.totalRealizedPnLPercentage, expectedPercentage, accuracy: 0.1,
+                       "Total P&L percentage should be weighted average of both cycles")
+
+        XCTAssertEqual(btcGroup.cycleCount, 2, "Should have 2 cycles")
+    }
+
+    /// T078: Test that groups are sorted by most recent close date
+    /// Scenario: Bitcoin closed 2 days ago, Ethereum closed 1 day ago, Cardano closed today
+    /// Expected: Groups sorted [Cardano, Ethereum, Bitcoin] (most recent first)
+    func testGroupsSortedByMostRecentCloseDate() {
+        // Arrange
+        let bitcoin = mockCoin(id: "bitcoin")
+        let ethereum = mockCoin(id: "ethereum")
+        let cardano = mockCoin(id: "cardano")
+        let currentPrices = ["bitcoin": bitcoin, "ethereum": ethereum, "cardano": cardano]
+
+        var transactions: [Transaction] = []
+
+        // Bitcoin: Closed 2 days ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .buy, amount: 1.0, pricePerCoin: 40000, date: Date().addingTimeInterval(-259200)))  // 3 days ago
+        transactions.append(createTransaction(coinId: "bitcoin", type: .sell, amount: 1.0, pricePerCoin: 50000, date: Date().addingTimeInterval(-172800)))  // 2 days ago
+
+        // Ethereum: Closed 1 day ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .buy, amount: 10.0, pricePerCoin: 2000, date: Date().addingTimeInterval(-172800)))  // 2 days ago
+        transactions.append(createTransaction(coinId: "ethereum", type: .sell, amount: 10.0, pricePerCoin: 2500, date: Date().addingTimeInterval(-86400)))  // 1 day ago
+
+        // Cardano: Closed today
+        transactions.append(createTransaction(coinId: "cardano", type: .buy, amount: 1000.0, pricePerCoin: 0.5, date: Date().addingTimeInterval(-86400)))  // 1 day ago
+        transactions.append(createTransaction(coinId: "cardano", type: .sell, amount: 1000.0, pricePerCoin: 0.6, date: Date()))  // Now
+
+        // Act
+        let closedPositions = computeClosedPositions(transactions: transactions, currentPrices: currentPrices)
+        let groups = computeClosedPositionGroups(closedPositions: closedPositions)
+
+        // Assert
+        XCTAssertEqual(groups.count, 3, "Should have 3 groups")
+        XCTAssertEqual(groups[0].coinId, "cardano", "First group should be Cardano (most recent)")
+        XCTAssertEqual(groups[1].coinId, "ethereum", "Second group should be Ethereum")
+        XCTAssertEqual(groups[2].coinId, "bitcoin", "Third group should be Bitcoin (least recent)")
+    }
 }

@@ -18,6 +18,7 @@ final class PortfolioViewModel {
 
     var holdings: [Holding] = []
     var closedPositions: [ClosedPosition] = [] // T017: Closed positions tracking
+    var closedPositionGroups: [ClosedPositionGroup] = [] // FR-019: Grouped closed positions
     var isLoading = false
     var errorMessage: String?
     var lastUpdateTime: Date?
@@ -132,8 +133,14 @@ final class PortfolioViewModel {
             // Compute holdings
             holdings = computeHoldings(transactions: transactions, currentPrices: prices)
 
+            // FR-018: Sort holdings by current value (highest first)
+            holdings.sort { $0.currentValue > $1.currentValue }
+
             // T018, T019: Compute closed positions
             closedPositions = computeClosedPositions(transactions: transactions, currentPrices: prices)
+
+            // FR-019, FR-022: Compute closed position groups
+            closedPositionGroups = computeClosedPositionGroups(closedPositions: closedPositions)
 
             lastUpdateTime = Date()
 
