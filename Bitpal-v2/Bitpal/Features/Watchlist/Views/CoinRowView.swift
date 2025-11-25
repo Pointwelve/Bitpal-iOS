@@ -41,7 +41,7 @@ struct CoinRowView: View, Equatable {
 
                 // Price info
                 VStack(alignment: .trailing, spacing: Spacing.tiny) {
-                    Text(Formatters.formatCurrency(coin.currentPrice))
+                    Text(Formatters.formatPrice(coin.currentPrice))
                         .font(Typography.priceDisplay)
                         .foregroundColor(.textPrimary)
 
@@ -50,7 +50,7 @@ struct CoinRowView: View, Equatable {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(coin.name), \(Formatters.formatCurrency(coin.currentPrice)), \(Formatters.formatPercentage(coin.priceChange24h)) change")
+        .accessibilityLabel("\(coin.name), \(Formatters.formatPrice(coin.currentPrice)), \(Formatters.formatPercentage(coin.priceChange24h)) change")
         .accessibilityHint("Swipe left to delete")
     }
 }
@@ -59,6 +59,7 @@ struct CoinRowView: View, Equatable {
 
 #Preview {
     VStack(spacing: Spacing.standard) {
+        // Large price (>= $1): 2 decimals
         CoinRowView(coin: Coin(
             id: "bitcoin",
             symbol: "btc",
@@ -68,6 +69,7 @@ struct CoinRowView: View, Equatable {
             lastUpdated: Date()
         ))
 
+        // Medium price (>= $1): 2 decimals
         CoinRowView(coin: Coin(
             id: "ethereum",
             symbol: "eth",
@@ -77,12 +79,33 @@ struct CoinRowView: View, Equatable {
             lastUpdated: Date()
         ))
 
+        // Small price (>= $0.01): 4 decimals
         CoinRowView(coin: Coin(
-            id: "cardano",
-            symbol: "ada",
-            name: "Cardano",
-            currentPrice: 0.45,
-            priceChange24h: 0.0,
+            id: "dogecoin",
+            symbol: "doge",
+            name: "Dogecoin",
+            currentPrice: 0.1488,
+            priceChange24h: 5.2,
+            lastUpdated: Date()
+        ))
+
+        // Very small price (>= $0.0001): 6 decimals
+        CoinRowView(coin: Coin(
+            id: "monad",
+            symbol: "mon",
+            name: "Monad",
+            currentPrice: 0.03522,
+            priceChange24h: 20.0,
+            lastUpdated: Date()
+        ))
+
+        // Micro price (< $0.0001): 8 decimals
+        CoinRowView(coin: Coin(
+            id: "shiba-inu",
+            symbol: "shib",
+            name: "Shiba Inu",
+            currentPrice: 0.00001234,
+            priceChange24h: -1.5,
             lastUpdated: Date()
         ))
     }

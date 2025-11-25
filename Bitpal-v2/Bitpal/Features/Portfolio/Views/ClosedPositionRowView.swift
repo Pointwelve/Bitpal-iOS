@@ -56,7 +56,7 @@ struct ClosedPositionRowView: View, Equatable {
                             Text("Avg Cost")
                                 .font(Typography.caption)
                                 .foregroundColor(.textSecondary)
-                            Text(Formatters.formatCurrency(closedPosition.avgCostPrice))
+                            Text(Formatters.formatPrice(closedPosition.avgCostPrice))
                                 .font(Typography.body)
                         }
                     }
@@ -67,7 +67,7 @@ struct ClosedPositionRowView: View, Equatable {
                             Text("Avg Sale")
                                 .font(Typography.caption)
                                 .foregroundColor(.textSecondary)
-                            Text(Formatters.formatCurrency(closedPosition.avgSalePrice))
+                            Text(Formatters.formatPrice(closedPosition.avgSalePrice))
                                 .font(Typography.body)
                         }
 

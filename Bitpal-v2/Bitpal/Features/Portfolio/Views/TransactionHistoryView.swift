@@ -197,7 +197,7 @@ struct TransactionRowView: View {
                         Text("Price")
                             .font(Typography.caption)
                             .foregroundColor(.textSecondary)
-                        Text(Formatters.formatCurrency(transaction.pricePerCoin))
+                        Text(Formatters.formatPrice(transaction.pricePerCoin))
                             .font(Typography.body)
                     }
 

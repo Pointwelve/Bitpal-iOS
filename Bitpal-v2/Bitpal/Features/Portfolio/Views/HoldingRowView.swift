@@ -55,7 +55,7 @@ struct HoldingRowView: View, Equatable {
                         Text("Avg Cost")
                             .font(Typography.caption)
                             .foregroundColor(.textSecondary)
-                        Text(Formatters.formatCurrency(holding.avgCost))
+                        Text(Formatters.formatPrice(holding.avgCost))
                             .font(Typography.body)
                     }
 
