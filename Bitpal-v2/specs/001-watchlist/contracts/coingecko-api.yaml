@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: CoinGecko API Subset for Bitpal Watchlist
+  description: |
+    API contract for CoinGecko endpoints used in the Watchlist feature.
+    This is a subset of the full CoinGecko API, documenting only the endpoints
+    required for Phase 1 MVP.
+
+    **Rate Limits**: Free tier - 50 calls/minute, 10K-30K calls/month
+    **Authentication**: No API key required for these endpoints
+    **Base URL**: https://api.coingecko.com/api/v3
+  version: 1.0.0
+  contact:
+    name: CoinGecko API Documentation
+    url: https://docs.coingecko.com/reference/introduction
+
+servers:
+  - url: https://api.coingecko.com/api/v3
+    description: CoinGecko API v3 (Production)
+
+paths:
+  /coins/list:
+    get:
+      summary: Get all available coins
+      description: |
+        Returns a list of all supported coins with id, name, and symbol.
+        Used for search autocomplete in the Watchlist feature.
+
+        **Caching Strategy**: Cache response for 7 days (coin list changes infrequently)
+        **Response Size**: ~10,000 coins, ~500KB JSON
+      operationId: getCoinsList
+      tags:
+        - Coins
+      responses:
+        '200':
+          description: Successful response with coin list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoinListItem'
+              example:
+                - id: "bitcoin"
+                  symbol: "btc"
+                  name: "Bitcoin"
+                - id: "ethereum"
+                  symbol: "eth"
+                  name: "Ethereum"
+                - id: "cardano"
+                  symbol: "ada"
+                  name: "Cardano"
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /coins/markets:
+    get:
+      summary: Get market data for specific coins
+      description: |
+        Returns market data (price, 24h change) for specified coins.
+        Used to fetch current prices for coins in the user's watchlist.
+
+        **Usage Pattern**: Batch request with comma-separated coin IDs
+        **Caching Strategy**: Cache response for 30 seconds (matches price update interval)
+        **Performance**: Response time <1s for up to 100 coins
+      operationId: getCoinsMarkets
+      tags:
+        - Coins
+      parameters:
+        - name: vs_currency
+          in: query
+          required: true
+          description: Target currency for market data (always "usd" for Bitpal)
+          schema:
+            type: string
+            enum: [usd]
+            default: usd
+        - name: ids
+          in: query
+          required: true
+          description: Comma-separated list of coin IDs (e.g., "bitcoin,ethereum,cardano")
+          schema:
+            type: string
+          example: "bitcoin,ethereum,cardano"
+        - name: order
+          in: query
+          required: false
+          description: Sort order for results
+          schema:
+            type: string
+            enum: [market_cap_desc, market_cap_asc, volume_desc, volume_asc, id_asc, id_desc]
+            default: market_cap_desc
+        - name: per_page
+          in: query
+          required: false
+          description: Number of results per page (max 250)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 250
+            default: 100
+        - name: page
+          in: query
+          required: false
+          description: Page number (1-indexed)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: sparkline
+          in: query
+          required: false
+          description: Include 7-day sparkline data (NOT used in Watchlist - reduces payload size)
+          schema:
+            type: boolean
+            default: false
+        - name: price_change_percentage
+          in: query
+          required: false
+          description: Include price change percentages for specified timeframes
+          schema:
+            type: string
+            enum: ["24h", "7d", "14d", "30d", "200d", "1y"]
+          example: "24h"
+      responses:
+        '200':
+          description: Successful response with market data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoinMarketData'
+              example:
+                - id: "bitcoin"
+                  symbol: "btc"
+                  name: "Bitcoin"
+                  current_price: 45000.50
+                  market_cap: 880000000000
+                  market_cap_rank: 1
+                  total_volume: 28000000000
+                  high_24h: 46000
+                  low_24h: 44000
+                  price_change_24h: 1000.25
+                  price_change_percentage_24h: 2.5
+                  last_updated: "2025-01-15T10:30:00.000Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    CoinListItem:
+      type: object
+      description: Lightweight coin metadata for search results
+      required:
+        - id
+        - symbol
+        - name
+      properties:
+        id:
+          type: string
+          description: Unique CoinGecko identifier (used as foreign key)
+          example: "bitcoin"
+        symbol:
+          type: string
+          description: Ticker symbol (lowercase)
+          example: "btc"
+        name:
+          type: string
+          description: Human-readable coin name
+          example: "Bitcoin"
+
+    CoinMarketData:
+      type: object
+      description: Full market data for a cryptocurrency
+      required:
+        - id
+        - symbol
+        - name
+        - current_price
+        - price_change_percentage_24h
+        - last_updated
+      properties:
+        id:
+          type: string
+          description: Unique CoinGecko identifier
+          example: "bitcoin"
+        symbol:
+          type: string
+          description: Ticker symbol (lowercase)
+          example: "btc"
+        name:
+          type: string
+          description: Human-readable coin name
+          example: "Bitcoin"
+        current_price:
+          type: number
+          format: double
+          description: Current price in USD (convert to Decimal in Swift)
+          example: 45000.50
+          minimum: 0
+        market_cap:
+          type: number
+          format: double
+          description: Total market capitalization in USD
+          example: 880000000000
+          nullable: true
+        market_cap_rank:
+          type: integer
+          description: Market cap rank (1 = highest)
+          example: 1
+          nullable: true
+        total_volume:
+          type: number
+          format: double
+          description: 24h trading volume in USD
+          example: 28000000000
+          nullable: true
+        high_24h:
+          type: number
+          format: double
+          description: Highest price in last 24h
+          example: 46000
+          nullable: true
+        low_24h:
+          type: number
+          format: double
+          description: Lowest price in last 24h
+          example: 44000
+          nullable: true
+        price_change_24h:
+          type: number
+          format: double
+          description: Absolute price change in last 24h
+          example: 1000.25
+          nullable: true
+        price_change_percentage_24h:
+          type: number
+          format: double
+          description: Percentage price change in last 24h (used in UI)
+          example: 2.5
+          nullable: true
+        last_updated:
+          type: string
+          format: date-time
+          description: Timestamp of last price update (ISO 8601)
+          example: "2025-01-15T10:30:00.000Z"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "coin not found"
+        status:
+          type: object
+          properties:
+            error_code:
+              type: integer
+              example: 404
+            error_message:
+              type: string
+              example: "coin not found"
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "invalid parameters"
+            status:
+              error_code: 400
+              error_message: "vs_currency is required"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded (50 calls/minute)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "rate limit exceeded"
+            status:
+              error_code: 429
+              error_message: "You have exceeded the Rate Limit. Please visit https://www.coingecko.com/en/api/pricing to subscribe to a plan."
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "internal server error"
+            status:
+              error_code: 500
+              error_message: "something went wrong"
+
+tags:
+  - name: Coins
+    description: Cryptocurrency data endpoints
+
+externalDocs:
+  description: Full CoinGecko API Documentation
+  url: https://docs.coingecko.com/reference/introduction
