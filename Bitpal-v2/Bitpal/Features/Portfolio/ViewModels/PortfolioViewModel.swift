@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 import Observation
 import OSLog
+import WidgetKit
 
 /// Main ViewModel for Portfolio feature
 /// Per Constitution Principle III: Uses @Observable (NOT ObservableObject)
@@ -144,6 +145,12 @@ final class PortfolioViewModel {
 
             lastUpdateTime = Date()
 
+            // T015: Update widget data and refresh timelines after portfolio load
+            WidgetDataProvider.shared.updateAndReloadWidgets(
+                summary: portfolioSummary,
+                holdings: holdings
+            )
+
             Logger.logic.info("Loaded portfolio: \(self.holdings.count) holdings, \(self.closedPositions.count) closed positions from \(transactions.count) transactions")
 
         } catch {
@@ -192,6 +199,10 @@ final class PortfolioViewModel {
         do {
             try context.save()
             await loadPortfolioWithPrices()
+
+            // T016: Reload widget timelines after transaction changes
+            WidgetDataProvider.shared.reloadWidgetTimelines()
+
             Logger.persistence.info("Deleted transaction: \(transaction.id)")
         } catch {
             Logger.persistence.error("Failed to delete transaction: \(error)")

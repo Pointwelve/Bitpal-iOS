@@ -67,11 +67,25 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
     exit 1
 fi
 
-# Function to find the repository root by searching for existing project markers
-find_repo_root() {
+# Function to find the project root by searching for .specify directory
+# This ensures specs are created relative to where .specify lives, not necessarily git root
+find_specify_root() {
     local dir="$1"
     while [ "$dir" != "/" ]; do
-        if [ -d "$dir/.git" ] || [ -d "$dir/.specify" ]; then
+        if [ -d "$dir/.specify" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    return 1
+}
+
+# Function to find git root (for branch operations)
+find_git_root() {
+    local dir="$1"
+    while [ "$dir" != "/" ]; do
+        if [ -d "$dir/.git" ]; then
             echo "$dir"
             return 0
         fi
@@ -111,26 +125,29 @@ check_existing_branches() {
     echo $((max_num + 1))
 }
 
-# Resolve repository root. Prefer git information when available, but fall back
-# to searching for repository markers so the workflow still functions in repositories that
-# were initialised with --no-git.
+# Resolve project root from .specify location (for specs) and git root (for branches)
+# This allows .specify to be in a subdirectory of a git repo
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Find the project root where .specify lives - this is where specs go
+PROJECT_ROOT="$(find_specify_root "$SCRIPT_DIR")"
+if [ -z "$PROJECT_ROOT" ]; then
+    echo "Error: Could not find .specify directory. Please run this script from within the project." >&2
+    exit 1
+fi
+
+# Check if we have git (for branch operations)
 if git rev-parse --show-toplevel >/dev/null 2>&1; then
-    REPO_ROOT=$(git rev-parse --show-toplevel)
+    GIT_ROOT=$(git rev-parse --show-toplevel)
     HAS_GIT=true
 else
-    REPO_ROOT="$(find_repo_root "$SCRIPT_DIR")"
-    if [ -z "$REPO_ROOT" ]; then
-        echo "Error: Could not determine repository root. Please run this script from within the repository." >&2
-        exit 1
-    fi
     HAS_GIT=false
 fi
 
-cd "$REPO_ROOT"
+# Use PROJECT_ROOT for specs (where .specify lives)
+cd "$PROJECT_ROOT"
 
-SPECS_DIR="$REPO_ROOT/specs"
+SPECS_DIR="$PROJECT_ROOT/specs"
 mkdir -p "$SPECS_DIR"
 
 # Function to generate branch name with stop word filtering and length filtering
@@ -243,7 +260,7 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
+TEMPLATE="$PROJECT_ROOT/.specify/templates/spec-template.md"
 SPEC_FILE="$FEATURE_DIR/spec.md"
 if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
 
