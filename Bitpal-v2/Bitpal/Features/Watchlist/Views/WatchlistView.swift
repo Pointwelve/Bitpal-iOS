@@ -40,7 +40,7 @@ struct WatchlistView: View {
                         LazyVStack(spacing: Spacing.standard) {
                             ForEach(viewModel.sortedWatchlist, id: \.0.coinId) { item, coin in
                                 CoinRowView(coin: coin)
-                                    .swipeActions(edge: .trailing) {
+                                    .contextMenu {
                                         Button(role: .destructive) {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                                 viewModel.removeCoin(coinId: coin.id)
@@ -49,11 +49,16 @@ struct WatchlistView: View {
                                             Label("Delete", systemImage: "trash")
                                         }
                                     }
+                                    .transition(.asymmetric(
+                                        insertion: .opacity,
+                                        removal: .opacity.combined(with: .move(edge: .leading))
+                                    ))
                             }
                         }
                         .padding(.horizontal, Spacing.medium)
                         .padding(.vertical, Spacing.small)
                         .animation(.easeInOut(duration: 0.2), value: viewModel.sortOption)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: viewModel.watchlistCoins.count)
                     }
                     .refreshable {
                         await viewModel.refreshPrices()
