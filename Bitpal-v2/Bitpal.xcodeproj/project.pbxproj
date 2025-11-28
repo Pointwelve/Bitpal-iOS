@@ -6,7 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1A8C20B22ED840100041111F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A8C20B12ED840100041111F /* WidgetKit.framework */; };
+		1A8C20B42ED840100041111F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A8C20B32ED840100041111F /* SwiftUI.framework */; };
+		1A8C20C32ED840110041111F /* BitpalWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1A8C20AF2ED840100041111F /* BitpalWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		1A8C20C12ED840110041111F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AB4F5822EBF284700E30A2E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A8C20AE2ED840100041111F;
+			remoteInfo = BitpalWidgetExtension;
+		};
 		1AB4F5982EBF284900E30A2E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1AB4F5822EBF284700E30A2E /* Project object */;
@@ -23,15 +36,73 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1A8C20C42ED840110041111F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1A8C20C32ED840110041111F /* BitpalWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		1A8C20AF2ED840100041111F /* BitpalWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BitpalWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A8C20B12ED840100041111F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		1A8C20B32ED840100041111F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		1A8C20E72ED845CF0041111F /* BitpalWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BitpalWidgetExtension.entitlements; sourceTree = "<group>"; };
 		1AB4F58A2EBF284700E30A2E /* Bitpal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitpal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AB4F5972EBF284900E30A2E /* BitpalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitpalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AB4F5A12EBF284900E30A2E /* BitpalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitpalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1A8C20C72ED840110041111F /* Exceptions for "BitpalWidget" folder in "BitpalWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1A8C20AE2ED840100041111F /* BitpalWidgetExtension */;
+		};
+		1A8C20DC2ED8408A0041111F /* Exceptions for "Bitpal" folder in "Bitpal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1AB4F5892EBF284700E30A2E /* Bitpal */;
+		};
+		1A8C20E02ED841490041111F /* Exceptions for "Bitpal" folder in "BitpalWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/Models/WidgetHolding.swift,
+				Shared/Models/WidgetPortfolioData.swift,
+				"Shared/Models/WidgetPortfolioData+Sample.swift",
+				Shared/Services/AppGroupStorage.swift,
+				Utilities/Logger.swift,
+			);
+			target = 1A8C20AE2ED840100041111F /* BitpalWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1A8C20B52ED840100041111F /* BitpalWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1A8C20C72ED840110041111F /* Exceptions for "BitpalWidget" folder in "BitpalWidgetExtension" target */,
+			);
+			path = BitpalWidget;
+			sourceTree = "<group>";
+		};
 		1AB4F58C2EBF284700E30A2E /* Bitpal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1A8C20DC2ED8408A0041111F /* Exceptions for "Bitpal" folder in "Bitpal" target */,
+				1A8C20E02ED841490041111F /* Exceptions for "Bitpal" folder in "BitpalWidgetExtension" target */,
+			);
 			path = Bitpal;
 			sourceTree = "<group>";
 		};
@@ -48,6 +119,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1A8C20AC2ED840100041111F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A8C20B42ED840100041111F /* SwiftUI.framework in Frameworks */,
+				1A8C20B22ED840100041111F /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1AB4F5872EBF284700E30A2E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -72,12 +152,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1A8C20B02ED840100041111F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1A8C20B12ED840100041111F /* WidgetKit.framework */,
+				1A8C20B32ED840100041111F /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		1AB4F5812EBF284700E30A2E = {
 			isa = PBXGroup;
 			children = (
+				1A8C20E72ED845CF0041111F /* BitpalWidgetExtension.entitlements */,
 				1AB4F58C2EBF284700E30A2E /* Bitpal */,
 				1AB4F59A2EBF284900E30A2E /* BitpalTests */,
 				1AB4F5A42EBF284900E30A2E /* BitpalUITests */,
+				1A8C20B52ED840100041111F /* BitpalWidget */,
+				1A8C20B02ED840100041111F /* Frameworks */,
 				1AB4F58B2EBF284700E30A2E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +180,7 @@
 				1AB4F58A2EBF284700E30A2E /* Bitpal.app */,
 				1AB4F5972EBF284900E30A2E /* BitpalTests.xctest */,
 				1AB4F5A12EBF284900E30A2E /* BitpalUITests.xctest */,
+				1A8C20AF2ED840100041111F /* BitpalWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +188,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1A8C20AE2ED840100041111F /* BitpalWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A8C20C82ED840110041111F /* Build configuration list for PBXNativeTarget "BitpalWidgetExtension" */;
+			buildPhases = (
+				1A8C20AB2ED840100041111F /* Sources */,
+				1A8C20AC2ED840100041111F /* Frameworks */,
+				1A8C20AD2ED840100041111F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1A8C20B52ED840100041111F /* BitpalWidget */,
+			);
+			name = BitpalWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = BitpalWidgetExtension;
+			productReference = 1A8C20AF2ED840100041111F /* BitpalWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		1AB4F5892EBF284700E30A2E /* Bitpal */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1AB4F5AB2EBF284900E30A2E /* Build configuration list for PBXNativeTarget "Bitpal" */;
@@ -102,10 +217,12 @@
 				1AB4F5862EBF284700E30A2E /* Sources */,
 				1AB4F5872EBF284700E30A2E /* Frameworks */,
 				1AB4F5882EBF284700E30A2E /* Resources */,
+				1A8C20C42ED840110041111F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1A8C20C22ED840110041111F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1AB4F58C2EBF284700E30A2E /* Bitpal */,
@@ -173,6 +290,9 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					1A8C20AE2ED840100041111F = {
+						CreatedOnToolsVersion = 26.1;
+					};
 					1AB4F5892EBF284700E30A2E = {
 						CreatedOnToolsVersion = 26.1;
 					};
@@ -203,11 +323,19 @@
 				1AB4F5892EBF284700E30A2E /* Bitpal */,
 				1AB4F5962EBF284900E30A2E /* BitpalTests */,
 				1AB4F5A02EBF284900E30A2E /* BitpalUITests */,
+				1A8C20AE2ED840100041111F /* BitpalWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1A8C20AD2ED840100041111F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1AB4F5882EBF284700E30A2E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,6 +360,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1A8C20AB2ED840100041111F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1AB4F5862EBF284700E30A2E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -256,6 +391,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1A8C20C22ED840110041111F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A8C20AE2ED840100041111F /* BitpalWidgetExtension */;
+			targetProxy = 1A8C20C12ED840110041111F /* PBXContainerItemProxy */;
+		};
 		1AB4F5992EBF284900E30A2E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1AB4F5892EBF284700E30A2E /* Bitpal */;
@@ -269,6 +409,68 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		1A8C20C52ED840110041111F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BitpalWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3QM48RQU9C;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BitpalWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BitpalWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-S.BitpalWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1A8C20C62ED840110041111F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BitpalWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3QM48RQU9C;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BitpalWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BitpalWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pointwelve.Bitpal-S.BitpalWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		1AB4F5A92EBF284900E30A2E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -395,11 +597,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Bitpal;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bitpal/Bitpal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3QM48RQU9C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bitpal/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -427,11 +631,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Bitpal;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bitpal/Bitpal.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3QM48RQU9C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bitpal/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -541,6 +747,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1A8C20C82ED840110041111F /* Build configuration list for PBXNativeTarget "BitpalWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A8C20C52ED840110041111F /* Debug */,
+				1A8C20C62ED840110041111F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1AB4F5852EBF284700E30A2E /* Build configuration list for PBXProject "Bitpal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -29,6 +29,9 @@ extension Logger {
 
     /// Error logs (exceptions, failures, error recovery)
     static let error = Logger(subsystem: subsystem, category: "error")
+
+    /// Widget logs (timeline provider, data sync, widget lifecycle)
+    static let widget = Logger(subsystem: subsystem, category: "widget")
 }
 
 // MARK: - Usage Examples
