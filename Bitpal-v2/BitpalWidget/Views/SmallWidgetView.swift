@@ -163,26 +163,22 @@ struct SmallWidgetView: View {
 
 // MARK: - Previews
 
-#Preview("Small Widget - With Data") {
+#Preview("With Data") {
     SmallWidgetView(entry: .snapshot())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
 }
 
-#Preview("Small Widget - Empty") {
+#Preview("Empty") {
     SmallWidgetView(entry: .empty())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
 }
 
-#Preview("Small Widget - Negative P&L") {
+#Preview("Negative P&L") {
     SmallWidgetView(entry: PortfolioEntry(date: Date(), data: .negative))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
 }
 
-#Preview("Small Widget - Stale Data") {
+#Preview("Stale Data") {
     SmallWidgetView(entry: PortfolioEntry(date: Date(), data: .stale))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
 }

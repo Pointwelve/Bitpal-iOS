@@ -240,25 +240,22 @@ struct LargeWidgetView: View {
 
 // MARK: - Previews
 
-#Preview("Large Widget - With Data") {
+#Preview("With Data") {
     LargeWidgetView(entry: .snapshot())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Empty") {
+#Preview("Empty") {
     LargeWidgetView(entry: .empty())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Single Holding") {
+#Preview("Single Holding") {
     LargeWidgetView(entry: PortfolioEntry(date: Date(), data: .singleHolding))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Three Holdings") {
+#Preview("Three Holdings") {
     LargeWidgetView(entry: PortfolioEntry(date: Date(), data: WidgetPortfolioData(
         totalValue: 95000,
         unrealizedPnL: 10000,
@@ -268,29 +265,24 @@ struct LargeWidgetView: View {
         lastUpdated: Date()
     )))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Full (5 Holdings)") {
+#Preview("Full (5 Holdings)") {
     LargeWidgetView(entry: .snapshot())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Negative P&L") {
+#Preview("Negative P&L") {
     LargeWidgetView(entry: PortfolioEntry(date: Date(), data: .negative))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Stale Data") {
+#Preview("Stale Data") {
     LargeWidgetView(entry: PortfolioEntry(date: Date(), data: .stale))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }
 
-#Preview("Large Widget - Closed Only") {
+#Preview("Closed Only") {
     LargeWidgetView(entry: PortfolioEntry(date: Date(), data: .closedOnly))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemLarge))
 }

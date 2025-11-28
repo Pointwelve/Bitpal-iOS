@@ -198,32 +198,27 @@ struct MediumWidgetView: View {
 
 // MARK: - Previews
 
-#Preview("Medium Widget - With Data") {
+#Preview("With Data") {
     MediumWidgetView(entry: .snapshot())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
 }
 
-#Preview("Medium Widget - Empty") {
+#Preview("Empty") {
     MediumWidgetView(entry: .empty())
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
 }
 
-#Preview("Medium Widget - Single Holding") {
+#Preview("Single Holding") {
     MediumWidgetView(entry: PortfolioEntry(date: Date(), data: .singleHolding))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
 }
 
-#Preview("Medium Widget - Two Holdings") {
+#Preview("Two Holdings") {
     MediumWidgetView(entry: PortfolioEntry(date: Date(), data: .twoHoldings))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
 }
 
-#Preview("Medium Widget - Negative P&L") {
+#Preview("Negative P&L") {
     MediumWidgetView(entry: PortfolioEntry(date: Date(), data: .negative))
         .containerBackground(.fill.tertiary, for: .widget)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
 }
