@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 # Common functions and variables for all scripts
 
-# Get repository root, with fallback for non-git repositories
+# Get repository root (the directory containing .specify)
+# Uses script location instead of git root to support monorepos and subdirectory projects
 get_repo_root() {
-    if git rev-parse --show-toplevel >/dev/null 2>&1; then
-        git rev-parse --show-toplevel
-    else
-        # Fall back to script location for non-git repos
-        local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        (cd "$script_dir/../../.." && pwd)
-    fi
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # Script is at .specify/scripts/bash/, so go up 3 levels to project root
+    (cd "$script_dir/../../.." && pwd)
 }
 
 # Get current branch, with fallback for non-git repositories
