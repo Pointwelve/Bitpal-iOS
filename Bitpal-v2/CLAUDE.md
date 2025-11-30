@@ -1200,3 +1200,10 @@ Gives user control instead of messy auto-sync. Avoids confusion from dust transa
 
 **Last Updated**: January 2025
 **Version**: 1.0 (Phase 1 MVP Specification)
+
+## Active Technologies
+- Swift 6.0+ (iOS 26+) + SwiftUI, SwiftData, UniformTypeIdentifiers (for file types) (006-portfolio-import-export)
+- Swift Data (existing Transaction model) (006-portfolio-import-export)
+
+## Recent Changes
+- 006-portfolio-import-export: Added Swift 6.0+ (iOS 26+) + SwiftUI, SwiftData, UniformTypeIdentifiers (for file types)

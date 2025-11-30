@@ -185,6 +185,44 @@ final class PortfolioViewModel {
         Logger.ui.info("Stopped periodic portfolio updates")
     }
 
+    // MARK: - Import/Export (T011)
+
+    /// Export all transactions to a shareable file URL
+    /// - Returns: URL to temporary JSON file for sharing
+    /// - Throws: ImportError or encoding errors
+    @MainActor
+    func exportPortfolio() async throws -> URL {
+        guard let context = modelContext else {
+            throw ImportError.fileAccessDenied
+        }
+
+        // Fetch all transactions
+        let descriptor = FetchDescriptor<Transaction>(
+            sortBy: [SortDescriptor(\.date, order: .forward)]
+        )
+        let transactions = try context.fetch(descriptor)
+
+        guard !transactions.isEmpty else {
+            throw ImportError.emptyFile
+        }
+
+        // Export to JSON
+        let service = ImportExportService.shared
+        let jsonData = try service.exportTransactions(transactions)
+        let url = try service.createExportURL(data: jsonData)
+
+        Logger.persistence.info("Exported \(transactions.count) transactions to \(url.lastPathComponent)")
+        return url
+    }
+
+    /// Check if there are transactions to export
+    @MainActor
+    var hasTransactionsToExport: Bool {
+        guard let context = modelContext else { return false }
+        let descriptor = FetchDescriptor<Transaction>()
+        return (try? context.fetchCount(descriptor)) ?? 0 > 0
+    }
+
     // MARK: - Transaction Management (T050, T051)
 
     /// Delete a transaction and recalculate holdings
