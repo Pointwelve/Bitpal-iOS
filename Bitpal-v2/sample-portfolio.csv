@@ -1,0 +1,9 @@
+coin_id,type,amount,price,date,notes
+bitcoin,buy,0.5,42000,2024-01-15,First BTC purchase
+bitcoin,buy,0.25,38000,2024-02-20,DCA
+ethereum,buy,2,2200,2024-01-20,ETH position
+ethereum,buy,1.5,2400,2024-03-10,Adding more ETH
+solana,buy,50,95,2024-02-01,SOL investment
+bitcoin,sell,0.1,65000,2024-06-15,Taking some profit
+cardano,buy,1000,0.45,2024-03-01,ADA bag
+dogecoin,buy,5000,0.12,2024-04-01,"Meme coin, just for fun"

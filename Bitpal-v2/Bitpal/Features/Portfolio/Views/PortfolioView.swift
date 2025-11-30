@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 /// Main portfolio view with summary and holdings list
 /// Per Constitution Principle II: Follows Liquid Glass design system
@@ -17,6 +18,16 @@ struct PortfolioView: View {
     @State private var showError = false
     @State private var scrollProxy: ScrollViewProxy? // T038: For scroll-to-section
 
+    // T012-T014: Import/Export state
+    @State private var exportItem: ExportFileItem?
+    @State private var showingImporter = false
+    @State private var showingImportPreview = false
+    @State private var importPreview: ImportPreview?
+    @State private var exportError: String?
+    @State private var showExportError = false
+    @State private var isExporting = false
+    @State private var isParsingImport = false
+
     // FR-017: Query all transactions for cycle filtering
     @Query(sort: \Transaction.date, order: .reverse)
     private var allTransactions: [Transaction]
@@ -26,11 +37,37 @@ struct PortfolioView: View {
             contentView
                 .navigationTitle("Portfolio")
                 .toolbar {
+                    // T012: Menu button with import/export options
                     ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            showAddTransaction = true
-                        } label: {
-                            Image(systemName: "plus")
+                        HStack(spacing: Spacing.small) {
+                            // Import/Export Menu
+                            Menu {
+                                // T013: Export button
+                                Button {
+                                    Task {
+                                        await performExport()
+                                    }
+                                } label: {
+                                    Label(isExporting ? "Exporting..." : "Export Portfolio", systemImage: "square.and.arrow.up")
+                                }
+                                .disabled(!viewModel.hasTransactionsToExport || isExporting)
+
+                                // Import button
+                                Button {
+                                    showingImporter = true
+                                } label: {
+                                    Label("Import Portfolio", systemImage: "square.and.arrow.down")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                            }
+
+                            // Add transaction button
+                            Button {
+                                showAddTransaction = true
+                            } label: {
+                                Image(systemName: "plus")
+                            }
                         }
                     }
                 }
@@ -63,6 +100,99 @@ struct PortfolioView: View {
             }
         } message: {
             Text(viewModel.errorMessage ?? "")
+        }
+        // T014: Export error alert
+        .alert("Export Failed", isPresented: $showExportError) {
+            Button("OK") {
+                exportError = nil
+            }
+        } message: {
+            Text(exportError ?? "Unable to export portfolio")
+        }
+        // T013: Share sheet for export - present directly to avoid black background
+        .onChange(of: exportItem) { _, newItem in
+            if let item = newItem {
+                ShareSheetPresenter.present(url: item.url) {
+                    exportItem = nil
+                }
+            }
+        }
+        // T024 (US2): File importer for import
+        .fileImporter(
+            isPresented: $showingImporter,
+            allowedContentTypes: [.json, .commaSeparatedText],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImportResult(result)
+        }
+        // Import preview sheet (US2)
+        .sheet(isPresented: $showingImportPreview) {
+            if let preview = importPreview {
+                ImportPreviewView(preview: preview, modelContext: modelContext) {
+                    // On successful import, reload portfolio
+                    Task {
+                        await viewModel.loadPortfolioWithPrices()
+                    }
+                }
+            }
+        }
+        // Loading overlay for import parsing
+        .overlay {
+            if isParsingImport {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    ProgressView("Parsing file...")
+                        .padding()
+                        .background(.regularMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+        }
+    }
+
+    // MARK: - T013: Export Action
+
+    @MainActor
+    private func performExport() async {
+        isExporting = true
+        do {
+            let url = try await viewModel.exportPortfolio()
+            exportItem = ExportFileItem(url: url)
+        } catch let error as ImportError {
+            exportError = error.localizedDescription
+            showExportError = true
+        } catch {
+            exportError = error.localizedDescription
+            showExportError = true
+        }
+        isExporting = false
+    }
+
+    // MARK: - Import Handler (US2)
+
+    private func handleImportResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            isParsingImport = true
+            Task {
+                do {
+                    let preview = try ImportExportService.shared.parseFile(at: url)
+                    await MainActor.run {
+                        isParsingImport = false
+                        importPreview = preview
+                        showingImportPreview = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        isParsingImport = false
+                        viewModel.errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        case .failure(let error):
+            viewModel.errorMessage = error.localizedDescription
         }
     }
 
