@@ -9,6 +9,7 @@ import Foundation
 
 /// Sort options for watchlist display
 enum SortOption: String, CaseIterable {
+    case marketCap = "Market Cap"
     case name = "Name (A-Z)"
     case price = "Price (High-Low)"
     case change24h = "24h Change (Best-Worst)"

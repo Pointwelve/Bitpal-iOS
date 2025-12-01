@@ -47,13 +47,11 @@ struct PortfolioTimelineProvider: TimelineProvider {
 
         let entry = createEntryFromStorage()
 
-        // Per FR-004: Request refresh after 30 minutes
-        // This is the maximum refresh rate WidgetKit supports
-        let refreshDate = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
+        // Use .atEnd policy to allow WidgetKit to refresh more responsively
+        // iOS manages refresh budget (~40-70/day) to prevent battery drain
+        let timeline = Timeline(entries: [entry], policy: .atEnd)
 
-        let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
-
-        Logger.widget.info("Timeline created with refresh at \(refreshDate)")
+        Logger.widget.info("Timeline created with .atEnd policy")
         completion(timeline)
     }
 

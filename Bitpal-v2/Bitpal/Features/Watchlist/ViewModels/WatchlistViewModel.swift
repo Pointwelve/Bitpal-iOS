@@ -28,14 +28,16 @@ final class WatchlistViewModel {
     /// Timestamp of last successful price update
     var lastUpdateTime: Date?
 
-    /// Current sort option
-    var sortOption: SortOption = .name
+    /// Current sort option (default: Market Cap per user request)
+    var sortOption: SortOption = .marketCap
 
     // MARK: - Computed Properties
 
     /// Sorted watchlist based on current sortOption
     var sortedWatchlist: [(WatchlistItem, Coin)] {
         switch sortOption {
+        case .marketCap:
+            return watchlistCoins.sorted { ($0.1.marketCap ?? 0) > ($1.1.marketCap ?? 0) }
         case .name:
             return watchlistCoins.sorted { $0.1.name < $1.1.name }
         case .price:

@@ -44,7 +44,7 @@ struct HoldingRowView: View, Equatable {
                         Text("Quantity")
                             .font(Typography.caption)
                             .foregroundColor(.textSecondary)
-                        Text(formatQuantity(holding.totalAmount))
+                        Text(Formatters.formatQuantity(holding.totalAmount))
                             .font(Typography.body)
                     }
 
@@ -92,16 +92,6 @@ struct HoldingRowView: View, Equatable {
         } else {
             return .textSecondary
         }
-    }
-
-    /// Format quantity with appropriate precision
-    private func formatQuantity(_ value: Decimal) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 8
-
-        return formatter.string(from: value as NSDecimalNumber) ?? "\(value)"
     }
 
     /// Format P&L with sign

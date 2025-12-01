@@ -58,18 +58,23 @@ enum CSVParser {
         var values: [String] = []
         var current = ""
         var inQuotes = false
+        var wasQuoted = false
 
         for char in line {
             if char == "\"" {
                 inQuotes.toggle()
+                wasQuoted = true
             } else if char == "," && !inQuotes {
-                values.append(current.trimmingCharacters(in: .whitespaces))
+                // Trim whitespace only for unquoted values
+                values.append(wasQuoted ? current : current.trimmingCharacters(in: .whitespaces))
                 current = ""
+                wasQuoted = false
             } else {
                 current.append(char)
             }
         }
-        values.append(current.trimmingCharacters(in: .whitespaces))
+        // Trim whitespace only for unquoted values
+        values.append(wasQuoted ? current : current.trimmingCharacters(in: .whitespaces))
 
         return values
     }
