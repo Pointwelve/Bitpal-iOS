@@ -9,7 +9,7 @@ import Foundation
 
 /// Import operation errors with localized descriptions
 /// Per Constitution Principle IV: Clear error handling for data operations
-enum ImportError: LocalizedError {
+enum ImportError: LocalizedError, Equatable {
     /// File is empty or contains no data
     case emptyFile
 

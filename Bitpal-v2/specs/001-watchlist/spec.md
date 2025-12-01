@@ -49,7 +49,7 @@ Users need to discover and add cryptocurrencies to their watchlist from CoinGeck
 
 ### User Story 3 - Sort and Organize Watchlist (Priority: P3)
 
-Users want to view their watchlist sorted by different criteria (name, price, 24h change) to quickly find information.
+Users want to view their watchlist sorted by different criteria (market cap, name, price, 24h change) to quickly find information.
 
 **Why this priority**: Sorting enhances UX but is not critical for MVP. Users can still use the watchlist without sorting, just less efficiently.
 
@@ -57,13 +57,15 @@ Users want to view their watchlist sorted by different criteria (name, price, 24
 
 **Acceptance Scenarios**:
 
-1. **Given** user has multiple coins in watchlist, **When** they tap the "Sort" picker and select "Name (A-Z)", **Then** coins are sorted alphabetically by name.
+1. **Given** user has multiple coins in watchlist, **When** they open the watchlist, **Then** coins are sorted by market cap (highest first) by default.
 
-2. **Given** watchlist is displayed, **When** user selects "Price (High-Low)" sort option, **Then** coins are sorted by current price in descending order.
+2. **Given** user has multiple coins in watchlist, **When** they tap the "Sort" picker and select "Name (A-Z)", **Then** coins are sorted alphabetically by name.
 
-3. **Given** watchlist is displayed, **When** user selects "24h Change (Best-Worst)" sort option, **Then** coins are sorted by 24h percentage change in descending order.
+3. **Given** watchlist is displayed, **When** user selects "Price (High-Low)" sort option, **Then** coins are sorted by current price in descending order.
 
-4. **Given** prices update via API, **When** the sort option is "Price (High-Low)", **Then** the list automatically re-sorts to maintain price order.
+4. **Given** watchlist is displayed, **When** user selects "24h Change (Best-Worst)" sort option, **Then** coins are sorted by 24h percentage change in descending order.
+
+5. **Given** prices update via API, **When** the sort option is "Price (High-Low)", **Then** the list automatically re-sorts to maintain price order.
 
 ---
 
@@ -126,7 +128,7 @@ Users need to clean up their watchlist by removing coins they no longer want to 
 
 - **FR-001**: System MUST allow users to search cryptocurrencies by name or symbol via CoinGecko API
 - **FR-002**: System MUST display coin name, symbol, current USD price, and 24-hour price change percentage for each watchlist item
-- **FR-003**: System MUST provide sort options: Name (A-Z), Price (High-Low), 24h Change (Best-Worst)
+- **FR-003**: System MUST provide sort options: Market Cap (default), Name (A-Z), Price (High-Low), 24h Change (Best-Worst)
 - **FR-004**: Users MUST be able to remove coins from watchlist via swipe-to-delete gesture
 - **FR-005**: System MUST support manual price refresh via pull-to-refresh gesture
 - **FR-006**: System MUST automatically update prices every 30 seconds in background without blocking UI
