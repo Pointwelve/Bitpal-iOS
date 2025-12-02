@@ -1204,6 +1204,9 @@ Gives user control instead of messy auto-sync. Avoids confusion from dust transa
 ## Active Technologies
 - Swift 6.0+ (iOS 26+) + SwiftUI, SwiftData, UniformTypeIdentifiers (for file types) (006-portfolio-import-export)
 - Swift Data (existing Transaction model) (006-portfolio-import-export)
+- Swift Charts (native iOS charting) for line and candlestick visualizations (007-price-charts)
+- CoinGecko API: `/coins/{id}/market_chart` and `/coins/{id}/ohlc` endpoints (007-price-charts)
 
 ## Recent Changes
 - 006-portfolio-import-export: Added Swift 6.0+ (iOS 26+) + SwiftUI, SwiftData, UniformTypeIdentifiers (for file types)
+- 007-price-charts: Added per-coin price charts with line/candlestick views, 7 time ranges, touch interaction, coin detail screen with header and market stats

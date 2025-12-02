@@ -24,34 +24,37 @@ struct CoinRowView: View, Equatable {
     // MARK: - Body
 
     var body: some View {
-        LiquidGlassCard {
-            HStack(alignment: .center, spacing: Spacing.medium) {
-                // Coin info
-                VStack(alignment: .leading, spacing: Spacing.tiny) {
-                    Text(coin.name)
-                        .font(Typography.headline)
-                        .foregroundColor(.textPrimary)
+        NavigationLink(destination: CoinDetailView(coinId: coin.id)) {
+            LiquidGlassCard {
+                HStack(alignment: .center, spacing: Spacing.medium) {
+                    // Coin info
+                    VStack(alignment: .leading, spacing: Spacing.tiny) {
+                        Text(coin.name)
+                            .font(Typography.headline)
+                            .foregroundColor(.textPrimary)
 
-                    Text(coin.symbol.uppercased())
-                        .font(Typography.caption)
-                        .foregroundColor(.textSecondary)
-                }
+                        Text(coin.symbol.uppercased())
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                    }
 
-                Spacer()
+                    Spacer()
 
-                // Price info
-                VStack(alignment: .trailing, spacing: Spacing.tiny) {
-                    Text(Formatters.formatPrice(coin.currentPrice))
-                        .font(Typography.priceDisplay)
-                        .foregroundColor(.textPrimary)
+                    // Price info
+                    VStack(alignment: .trailing, spacing: Spacing.tiny) {
+                        Text(Formatters.formatPrice(coin.currentPrice))
+                            .font(Typography.priceDisplay)
+                            .foregroundColor(.textPrimary)
 
-                    PriceChangeLabel(priceChange: coin.priceChange24h)
+                        PriceChangeLabel(priceChange: coin.priceChange24h)
+                    }
                 }
             }
         }
+        .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(coin.name), \(Formatters.formatPrice(coin.currentPrice)), \(Formatters.formatPercentage(coin.priceChange24h)) change")
-        .accessibilityHint("Swipe left to delete")
+        .accessibilityHint("Double tap to view details. Swipe left to delete")
     }
 }
 

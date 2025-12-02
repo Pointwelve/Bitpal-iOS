@@ -16,7 +16,8 @@ struct BitpalApp: App {
         }
         .modelContainer(for: [
             WatchlistItem.self,
-            Transaction.self
+            Transaction.self,
+            CachedChartData.self
         ])
     }
 }
