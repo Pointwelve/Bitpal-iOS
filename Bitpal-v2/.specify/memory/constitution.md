@@ -1,34 +1,38 @@
 <!--
 =============================================================================
-SYNC IMPACT REPORT - Constitution v1.0.0
+SYNC IMPACT REPORT - Constitution v3.0.0
 =============================================================================
 
-VERSION CHANGE: New → 1.0.0 (initial ratification)
+VERSION CHANGE: 2.0.0 → 3.0.0 (Phase 2 → Phase 3 transition)
 
-PRINCIPLES DEFINED (5 total):
-  I.   Performance-First Architecture (NON-NEGOTIABLE)
-  II.  Liquid Glass Design System
-  III. MVVM + Modern Swift Patterns
-  IV.  Data Integrity & Calculation Accuracy
-  V.   Phase Discipline (Scope Management)
+PHASE TRANSITION:
+  - Phase 2 (Widgets): ✅ COMPLETE - All features shipped
+  - Phase 3 (Visual Intelligence): 🔵 ACTIVE - Now in development
 
-SECTIONS ADDED:
-  - Core Principles (5 principles)
-  - Development Standards
-  - Testing Strategy
-  - Governance
+PHASE 2 DELIVERED:
+  - Small, Medium, Large portfolio widgets
+  - App Groups shared data layer
+  - 30-minute timeline refresh
+  - Offline support with cached data
+  - Deep linking to Portfolio tab
+  - Light/Dark mode support
+
+PHASE 3 SCOPE (NOW ACTIVE):
+  - Price charts per coin (1D, 1W, 1M, 1Y)
+  - Portfolio value over time chart
+  - Price alerts (push notifications)
+  - Best/worst performers view
+  - Portfolio allocation breakdown
 
 TEMPLATES REQUIRING UPDATES:
-  ✅ .specify/templates/plan-template.md - Constitution Check updated
-  ✅ .specify/templates/spec-template.md - Phase scope alignment verified
-  ✅ .specify/templates/tasks-template.md - Testing strategy aligned
+  ✅ All templates remain valid for Phase 3
 
-FOLLOW-UP TODOS: None (all placeholders filled)
+FOLLOW-UP TODOS: None
 
-RATIONALE FOR v1.0.0:
-  - Initial ratification of project constitution
-  - Defines complete governance framework for Phase 1 MVP
-  - Establishes non-negotiable performance and scope constraints
+RATIONALE FOR v3.0.0:
+  - Major version bump for phase transition (per governance)
+  - Phase 2 Widgets feature complete and shipped
+  - Phase 3 Visual Intelligence now active for implementation
 
 =============================================================================
 -->
@@ -124,7 +128,7 @@ RATIONALE FOR v1.0.0:
 
 **Current phase scope is FROZEN.** Features not explicitly listed in the current phase are FORBIDDEN. Future phases exist for context only.
 
-**Current Phase: PHASE 2 (Widgets)**
+**Current Phase: PHASE 3 (Visual Intelligence)**
 
 See Phase Roadmap section below for complete phase definitions.
 
@@ -167,61 +171,52 @@ See Phase Roadmap section below for complete phase definitions.
 
 ---
 
-### Phase 2: Widgets 🔵 ACTIVE
-**Status**: In Development
-**Target Duration**: 2-3 weeks
+### Phase 2: Widgets ✅ COMPLETE
+**Status**: Shipped
+**Duration**: Completed December 2025
 **Goal**: Create daily habit through glanceability
 
-**Scope (ACTIVE - Implementation Permitted):**
+**Delivered Features:**
 
-**2.1 Home Screen Widgets (Required):**
-- [ ] Small widget (systemSmall): Portfolio value, total P&L, update timestamp
-- [ ] Medium widget (systemMedium): Portfolio value, P&L breakdown, top 2 holdings
-- [ ] Large widget (systemLarge): Portfolio value, P&L breakdown, top 5 holdings
-- [ ] App Groups for shared data access
-- [ ] 30-minute timeline refresh
-- [ ] Offline support with cached data
-- [ ] Deep link to Portfolio tab on tap
-- [ ] Empty state when no holdings
-- [ ] Light/Dark mode support
+**2.1 Home Screen Widgets:**
+- ✅ Small widget (systemSmall): Portfolio value, total P&L, update timestamp
+- ✅ Medium widget (systemMedium): Portfolio value, P&L breakdown, top 2 holdings
+- ✅ Large widget (systemLarge): Portfolio value, P&L breakdown, top 5 holdings
+- ✅ App Groups for shared data access
+- ✅ 30-minute timeline refresh
+- ✅ Offline support with cached data
+- ✅ Deep link to Portfolio tab on tap
+- ✅ Empty state when no holdings
+- ✅ Light/Dark mode support
 
-**2.2 Widget Infrastructure (Required):**
-- [ ] Shared data layer between app and widget
-- [ ] Background price fetching for widget
-- [ ] Cache management for offline display
-- [ ] Error handling (show cached data on failure)
+**2.2 Widget Infrastructure:**
+- ✅ Shared data layer between app and widget
+- ✅ Background price fetching for widget
+- ✅ Cache management for offline display
+- ✅ Error handling (show cached data on failure)
 
-**Success Criteria:**
-- [ ] All 3 widget sizes render correctly
-- [ ] Widget values match main app exactly
-- [ ] Updates occur every 30 minutes
-- [ ] Offline shows cached data gracefully
-- [ ] No crashes in any edge case
-
-**Explicitly OUT OF SCOPE for Phase 2:**
-- ❌ Watchlist widgets (portfolio only)
-- ❌ Lock screen widgets
-- ❌ Widget configuration UI
-- ❌ Widget customization (themes, colors)
-- ❌ Interactive widgets (buttons)
-- ❌ Live Activities
-- ❌ Any monetization
+**Success Criteria Met:**
+- ✅ All 3 widget sizes render correctly
+- ✅ Widget values match main app exactly
+- ✅ Updates occur every 30 minutes
+- ✅ Offline shows cached data gracefully
+- ✅ No crashes in any edge case
 
 ---
 
-### Phase 3: Visual Intelligence ⚪ PLANNED
-**Status**: Not Started
+### Phase 3: Visual Intelligence 🔵 ACTIVE
+**Status**: In Development
 **Target Duration**: 4-6 weeks
 **Goal**: Make data actionable, increase daily engagement
 
-**Planned Scope:**
-- Price charts per coin (1D, 1W, 1M, 1Y)
-- Portfolio value over time chart
-- Price alerts (push notifications)
-- Best/worst performers view
-- Portfolio allocation breakdown
+**Scope (ACTIVE - Implementation Permitted):**
+- [ ] Price charts per coin (1D, 1W, 1M, 1Y)
+- [ ] Portfolio value over time chart
+- [ ] Price alerts (push notifications)
+- [ ] Best/worst performers view
+- [ ] Portfolio allocation breakdown
 
-**Dependencies**: Phase 2 complete
+**Dependencies**: Phase 2 complete ✅
 
 ---
 
@@ -426,7 +421,7 @@ See Phase Roadmap section below for complete phase definitions.
 
 ---
 
-**Version**: 2.0.0
+**Version**: 3.0.0
 **Ratified**: 2025-11-08
-**Last Amended**: 2025-11-26
-**Current Phase**: Phase 2 (Widgets)
+**Last Amended**: 2025-12-01
+**Current Phase**: Phase 3 (Visual Intelligence)
