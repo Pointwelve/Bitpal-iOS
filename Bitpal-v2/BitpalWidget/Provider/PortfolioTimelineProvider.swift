@@ -41,17 +41,32 @@ struct PortfolioTimelineProvider: TimelineProvider {
     }
 
     /// Provides timeline entries for the widget.
-    /// Per FR-004: Timeline refreshes every 30 minutes.
+    /// Creates multiple entries at 15-minute intervals so widget appears to refresh when viewed.
     func getTimeline(in context: Context, completion: @escaping (Timeline<PortfolioEntry>) -> Void) {
         Logger.widget.info("Generating timeline")
 
-        let entry = createEntryFromStorage()
+        let currentDate = Date()
+        let data = storage.readPortfolioData()
 
-        // Use .atEnd policy to allow WidgetKit to refresh more responsively
-        // iOS manages refresh budget (~40-70/day) to prevent battery drain
-        let timeline = Timeline(entries: [entry], policy: .atEnd)
+        // Create entries for the next 2 hours at 15-minute intervals
+        // This allows widget to "update" when viewed if time has passed
+        var entries: [PortfolioEntry] = []
+        for minuteOffset in stride(from: 0, through: 120, by: 15) {
+            let entryDate = currentDate.addingTimeInterval(Double(minuteOffset) * 60)
+            let entry: PortfolioEntry
+            if let data = data {
+                entry = .entry(data: data, at: entryDate)
+            } else {
+                entry = PortfolioEntry(date: entryDate, data: .empty)
+            }
+            entries.append(entry)
+        }
 
-        Logger.widget.info("Timeline created with .atEnd policy")
+        // Request refresh after last entry (2 hours)
+        let refreshDate = currentDate.addingTimeInterval(2 * 60 * 60)
+        let timeline = Timeline(entries: entries, policy: .after(refreshDate))
+
+        Logger.widget.info("Timeline created with \(entries.count) entries, next refresh at \(refreshDate)")
         completion(timeline)
     }
 
