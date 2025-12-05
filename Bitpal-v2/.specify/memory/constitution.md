@@ -232,6 +232,7 @@ See Phase Roadmap section below for complete phase definitions.
 - Multiple portfolios (free tier = 1)
 - Advanced chart features
 - 15-minute widget updates (free = 30min)
+- Per-transaction realized gain display in transaction history
 
 **Monetization Philosophy:**
 - Widgets remain FREE (growth driver)

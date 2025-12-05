@@ -43,22 +43,26 @@ struct PortfolioSummary: Equatable {
 
 // MARK: - Computation Functions
 
-/// Computes portfolio summary from open holdings and closed positions.
+/// Computes portfolio summary from open holdings, closed positions, and partial realized gains.
+/// Per Amendment 2025-12-05: Realized P&L now includes partial sale gains from open positions.
 /// - Parameters:
 ///   - holdings: Array of active open positions
 ///   - closedPositions: Array of closed trading cycles
+///   - partialRealizedGains: Realized gains from partial sales in open positions (default: 0)
 /// - Returns: PortfolioSummary with aggregated metrics
 func computePortfolioSummary(
     holdings: [Holding],
-    closedPositions: [ClosedPosition]
+    closedPositions: [ClosedPosition],
+    partialRealizedGains: Decimal = 0
 ) -> PortfolioSummary {
     // Open holdings metrics
     let totalValue = holdings.reduce(0) { $0 + $1.currentValue }
     let unrealizedPnL = holdings.reduce(0) { $0 + $1.profitLoss }
     let totalOpenCost = holdings.reduce(0) { $0 + $1.totalCost }
 
-    // Closed positions metrics
-    let realizedPnL = closedPositions.reduce(0) { $0 + $1.realizedPnL }
+    // Closed positions metrics (full cycles + partial sales)
+    let closedPositionsPnL = closedPositions.reduce(0) { $0 + $1.realizedPnL }
+    let realizedPnL = closedPositionsPnL + partialRealizedGains
     let totalClosedCost = closedPositions.reduce(0) { $0 + ($1.avgCostPrice * $1.totalQuantity) }
 
     return PortfolioSummary(

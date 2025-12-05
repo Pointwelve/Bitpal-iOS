@@ -18,69 +18,67 @@ struct HoldingRowView: View, Equatable {
     }
 
     var body: some View {
-        NavigationLink(destination: CoinDetailView(coinId: holding.coin.id)) {
-            LiquidGlassCard {
-                VStack(alignment: .leading, spacing: Spacing.small) {
-                    // Header: Coin name and symbol
-                    HStack {
-                        VStack(alignment: .leading, spacing: Spacing.tiny) {
-                            Text(holding.coin.name)
-                                .font(Typography.headline)
-                            Text(holding.coin.symbol.uppercased())
-                                .font(Typography.caption)
-                                .foregroundColor(.textSecondary)
-                        }
-                        Spacer()
-                        // Current value
-                        Text(Formatters.formatCurrency(holding.currentValue))
+        // Navigation handled by parent (PortfolioView) → TransactionHistoryView
+        LiquidGlassCard {
+            VStack(alignment: .leading, spacing: Spacing.small) {
+                // Header: Coin name and symbol
+                HStack {
+                    VStack(alignment: .leading, spacing: Spacing.tiny) {
+                        Text(holding.coin.name)
                             .font(Typography.headline)
+                        Text(holding.coin.symbol.uppercased())
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                    }
+                    Spacer()
+                    // Current value
+                    Text(Formatters.formatCurrency(holding.currentValue))
+                        .font(Typography.headline)
+                }
+
+                Divider()
+
+                // Details grid
+                HStack {
+                    // Quantity
+                    VStack(alignment: .leading, spacing: Spacing.tiny) {
+                        Text("Quantity")
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                        Text(Formatters.formatQuantity(holding.totalAmount))
+                            .font(Typography.body)
                     }
 
-                    Divider()
+                    Spacer()
 
-                    // Details grid
-                    HStack {
-                        // Quantity
-                        VStack(alignment: .leading, spacing: Spacing.tiny) {
-                            Text("Quantity")
-                                .font(Typography.caption)
-                                .foregroundColor(.textSecondary)
-                            Text(Formatters.formatQuantity(holding.totalAmount))
+                    // Avg Cost
+                    VStack(alignment: .center, spacing: Spacing.tiny) {
+                        Text("Avg Cost")
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                        Text(Formatters.formatPrice(holding.avgCost))
+                            .font(Typography.body)
+                    }
+
+                    Spacer()
+
+                    // P&L (FR-011: color coding)
+                    VStack(alignment: .trailing, spacing: Spacing.tiny) {
+                        Text("P&L")
+                            .font(Typography.caption)
+                            .foregroundColor(.textSecondary)
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(formatProfitLoss(holding.profitLoss))
                                 .font(Typography.body)
-                        }
-
-                        Spacer()
-
-                        // Avg Cost
-                        VStack(alignment: .center, spacing: Spacing.tiny) {
-                            Text("Avg Cost")
+                                .foregroundColor(profitLossColor)
+                            Text(formatPercentage(holding.profitLossPercentage))
                                 .font(Typography.caption)
-                                .foregroundColor(.textSecondary)
-                            Text(Formatters.formatPrice(holding.avgCost))
-                                .font(Typography.body)
-                        }
-
-                        Spacer()
-
-                        // P&L (FR-011: color coding)
-                        VStack(alignment: .trailing, spacing: Spacing.tiny) {
-                            Text("P&L")
-                                .font(Typography.caption)
-                                .foregroundColor(.textSecondary)
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text(formatProfitLoss(holding.profitLoss))
-                                    .font(Typography.body)
-                                    .foregroundColor(profitLossColor)
-                                Text(formatPercentage(holding.profitLossPercentage))
-                                    .font(Typography.caption)
-                                    .foregroundColor(profitLossColor)
-                            }
+                                .foregroundColor(profitLossColor)
                         }
                     }
                 }
             }
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Helpers

@@ -175,15 +175,16 @@ final class ChartStatisticsTests: XCTestCase {
 
     func testStatisticsWithSmallValues() {
         // Given: Small meme coin style values
+        // Use string-based Decimal initialization to avoid floating-point precision issues
         let stats = ChartStatistics(
-            periodHigh: Decimal(0.0001),
-            periodLow: Decimal(0.00005),
-            startPrice: Decimal(0.00008),
-            endPrice: Decimal(0.00009)
+            periodHigh: Decimal(string: "0.0001")!,
+            periodLow: Decimal(string: "0.00005")!,
+            startPrice: Decimal(string: "0.00008")!,
+            endPrice: Decimal(string: "0.00009")!
         )
 
         // Then: Should handle small values correctly
-        XCTAssertEqual(stats.priceChange, Decimal(0.00001))
+        XCTAssertEqual(stats.priceChange, Decimal(string: "0.00001")!)
         XCTAssertTrue(stats.isPositive)
     }
 

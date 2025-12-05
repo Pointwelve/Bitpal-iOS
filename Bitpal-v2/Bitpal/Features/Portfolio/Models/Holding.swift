@@ -113,7 +113,7 @@ func computeHoldings(
 /// Per FR-016: Holdings must not include closed cycle data
 /// - Parameter transactions: All transactions for a specific coin
 /// - Returns: Only transactions from the current open cycle (after last close)
-private func filterOpenCycleTransactions(_ transactions: [Transaction]) -> [Transaction] {
+func filterOpenCycleTransactions(_ transactions: [Transaction]) -> [Transaction] {
     // Sort transactions by date (chronological order)
     let sortedTxs = transactions.sorted { $0.date < $1.date }
 
@@ -150,4 +150,58 @@ private func filterOpenCycleTransactions(_ transactions: [Transaction]) -> [Tran
     }
 
     return Array(sortedTxs[openCycleStart...])
+}
+
+// MARK: - Partial Realized Gains Calculation
+
+/// Computes realized gains from partial sales in open positions.
+/// Per Amendment 2025-12-05: Realized P&L now includes partial sale gains.
+/// Uses average cost method: each sell realizes (sellPrice - avgCost) × quantity
+/// - Parameters:
+///   - transactions: All user transactions across all coins
+///   - currentPrices: Dictionary of current coin prices keyed by coinId (for validation)
+/// - Returns: Total realized gains from partial sales in open positions
+func computePartialRealizedGains(
+    transactions: [Transaction],
+    currentPrices: [String: Coin]
+) -> Decimal {
+    // Group transactions by coinId
+    let grouped = Dictionary(grouping: transactions, by: { $0.coinId })
+
+    var totalPartialRealizedGains: Decimal = 0
+
+    for (coinId, txs) in grouped {
+        // Skip if coin not in current prices (can't validate it's a real coin)
+        guard currentPrices[coinId] != nil else { continue }
+
+        // Get only open cycle transactions
+        let openCycleTxs = filterOpenCycleTransactions(txs)
+
+        // Skip if no open cycle (fully closed positions handled by ClosedPosition)
+        guard !openCycleTxs.isEmpty else { continue }
+
+        // Calculate weighted average cost from all buys in open cycle
+        var totalBuyAmount: Decimal = 0
+        var totalBuyCost: Decimal = 0
+
+        for tx in openCycleTxs {
+            if tx.type == .buy {
+                totalBuyAmount += tx.amount
+                totalBuyCost += tx.amount * tx.pricePerCoin
+            }
+        }
+
+        let avgCost: Decimal = totalBuyAmount > 0 ? totalBuyCost / totalBuyAmount : 0
+
+        // Calculate realized gains from each sell in open cycle
+        for tx in openCycleTxs {
+            if tx.type == .sell {
+                // Realized gain = (sale price - avg cost) × quantity sold
+                let realizedGain = (tx.pricePerCoin - avgCost) * tx.amount
+                totalPartialRealizedGains += realizedGain
+            }
+        }
+    }
+
+    return totalPartialRealizedGains
 }

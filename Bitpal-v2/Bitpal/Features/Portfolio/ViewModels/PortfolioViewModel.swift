@@ -20,6 +20,7 @@ final class PortfolioViewModel {
     var holdings: [Holding] = []
     var closedPositions: [ClosedPosition] = [] // T017: Closed positions tracking
     var closedPositionGroups: [ClosedPositionGroup] = [] // FR-019: Grouped closed positions
+    var partialRealizedGains: Decimal = 0 // Amendment 2025-12-05: Partial sale realized P&L
     var isLoading = false
     var errorMessage: String?
     var lastUpdateTime: Date?
@@ -81,8 +82,13 @@ final class PortfolioViewModel {
 
     /// T031: Portfolio summary with unrealized and realized P&L
     /// Per US2: Comprehensive financial picture
+    /// Per Amendment 2025-12-05: Includes partial sale realized gains
     var portfolioSummary: PortfolioSummary {
-        computePortfolioSummary(holdings: holdings, closedPositions: closedPositions)
+        computePortfolioSummary(
+            holdings: holdings,
+            closedPositions: closedPositions,
+            partialRealizedGains: partialRealizedGains
+        )
     }
 
     /// Check if portfolio is empty (T039, T070: Fixed to account for closed positions)
@@ -121,6 +127,9 @@ final class PortfolioViewModel {
 
             guard !transactions.isEmpty else {
                 holdings = []
+                closedPositions = []
+                closedPositionGroups = []
+                partialRealizedGains = 0
                 isLoading = false
                 return
             }
@@ -142,6 +151,9 @@ final class PortfolioViewModel {
 
             // FR-019, FR-022: Compute closed position groups
             closedPositionGroups = computeClosedPositionGroups(closedPositions: closedPositions)
+
+            // Amendment 2025-12-05: Compute partial realized gains from open positions
+            partialRealizedGains = computePartialRealizedGains(transactions: transactions, currentPrices: prices)
 
             lastUpdateTime = Date()
 
