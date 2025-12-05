@@ -161,11 +161,13 @@ A user wants to see the exact price at a specific point in time to understand hi
 **Line Chart Time Ranges** (5 options):
 | Range | Data Points | Granularity |
 |-------|-------------|-------------|
-| 1H | ~60 | 1-minute |
-| 1D | ~24 | Hourly |
+| 1H | ~12 | 5-minute* |
+| 1D | ~96 | 15-minute |
 | 1W | ~42 | 4-hour |
 | 1M | ~30 | Daily |
 | 1Y | ~52 | Weekly |
+
+*See Known Limitations - CoinGecko free tier constraint
 
 **Candlestick Chart Time Ranges** (7 options):
 | Range | Candles | Interval |
@@ -200,3 +202,10 @@ A user wants to see the exact price at a specific point in time to understand hi
 - Existing coin data models from Watchlist/Portfolio features.
 - Navigation infrastructure to access coin detail screens.
 - Local storage for persisting user's chart type preference.
+
+## Known Limitations
+
+**CoinGecko Free Tier Granularity:**
+- 1-day API requests return ~5-minute intervals
+- 1H time range displays ~12 data points (60 min ÷ 5 min intervals)
+- This is an API limitation, not a bug - accepted as sufficient for trend visualization

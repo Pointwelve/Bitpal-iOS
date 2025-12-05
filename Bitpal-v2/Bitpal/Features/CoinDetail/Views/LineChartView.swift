@@ -20,6 +20,8 @@ struct LineChartView: View {
     // MARK: - Touch Interaction State
 
     @State private var selectedPoint: ChartDataPoint?
+    @State private var selectedPointPosition: CGPoint = .zero
+    @State private var plotFrameSize: CGSize = .zero
 
     // MARK: - Computed Properties
 
@@ -87,13 +89,7 @@ struct LineChartView: View {
                 .symbol(.circle)
                 .symbolSize(80)
                 .foregroundStyle(chartColor)
-                .annotation(position: .top, alignment: .center, spacing: Spacing.small) {
-                    SelectionTooltip(
-                        price: selected.price,
-                        timestamp: selected.timestamp,
-                        chartColor: chartColor
-                    )
-                }
+                // Tooltip rendered in overlay to prevent chart size changes
             }
         }
     }
@@ -116,7 +112,16 @@ struct LineChartView: View {
                         DragGesture(minimumDistance: 0)
                             .onChanged { value in
                                 if let date: Date = proxy.value(atX: value.location.x) {
-                                    selectedPoint = findNearestPoint(to: date)
+                                    if let point = findNearestPoint(to: date) {
+                                        selectedPoint = point
+                                        plotFrameSize = plotFrame.size
+
+                                        // Store absolute position for overlay tooltip
+                                        if let xPos = proxy.position(forX: point.timestamp),
+                                           let yPos = proxy.position(forY: NSDecimalNumber(decimal: point.price).doubleValue) {
+                                            selectedPointPosition = CGPoint(x: xPos, y: yPos)
+                                        }
+                                    }
                                 }
                             }
                             .onEnded { _ in
@@ -125,8 +130,43 @@ struct LineChartView: View {
                                 }
                             }
                     )
+
+                // Tooltip rendered in overlay (outside Chart) to prevent layout changes
+                if let selected = selectedPoint {
+                    tooltipOverlay(for: selected, in: plotFrame)
+                }
             }
         }
+    }
+
+    // MARK: - Tooltip Overlay
+
+    @ViewBuilder
+    private func tooltipOverlay(for point: ChartDataPoint, in plotFrame: CGRect) -> some View {
+        let tooltipWidth: CGFloat = 100
+        let tooltipHeight: CGFloat = 44
+        let verticalOffset: CGFloat = 12
+
+        // Calculate x position with clamping to stay within bounds
+        let xPos = selectedPointPosition.x
+        let clampedX = min(max(xPos, tooltipWidth / 2), plotFrame.width - tooltipWidth / 2)
+
+        // Determine if tooltip should be above or below point
+        let yRatio = selectedPointPosition.y / plotFrame.height
+        let showBelow = yRatio < 0.35
+
+        // Calculate y position
+        let yPos = showBelow
+            ? selectedPointPosition.y + verticalOffset + tooltipHeight / 2
+            : selectedPointPosition.y - verticalOffset - tooltipHeight / 2
+
+        SelectionTooltip(
+            price: point.price,
+            timestamp: point.timestamp,
+            chartColor: chartColor
+        )
+        .frame(width: tooltipWidth)
+        .position(x: clampedX, y: yPos)
     }
 
     // MARK: - Labels Overlay
@@ -175,6 +215,7 @@ struct LineChartView: View {
             abs(targetDate.timeIntervalSince(point2.timestamp))
         }
     }
+
 }
 
 // MARK: - Selection Tooltip
