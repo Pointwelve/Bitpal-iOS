@@ -56,12 +56,28 @@ enum ChartType: String, CaseIterable, Identifiable, Codable {
             return range
         }
 
-        // Find closest match for unavailable short ranges
-        switch range {
-        case .fifteenMinutes, .fourHours:
-            return .oneHour  // Closest to unavailable short ranges
-        default:
-            return availableRanges.first ?? .oneDay
+        // Find closest match for unavailable ranges
+        switch self {
+        case .line:
+            // Line chart: 15M and 4H not available, map to 1H
+            switch range {
+            case .fifteenMinutes, .fourHours:
+                return .oneHour
+            case .sixMonths:
+                return .oneYear  // No 6M in line chart, use 1Y
+            default:
+                return availableRanges.first ?? .oneDay
+            }
+        case .candle:
+            // Candle chart: Only 30M, 4H, 4D available (oneDay, oneWeek, sixMonths)
+            switch range {
+            case .fifteenMinutes, .oneHour, .fourHours:
+                return .oneDay      // → 30M candles
+            case .oneMonth, .oneYear:
+                return .sixMonths   // → 4D candles
+            default:
+                return .oneDay
+            }
         }
     }
 

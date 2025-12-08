@@ -4,6 +4,7 @@
 **Created**: 2025-12-01
 **Status**: Draft
 **Input**: User description: "Per-coin price charts with 15M, 1H, 4H, 1D, 1W, 1M, 1Y time ranges for cryptocurrency price history visualization"
+**Note**: Original input refined during implementation based on CoinGecko API constraints. Final implementation: Line chart (5 ranges: 1H, 1D, 1W, 1M, 1Y), Candlestick chart (3 candle intervals: 30M, 4H, 4D). See Known Limitations section.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -52,10 +53,10 @@ A user wants to switch between different time periods to understand both short-t
 **Acceptance Scenarios**:
 
 1. **Given** a user is viewing a Line chart, **When** they see time range options, **Then** they see 5 options: 1H, 1D, 1W, 1M, 1Y.
-2. **Given** a user is viewing a Candlestick chart, **When** they see time range options, **Then** they see 7 options: 15M, 1H, 4H, 1D, 1W, 1M, 1Y.
+2. **Given** a user is viewing a Candlestick chart, **When** they see time range options, **Then** they see 3 candle interval options: 30M, 4H, 4D (representing candle granularity, not time range).
 3. **Given** a user taps any time range, **When** the chart updates, **Then** it displays data for the selected period.
 4. **Given** a user switches time ranges, **When** the new data loads, **Then** the transition is smooth and the selected time range button is visually highlighted.
-5. **Given** a user is viewing Candlestick at 15M, **When** they switch to Line chart, **Then** the time range automatically changes to 1H (closest available).
+5. **Given** a user is viewing Candlestick at 30M, **When** they switch to Line chart, **Then** the time range automatically changes to 1D (closest available).
 
 ---
 
@@ -112,7 +113,7 @@ A user wants to see the exact price at a specific point in time to understand hi
 - **FR-010**: System MUST display Line chart by default for new users.
 - **FR-011**: System MUST allow users to toggle between Line and Candlestick chart types.
 - **FR-012**: Line chart MUST support 5 time ranges: 1H, 1D, 1W, 1M, 1Y.
-- **FR-013**: Candlestick chart MUST support 7 time ranges: 15M, 1H, 4H, 1D, 1W, 1M, 1Y.
+- **FR-013**: Candlestick chart MUST support 3 candle interval options: 30M (1-day history), 4H (1-week history), 4D (6-month history).
 - **FR-014**: Line chart MUST display a continuous line showing closing prices over time.
 - **FR-015**: Candlestick chart MUST display OHLC (Open, High, Low, Close) data for each time interval.
 - **FR-016**: System MUST color candlesticks green when close > open, red when close < open.
@@ -138,7 +139,7 @@ A user wants to see the exact price at a specific point in time to understand hi
 - **CoinDetail**: Aggregate view of coin information including name, symbol, logo URL, current price, 24h change, market cap, volume, circulating supply.
 - **ChartDataPoint**: Represents a single price point with timestamp and closing price (for line chart).
 - **CandleDataPoint**: Represents OHLC data with timestamp, open, high, low, close prices (for candlestick chart).
-- **ChartTimeRange**: Enumeration of available time ranges (15M, 1H, 4H, 1D, 1W, 1M, 1Y) with associated data granularity.
+- **ChartTimeRange**: Enumeration of available time ranges. Line chart: 1H, 1D, 1W, 1M, 1Y. Candlestick chart: 30M, 4H, 4D (labeled by candle interval).
 - **ChartType**: Enumeration of chart display types (Line, Candlestick).
 - **PriceChart**: Collection of chart data points for a specific coin and time range, including metadata (period high, period low, price change).
 
@@ -148,7 +149,7 @@ A user wants to see the exact price at a specific point in time to understand hi
 
 - **SC-001**: Chart renders and displays data within 2 seconds of navigation (cached) or 3 seconds (network fetch).
 - **SC-002**: Touch interaction on chart updates price indicator at 60fps with no perceptible lag.
-- **SC-003**: Users can switch between all 7 time ranges within a single viewing session.
+- **SC-003**: Users can switch between all available time ranges (5 for line chart, 3 for candlestick) within a single viewing session.
 - **SC-004**: Chart displays accurate price data matching the source data provider.
 - **SC-005**: Previously viewed charts are available offline using cached data.
 - **SC-006**: 90% of users can successfully view and interact with price charts on first attempt.
@@ -169,21 +170,22 @@ A user wants to see the exact price at a specific point in time to understand hi
 
 *See Known Limitations - CoinGecko free tier constraint
 
-**Candlestick Chart Time Ranges** (7 options):
-| Range | Candles | Interval |
-|-------|---------|----------|
-| 15M | ~15 | 1-minute |
-| 1H | ~60 | 1-minute |
-| 4H | ~48 | 5-minute |
-| 1D | ~24 | 1-hour |
-| 1W | ~42 | 4-hour |
-| 1M | ~30 | 1-day |
-| 1Y | ~52 | 1-week |
+**Candlestick Chart Time Ranges** (3 options, labeled by candle interval):
+| Label | Candles | Candle Interval | History | API Days |
+|-------|---------|-----------------|---------|----------|
+| 30M | 42 | 30-minute | 1 day | 1 |
+| 4H | 42 | 4-hour | 1 week | 7 |
+| 4D | 42 | 4-day | 6 months | 180 |
+
+**Note**: All candlestick options display exactly 42 candles for uniform visual density when switching between time ranges. Labels follow standard trading chart conventions (candle interval, not time range).
 
 - Chart data will be cached locally with a reasonable TTL:
-  - Short-term (15M, 1H, 4H): 1 minute cache
-  - Medium-term (1D): 5 minutes cache
-  - Long-term (1W, 1M, 1Y): 1 hour cache
+  - Line chart short-term (1H): 1 minute cache
+  - Line chart medium-term (1D): 5 minutes cache
+  - Line chart long-term (1W, 1M, 1Y): 15-60 minutes cache
+  - Candlestick 30M: 5 minutes cache (1-day history)
+  - Candlestick 4H: 15 minutes cache (1-week history)
+  - Candlestick 4D: 1 hour cache (6-month history)
 - User's chart type preference (Line/Candlestick) will be persisted locally.
 - The chart will be displayed on a coin detail screen accessible from both Watchlist and Portfolio.
 
@@ -206,6 +208,24 @@ A user wants to see the exact price at a specific point in time to understand hi
 ## Known Limitations
 
 **CoinGecko Free Tier Granularity:**
+
+*Line Chart:*
 - 1-day API requests return ~5-minute intervals
 - 1H time range displays ~12 data points (60 min ÷ 5 min intervals)
 - This is an API limitation, not a bug - accepted as sufficient for trend visualization
+
+*Candlestick Chart (OHLC API):*
+- Candle interval is determined automatically by API based on days parameter
+- days=1 returns 30-minute candles (labeled "30M")
+- days=7-30 returns 4-hour candles (labeled "4H")
+- days=31+ returns 4-day candles (labeled "4D")
+- All candle options display 42 candles for consistent visual density
+
+**Future Enhancement (Paid API Plan):**
+With CoinGecko paid API subscription, additional candle intervals become available:
+| Label | Candle Interval | API Parameter |
+|-------|-----------------|---------------|
+| 1H | 1-hour candles | `interval=hourly` |
+| 1D | 1-day candles | `interval=daily` |
+
+Note: 15-minute candles are NOT available on any CoinGecko plan.

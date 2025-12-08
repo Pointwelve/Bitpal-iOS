@@ -40,18 +40,29 @@ struct CoinDetailView: View {
                         .padding(.horizontal, Spacing.medium)
                 }
 
-                // Price Chart with time range selector
+                // Price Chart with chart type toggle and time range selector
                 PriceChartView(
-                    dataPoints: viewModel.lineChartData,
+                    lineDataPoints: viewModel.lineChartData,
+                    candleDataPoints: viewModel.candleChartData,
                     statistics: viewModel.chartStatistics,
                     isLoading: viewModel.isLoadingChart,
-                    availableRanges: ChartTimeRange.lineRanges,
+                    availableRanges: viewModel.availableTimeRanges,
                     selectedRange: $viewModel.selectedTimeRange,
+                    selectedChartType: $viewModel.selectedChartType,
                     onRangeChange: { range in
                         viewModel.switchTimeRange(to: range)
+                    },
+                    onChartTypeChange: { type in
+                        viewModel.switchChartType(to: type)
                     }
                 )
                 .padding(.horizontal, Spacing.medium)
+
+                // Limited history indicator
+                if viewModel.hasLimitedHistory {
+                    limitedHistoryBanner
+                        .padding(.horizontal, Spacing.medium)
+                }
 
                 // Chart Performance Section
                 if let stats = viewModel.chartStatistics {
@@ -140,6 +151,13 @@ struct CoinDetailView: View {
 
     // MARK: - Helpers
 
+    /// Display label for performance section based on chart type
+    private var performanceRangeLabel: String {
+        viewModel.selectedChartType == .candle
+            ? viewModel.selectedTimeRange.candleDisplayName
+            : viewModel.selectedTimeRange.displayName
+    }
+
     private func formatPriceChange(_ coinDetail: CoinDetail) -> String {
         let absChange = abs(coinDetail.priceChange24h)
         let priceChange = coinDetail.currentPrice * (absChange / 100)
@@ -154,7 +172,7 @@ struct CoinDetailView: View {
             VStack(alignment: .leading, spacing: Spacing.medium) {
                 // Section header with time range
                 HStack {
-                    Text("\(viewModel.selectedTimeRange.displayName) Performance")
+                    Text("\(performanceRangeLabel) Performance")
                         .font(Typography.headline)
                         .foregroundColor(.textPrimary)
 
@@ -320,6 +338,20 @@ struct CoinDetailView: View {
             .transition(.move(edge: .top).combined(with: .opacity))
             .animation(.spring(response: 0.3), value: viewModel.errorMessage)
         }
+    }
+
+    private var limitedHistoryBanner: some View {
+        HStack(spacing: Spacing.small) {
+            Image(systemName: "info.circle")
+                .foregroundColor(.textSecondary)
+                .font(.caption)
+
+            Text("Limited data available for this time range")
+                .font(Typography.caption)
+                .foregroundColor(.textSecondary)
+        }
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.hasLimitedHistory)
     }
 }
 

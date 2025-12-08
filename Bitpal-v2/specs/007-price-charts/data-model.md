@@ -54,8 +54,9 @@
 │ .oneHour = "1H"         │     │ .candle = "Candle"      │
 │ .fourHours = "4H"       │     └─────────────────────────┘
 │ .oneDay = "1D"          │
-│ .oneWeek = "1W"         │
-│ .oneMonth = "1M"        │
+│ .oneWeek = "1W"         │  Line: 1H, 1D, 1W, 1M, 1Y
+│ .oneMonth = "1M"        │  Candle: 30M, 4H, 4D
+│ .sixMonths = "6M"       │  (labeled by candle interval)
 │ .oneYear = "1Y"         │
 └─────────────────────────┘
 ```
@@ -299,6 +300,7 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
     case oneDay = "1D"
     case oneWeek = "1W"
     case oneMonth = "1M"
+    case sixMonths = "6M"
     case oneYear = "1Y"
 
     var id: String { rawValue }
@@ -317,6 +319,7 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
         case .oneDay: return "1 day"
         case .oneWeek: return "1 week"
         case .oneMonth: return "1 month"
+        case .sixMonths: return "6 months"
         case .oneYear: return "1 year"
         }
     }
@@ -332,12 +335,14 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
             return "7"
         case .oneMonth:
             return "30"
+        case .sixMonths:
+            return "180"
         case .oneYear:
             return "365"
         }
     }
 
-    /// Maximum data points to display for performance
+    /// Maximum data points to display for performance (line charts)
     var maxDataPoints: Int {
         switch self {
         case .fifteenMinutes: return 15
@@ -346,9 +351,13 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
         case .oneDay: return 96
         case .oneWeek: return 42
         case .oneMonth: return 30
+        case .sixMonths: return 45
         case .oneYear: return 52
         }
     }
+
+    /// Maximum candles to display for candlestick charts (consistent 42 for uniform UX)
+    static var candleMaxDataPoints: Int { 42 }
 
     // MARK: - Caching
 
@@ -363,7 +372,7 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
             return 900         // 15 minutes
         case .oneMonth:
             return 1800        // 30 minutes
-        case .oneYear:
+        case .sixMonths, .oneYear:
             return 3600        // 1 hour
         }
     }
@@ -373,14 +382,27 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
 
     // MARK: - Chart Type Availability
 
-    /// Time ranges available for line charts (simpler, 5 options)
+    /// Time ranges available for line charts (5 options)
     static var lineRanges: [ChartTimeRange] {
         [.oneHour, .oneDay, .oneWeek, .oneMonth, .oneYear]
     }
 
-    /// Time ranges available for candlestick charts (all 7 options)
+    /// Time ranges available for candlestick charts (3 options, labeled by candle interval)
+    /// 30M = 30-minute candles (1-day history)
+    /// 4H = 4-hour candles (1-week history)
+    /// 4D = 4-day candles (6-month history)
     static var candleRanges: [ChartTimeRange] {
-        allCases
+        [.oneDay, .oneWeek, .sixMonths]  // Maps to 30M, 4H, 4D candle intervals
+    }
+
+    /// Display name for candlestick charts (shows candle interval, not time range)
+    var candleDisplayName: String {
+        switch self {
+        case .oneDay: return "30M"      // 30-minute candles
+        case .oneWeek: return "4H"      // 4-hour candles
+        case .sixMonths: return "4D"    // 4-day candles
+        default: return displayName     // Fallback for other cases
+        }
     }
 
     /// Default time range
@@ -406,6 +428,8 @@ enum ChartTimeRange: String, CaseIterable, Identifiable, Codable {
             cutoffDate = now.addingTimeInterval(-7 * 24 * 60 * 60)
         case .oneMonth:
             cutoffDate = now.addingTimeInterval(-30 * 24 * 60 * 60)
+        case .sixMonths:
+            cutoffDate = now.addingTimeInterval(-180 * 24 * 60 * 60)
         case .oneYear:
             cutoffDate = now.addingTimeInterval(-365 * 24 * 60 * 60)
         }
@@ -473,12 +497,28 @@ enum ChartType: String, CaseIterable, Identifiable, Codable {
             return range
         }
 
-        // Find closest match
-        switch range {
-        case .fifteenMinutes, .fourHours:
-            return .oneHour  // Closest to unavailable short ranges
-        default:
-            return availableRanges.first ?? .oneDay
+        // Find closest match based on chart type
+        switch self {
+        case .line:
+            // Line chart: map unavailable candle-only ranges
+            switch range {
+            case .fifteenMinutes, .fourHours:
+                return .oneHour
+            case .sixMonths:
+                return .oneYear
+            default:
+                return availableRanges.first ?? .oneDay
+            }
+        case .candle:
+            // Candle chart: Only 30M, 4H, 4D available (oneDay, oneWeek, sixMonths)
+            switch range {
+            case .fifteenMinutes, .oneHour, .fourHours:
+                return .oneDay      // → 30M candles
+            case .oneMonth, .oneYear:
+                return .sixMonths   // → 4D candles
+            default:
+                return .oneDay
+            }
         }
     }
 

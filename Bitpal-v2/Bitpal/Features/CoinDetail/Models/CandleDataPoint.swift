@@ -74,3 +74,46 @@ extension Array where Element == [Double] {
         compactMap { CandleDataPoint(from: $0) }
     }
 }
+
+// MARK: - Candle Array Extension
+
+extension Array where Element == CandleDataPoint {
+    /// Ensure candle continuity: each candle's open equals the previous candle's close
+    /// This fixes visual gaps caused by CoinGecko API returning non-continuous OHLC data
+    /// Note: High/Low are adjusted if needed to ensure they still bound the open/close range
+    func ensureContinuity() -> [CandleDataPoint] {
+        guard count > 1 else { return self }
+
+        var result: [CandleDataPoint] = []
+        result.reserveCapacity(count)
+
+        // First candle stays as-is
+        result.append(self[0])
+
+        // For each subsequent candle, set open to previous close
+        for i in 1..<count {
+            let current = self[i]
+            let previousClose = result[i - 1].close
+
+            // Adjust open to previous close
+            let adjustedOpen = previousClose
+
+            // Ensure high is at least the max of open and close
+            let adjustedHigh = Swift.max(current.high, Swift.max(adjustedOpen, current.close))
+
+            // Ensure low is at most the min of open and close
+            let adjustedLow = Swift.min(current.low, Swift.min(adjustedOpen, current.close))
+
+            let adjustedCandle = CandleDataPoint(
+                timestamp: current.timestamp,
+                open: adjustedOpen,
+                high: adjustedHigh,
+                low: adjustedLow,
+                close: current.close
+            )
+            result.append(adjustedCandle)
+        }
+
+        return result
+    }
+}

@@ -5,7 +5,7 @@
 
 ## Summary
 
-Implement a new coin detail screen with interactive price charts supporting both line and candlestick visualizations. Users can view price history across multiple time ranges (15M to 1Y), toggle between chart types, and inspect specific price points via touch interaction. The screen also displays coin header information and market statistics.
+Implement a new coin detail screen with interactive price charts supporting both line and candlestick visualizations. Users can view price history across multiple time ranges (5 for line chart: 1H-1Y, 3 candle intervals for candlestick: 30M, 4H, 4D), toggle between chart types, and inspect specific price points via touch interaction. The screen also displays coin header information and market statistics.
 
 ## Technical Context
 
@@ -17,7 +17,7 @@ Implement a new coin detail screen with interactive price charts supporting both
 **Project Type**: Mobile (iOS)
 **Performance Goals**: 60fps chart interactions, <3s initial load, <300ms transitions
 **Constraints**: Offline-capable (cached data), <200ms touch response, no external charting libraries
-**Scale/Scope**: Single coin detail screen, 2 chart types, 7 time ranges
+**Scale/Scope**: Single coin detail screen, 2 chart types, 8 time range options (5 line + 3 candle intervals)
 
 ## Constitution Check
 

@@ -14,6 +14,7 @@ struct TimeRangeSelector: View {
 
     let ranges: [ChartTimeRange]
     @Binding var selectedRange: ChartTimeRange
+    var chartType: ChartType = .line
     var onRangeSelected: ((ChartTimeRange) -> Void)?
 
     // MARK: - Body
@@ -24,11 +25,11 @@ struct TimeRangeSelector: View {
                 TimeRangeButton(
                     range: range,
                     isSelected: selectedRange == range,
+                    displayName: chartType == .candle ? range.candleDisplayName : range.displayName,
                     action: {
                         guard range != selectedRange else { return }
-                        // Call callback first, before updating binding
+                        // Only call callback - parent handles state via loadChartData
                         onRangeSelected?(range)
-                        selectedRange = range
                     }
                 )
             }
@@ -42,11 +43,12 @@ struct TimeRangeSelector: View {
 struct TimeRangeButton: View {
     let range: ChartTimeRange
     let isSelected: Bool
+    let displayName: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(range.displayName)
+            Text(displayName)
                 .font(Typography.subheadline)
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(isSelected ? .textPrimary : .textSecondary)
@@ -70,13 +72,15 @@ struct TimeRangeButton: View {
         // Line chart ranges (5 options)
         TimeRangeSelector(
             ranges: ChartTimeRange.lineRanges,
-            selectedRange: .constant(.oneDay)
+            selectedRange: .constant(.oneDay),
+            chartType: .line
         )
 
-        // Candle chart ranges (7 options)
+        // Candle chart ranges (3 options: 30M, 4H, 4D)
         TimeRangeSelector(
             ranges: ChartTimeRange.candleRanges,
-            selectedRange: .constant(.fourHours)
+            selectedRange: .constant(.oneDay),
+            chartType: .candle
         )
     }
     .padding()
