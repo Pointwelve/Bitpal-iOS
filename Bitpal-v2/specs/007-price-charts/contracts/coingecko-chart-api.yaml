@@ -1,0 +1,404 @@
+# CoinGecko API Contracts for Price Charts
+# Feature: 007-price-charts
+# Date: 2025-12-01
+
+openapi: 3.0.3
+info:
+  title: CoinGecko Chart API Contract
+  description: API contracts for coin price chart data
+  version: 1.0.0
+
+servers:
+  - url: https://api.coingecko.com/api/v3
+    description: CoinGecko Free API
+
+paths:
+  /coins/{id}:
+    get:
+      operationId: getCoinDetails
+      summary: Get coin details including market stats
+      description: Retrieves detailed coin information for the header and market stats sections
+      tags:
+        - Coin Detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: CoinGecko coin ID
+          schema:
+            type: string
+          example: bitcoin
+        - name: localization
+          in: query
+          required: false
+          description: Include localized data
+          schema:
+            type: boolean
+            default: false
+        - name: tickers
+          in: query
+          required: false
+          description: Include ticker data
+          schema:
+            type: boolean
+            default: false
+        - name: market_data
+          in: query
+          required: true
+          description: Include market data
+          schema:
+            type: boolean
+            default: true
+        - name: community_data
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: developer_data
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: sparkline
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Coin details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoinDetailResponse'
+              example:
+                id: bitcoin
+                symbol: btc
+                name: Bitcoin
+                image:
+                  large: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png"
+                market_data:
+                  current_price:
+                    usd: 42000.50
+                  price_change_percentage_24h: 2.5
+                  market_cap:
+                    usd: 820000000000
+                  total_volume:
+                    usd: 25000000000
+                  circulating_supply: 19500000
+                last_updated: "2025-12-01T10:30:00.000Z"
+        '404':
+          description: Coin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /coins/{id}/market_chart:
+    get:
+      operationId: getMarketChart
+      summary: Get historical market data for line charts
+      description: Retrieves price, market cap, and volume data over time
+      tags:
+        - Price Chart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: CoinGecko coin ID
+          schema:
+            type: string
+          example: bitcoin
+        - name: vs_currency
+          in: query
+          required: true
+          description: Target currency for price data
+          schema:
+            type: string
+            default: usd
+          example: usd
+        - name: days
+          in: query
+          required: true
+          description: Number of days of data
+          schema:
+            type: string
+            enum: ["1", "7", "14", "30", "90", "180", "365", "max"]
+          example: "7"
+        - name: interval
+          in: query
+          required: false
+          description: Data granularity (auto-determined if omitted)
+          schema:
+            type: string
+            enum: ["5m", "hourly", "daily"]
+        - name: precision
+          in: query
+          required: false
+          description: Decimal precision for prices
+          schema:
+            type: string
+            enum: ["full", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+            default: full
+      responses:
+        '200':
+          description: Market chart data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketChartResponse'
+              example:
+                prices:
+                  - [1701388800000, 42000.50]
+                  - [1701392400000, 42150.75]
+                  - [1701396000000, 41980.25]
+                market_caps:
+                  - [1701388800000, 820000000000]
+                  - [1701392400000, 822500000000]
+                total_volumes:
+                  - [1701388800000, 25000000000]
+                  - [1701392400000, 25500000000]
+        '404':
+          description: Coin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+
+  /coins/{id}/ohlc:
+    get:
+      operationId: getOHLC
+      summary: Get OHLC candlestick data
+      description: Retrieves Open, High, Low, Close data for candlestick charts
+      tags:
+        - Price Chart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: CoinGecko coin ID
+          schema:
+            type: string
+          example: bitcoin
+        - name: vs_currency
+          in: query
+          required: true
+          description: Target currency for price data
+          schema:
+            type: string
+            default: usd
+          example: usd
+        - name: days
+          in: query
+          required: true
+          description: Number of days of data
+          schema:
+            type: string
+            enum: ["1", "7", "14", "30", "90", "180", "365", "max"]
+          example: "7"
+        - name: interval
+          in: query
+          required: false
+          description: Candle interval (auto-determined if omitted)
+          schema:
+            type: string
+            enum: ["daily", "hourly"]
+        - name: precision
+          in: query
+          required: false
+          description: Decimal precision for prices
+          schema:
+            type: string
+            enum: ["full", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+            default: full
+      responses:
+        '200':
+          description: OHLC data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OHLCResponse'
+              example:
+                - [1701388800000, 42000, 42500, 41800, 42300]
+                - [1701392400000, 42300, 42600, 42100, 42450]
+                - [1701396000000, 42450, 42550, 42200, 42350]
+        '404':
+          description: Coin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+
+components:
+  schemas:
+    CoinDetailResponse:
+      type: object
+      required:
+        - id
+        - symbol
+        - name
+        - market_data
+      properties:
+        id:
+          type: string
+          description: CoinGecko unique identifier
+          example: bitcoin
+        symbol:
+          type: string
+          description: Trading symbol
+          example: btc
+        name:
+          type: string
+          description: Full name
+          example: Bitcoin
+        image:
+          type: object
+          properties:
+            thumb:
+              type: string
+              format: uri
+            small:
+              type: string
+              format: uri
+            large:
+              type: string
+              format: uri
+        market_data:
+          type: object
+          required:
+            - current_price
+          properties:
+            current_price:
+              type: object
+              properties:
+                usd:
+                  type: number
+                  format: double
+                  example: 42000.50
+            price_change_percentage_24h:
+              type: number
+              format: double
+              nullable: true
+              example: 2.5
+            market_cap:
+              type: object
+              properties:
+                usd:
+                  type: number
+                  format: double
+                  nullable: true
+                  example: 820000000000
+            total_volume:
+              type: object
+              properties:
+                usd:
+                  type: number
+                  format: double
+                  nullable: true
+                  example: 25000000000
+            circulating_supply:
+              type: number
+              format: double
+              nullable: true
+              example: 19500000
+        last_updated:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:30:00.000Z"
+
+    MarketChartResponse:
+      type: object
+      required:
+        - prices
+      properties:
+        prices:
+          type: array
+          description: Array of [timestamp_ms, price] pairs
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
+          example:
+            - [1701388800000, 42000.50]
+            - [1701392400000, 42150.75]
+        market_caps:
+          type: array
+          description: Array of [timestamp_ms, market_cap] pairs
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
+          nullable: true
+        total_volumes:
+          type: array
+          description: Array of [timestamp_ms, volume] pairs
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
+          nullable: true
+
+    OHLCResponse:
+      type: array
+      description: Array of OHLC candles
+      items:
+        type: array
+        description: "[timestamp_ms, open, high, low, close]"
+        items:
+          type: number
+        minItems: 5
+        maxItems: 5
+      example:
+        - [1701388800000, 42000, 42500, 41800, 42300]
+        - [1701392400000, 42300, 42600, 42100, 42450]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "coin not found"
+
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-cg-pro-api-key
+      description: CoinGecko Pro API key (optional for free tier)
+
+# Rate Limiting Notes:
+# - Free tier: 50 calls/minute
+# - Minimum interval: 1.2 seconds between requests
+# - Market chart cache: refreshes every 30 seconds
+# - OHLC cache: refreshes every 15 minutes
+
+# Auto-Granularity Notes:
+# Market Chart (when interval omitted):
+#   - 1 day: 5-minute intervals (~288 points)
+#   - 2-90 days: Hourly intervals
+#   - 90+ days: Daily intervals
+#
+# OHLC (candle body size):
+#   - 1-2 days: 30-minute candles
+#   - 3-30 days: 4-hour candles
+#   - 31+ days: 4-day candles

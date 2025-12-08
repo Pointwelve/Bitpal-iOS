@@ -140,4 +140,5 @@ enum Formatters {
     static func formatCompactPercentage(_ value: Decimal) -> String {
         compactPercentage.string(from: value as NSDecimalNumber) ?? "0%"
     }
+
 }

@@ -40,6 +40,11 @@ struct PortfolioEntry: TimelineEntry {
         PortfolioEntry(date: Date(), data: data)
     }
 
+    /// Create entry with real portfolio data at specific time
+    static func entry(data: WidgetPortfolioData, at date: Date) -> PortfolioEntry {
+        PortfolioEntry(date: date, data: data)
+    }
+
     /// Create empty state entry (no holdings)
     static func empty() -> PortfolioEntry {
         PortfolioEntry(date: Date(), data: .empty)

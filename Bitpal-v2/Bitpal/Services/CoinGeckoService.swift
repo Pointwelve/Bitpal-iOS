@@ -155,4 +155,135 @@ final class CoinGeckoService {
         marketDataCacheTime = nil
         Logger.api.debug("CoinGeckoService: Market data cache invalidated")
     }
+
+    // MARK: - Chart Data Methods
+
+    /// Fetch detailed coin information for coin detail screen
+    /// Uses /coins/{id} endpoint with market_data enabled
+    func fetchCoinDetail(id: String) async throws -> CoinDetail {
+        await rateLimiter.waitForNextRequest()
+
+        let urlString = "\(baseURL)/coins/\(id)?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false"
+
+        guard let url = URL(string: urlString) else {
+            throw ChartError.invalidCoinId
+        }
+
+        Logger.chart.info("CoinGeckoService: Fetching coin detail for \(id)")
+
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ChartError.networkError(NSError(domain: "Invalid response", code: -1))
+        }
+
+        switch httpResponse.statusCode {
+        case 200:
+            break
+        case 404:
+            throw ChartError.invalidCoinId
+        case 429:
+            throw ChartError.rateLimitExceeded
+        default:
+            Logger.chart.error("CoinGeckoService: API returned status \(httpResponse.statusCode)")
+            throw ChartError.networkError(NSError(domain: "HTTP \(httpResponse.statusCode)", code: httpResponse.statusCode))
+        }
+
+        let decoder = JSONDecoder()
+        let apiResponse = try decoder.decode(CoinDetailAPIResponse.self, from: data)
+
+        Logger.chart.info("CoinGeckoService: Fetched detail for \(apiResponse.name)")
+
+        return apiResponse.toCoinDetail()
+    }
+
+    /// Fetch market chart data for line charts
+    /// Uses /coins/{id}/market_chart endpoint
+    func fetchMarketChart(coinId: String, days: String, currency: String = "usd") async throws -> [ChartDataPoint] {
+        await rateLimiter.waitForNextRequest()
+
+        let urlString = "\(baseURL)/coins/\(coinId)/market_chart?vs_currency=\(currency)&days=\(days)"
+
+        guard let url = URL(string: urlString) else {
+            throw ChartError.invalidCoinId
+        }
+
+        Logger.chart.info("CoinGeckoService: Fetching market chart for \(coinId), days=\(days)")
+
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ChartError.networkError(NSError(domain: "Invalid response", code: -1))
+        }
+
+        switch httpResponse.statusCode {
+        case 200:
+            break
+        case 404:
+            throw ChartError.invalidCoinId
+        case 429:
+            throw ChartError.rateLimitExceeded
+        default:
+            Logger.chart.error("CoinGeckoService: API returned status \(httpResponse.statusCode)")
+            throw ChartError.networkError(NSError(domain: "HTTP \(httpResponse.statusCode)", code: httpResponse.statusCode))
+        }
+
+        let decoder = JSONDecoder()
+        let chartResponse = try decoder.decode(MarketChartResponse.self, from: data)
+
+        let dataPoints = chartResponse.toChartDataPoints()
+
+        guard !dataPoints.isEmpty else {
+            throw ChartError.noDataAvailable
+        }
+
+        Logger.chart.info("CoinGeckoService: Fetched \(dataPoints.count) chart data points")
+
+        return dataPoints
+    }
+
+    /// Fetch OHLC data for candlestick charts
+    /// Uses /coins/{id}/ohlc endpoint
+    func fetchOHLC(coinId: String, days: String, currency: String = "usd") async throws -> [CandleDataPoint] {
+        await rateLimiter.waitForNextRequest()
+
+        let urlString = "\(baseURL)/coins/\(coinId)/ohlc?vs_currency=\(currency)&days=\(days)"
+
+        guard let url = URL(string: urlString) else {
+            throw ChartError.invalidCoinId
+        }
+
+        Logger.chart.info("CoinGeckoService: Fetching OHLC for \(coinId), days=\(days)")
+
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ChartError.networkError(NSError(domain: "Invalid response", code: -1))
+        }
+
+        switch httpResponse.statusCode {
+        case 200:
+            break
+        case 404:
+            throw ChartError.invalidCoinId
+        case 429:
+            throw ChartError.rateLimitExceeded
+        default:
+            Logger.chart.error("CoinGeckoService: API returned status \(httpResponse.statusCode)")
+            throw ChartError.networkError(NSError(domain: "HTTP \(httpResponse.statusCode)", code: httpResponse.statusCode))
+        }
+
+        let decoder = JSONDecoder()
+        let ohlcResponse = try decoder.decode(OHLCResponse.self, from: data)
+
+        let candles = ohlcResponse.toCandles()
+
+        guard !candles.isEmpty else {
+            throw ChartError.noDataAvailable
+        }
+
+        Logger.chart.info("CoinGeckoService: Fetched \(candles.count) OHLC candles")
+
+        return candles
+    }
 }

@@ -281,4 +281,137 @@ final class HoldingCalculationTests: XCTestCase {
 
         XCTAssertEqual(holding.profitLossPercentage, 0)
     }
+
+    // MARK: - Partial Realized Gains Tests (Amendment 2025-12-05)
+
+    func testPartialSaleRealizedGain() {
+        // Buy 2 BTC @ $40,000, Sell 1 BTC @ $50,000
+        // Expected partial realized gain: ($50,000 - $40,000) × 1 = $10,000
+        let transactions = [
+            makeTransaction(type: .buy, amount: 2, pricePerCoin: 40000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 50000)
+        ]
+
+        let coin = makeCoin(currentPrice: 55000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, 10000, "Expected $10,000 realized gain from partial sale")
+    }
+
+    func testMultiplePartialSales() {
+        // Buy 3 BTC @ $40,000
+        // Sell 1 BTC @ $45,000 (+$5,000)
+        // Sell 1 BTC @ $50,000 (+$10,000)
+        // Expected partial realized gain: $15,000
+        let transactions = [
+            makeTransaction(type: .buy, amount: 3, pricePerCoin: 40000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 45000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 50000)
+        ]
+
+        let coin = makeCoin(currentPrice: 55000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, 15000, "Expected $15,000 realized gain from multiple partial sales")
+    }
+
+    func testPartialSaleWithLoss() {
+        // Buy 2 BTC @ $50,000
+        // Sell 1 BTC @ $40,000
+        // Expected partial realized gain: ($40,000 - $50,000) × 1 = -$10,000
+        let transactions = [
+            makeTransaction(type: .buy, amount: 2, pricePerCoin: 50000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 40000)
+        ]
+
+        let coin = makeCoin(currentPrice: 45000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, -10000, "Expected -$10,000 realized loss from partial sale")
+    }
+
+    func testNoPartialGainsWhenNoSells() {
+        // Buy 2 BTC @ $40,000, no sells
+        // Expected partial realized gain: $0
+        let transactions = [
+            makeTransaction(type: .buy, amount: 2, pricePerCoin: 40000)
+        ]
+
+        let coin = makeCoin(currentPrice: 50000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, 0, "Expected $0 realized gain when no sells")
+    }
+
+    func testNoPartialGainsForFullyClosed() {
+        // Buy 1 BTC @ $40,000, Sell 1 BTC @ $50,000 (fully closed)
+        // Expected partial realized gain: $0 (handled by ClosedPosition, not partial)
+        let transactions = [
+            makeTransaction(type: .buy, amount: 1, pricePerCoin: 40000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 50000)
+        ]
+
+        let coin = makeCoin(currentPrice: 55000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, 0, "Expected $0 partial gains for fully closed position")
+    }
+
+    func testPartialGainsWithWeightedAvgCost() {
+        // Buy 1 BTC @ $40,000
+        // Buy 1 BTC @ $50,000
+        // Avg cost = $45,000
+        // Sell 1 BTC @ $55,000
+        // Expected partial realized gain: ($55,000 - $45,000) × 1 = $10,000
+        let transactions = [
+            makeTransaction(type: .buy, amount: 1, pricePerCoin: 40000),
+            makeTransaction(type: .buy, amount: 1, pricePerCoin: 50000),
+            makeTransaction(type: .sell, amount: 1, pricePerCoin: 55000)
+        ]
+
+        let coin = makeCoin(currentPrice: 60000)
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": coin]
+        )
+
+        XCTAssertEqual(partialGains, 10000, "Expected $10,000 realized gain using weighted avg cost")
+    }
+
+    func testPartialGainsAcrossMultipleCoins() {
+        // BTC: Buy 2 @ $40,000, Sell 1 @ $50,000 (+$10,000)
+        // ETH: Buy 10 @ $3,000, Sell 5 @ $4,000 (+$5,000)
+        // Expected total partial realized gain: $15,000
+        let transactions = [
+            makeTransaction(coinId: "bitcoin", type: .buy, amount: 2, pricePerCoin: 40000),
+            makeTransaction(coinId: "bitcoin", type: .sell, amount: 1, pricePerCoin: 50000),
+            makeTransaction(coinId: "ethereum", type: .buy, amount: 10, pricePerCoin: 3000),
+            makeTransaction(coinId: "ethereum", type: .sell, amount: 5, pricePerCoin: 4000)
+        ]
+
+        let btc = makeCoin(id: "bitcoin", currentPrice: 55000)
+        let eth = makeCoin(id: "ethereum", symbol: "eth", name: "Ethereum", currentPrice: 3500)
+
+        let partialGains = computePartialRealizedGains(
+            transactions: transactions,
+            currentPrices: ["bitcoin": btc, "ethereum": eth]
+        )
+
+        XCTAssertEqual(partialGains, 15000, "Expected $15,000 total realized gain across multiple coins")
+    }
 }

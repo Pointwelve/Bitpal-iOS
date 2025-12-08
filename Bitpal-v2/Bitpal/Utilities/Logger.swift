@@ -32,6 +32,9 @@ extension Logger {
 
     /// Widget logs (timeline provider, data sync, widget lifecycle)
     static let widget = Logger(subsystem: subsystem, category: "widget")
+
+    /// Chart logs (price chart data, OHLC parsing, chart rendering, cache operations)
+    static let chart = Logger(subsystem: subsystem, category: "chart")
 }
 
 // MARK: - Usage Examples

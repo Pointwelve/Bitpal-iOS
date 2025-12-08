@@ -18,6 +18,7 @@ struct HoldingRowView: View, Equatable {
     }
 
     var body: some View {
+        // Navigation handled by parent (PortfolioView) → TransactionHistoryView
         LiquidGlassCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
                 // Header: Coin name and symbol

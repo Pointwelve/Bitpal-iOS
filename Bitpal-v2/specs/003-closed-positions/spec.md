@@ -12,6 +12,18 @@
 - Q: How should multiple close/reopen cycles for the same coin be tracked? → A: Each close/reopen cycle creates separate entry identified by close date
 - Q: What is the collapsed state behavior when there are more than 5 closed positions? → A: Show header with count (e.g., "Closed Positions (12)"), tap to expand/collapse all entries
 
+### Amendment 2025-12-05: Partial Sale Realized P&L
+
+**Change**: Portfolio Summary now includes realized P&L from partial sales (not just fully closed positions).
+
+**Rationale**: Industry standard behavior (Yahoo Finance, Crypto.com, CoinTracking) tracks realized gains immediately on each sale, not just when position fully closes.
+
+**Impact**:
+- FR-008 updated: Realized P&L = closed positions P&L + partial sale gains from open positions
+- Edge case "Partial Sales" updated: Partial sales generate realized P&L while position remains in active holdings
+
+**Deferred**: Per-transaction realized gain display in transaction history (moved to Phase 4+)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - View Closed Positions List (Priority: P1)
