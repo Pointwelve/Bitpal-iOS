@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import UIKit
 
 /// Candlestick chart view for displaying OHLC price data
 /// Per Constitution Principle I: Performance optimized with limited data points
@@ -22,6 +23,10 @@ struct CandlestickChartView: View {
     @State private var selectedCandlePosition: CGPoint = .zero
     @State private var plotFrameSize: CGSize = .zero
     @State private var chartWidth: CGFloat = 0
+
+    // MARK: - Haptic Feedback
+
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
 
     // MARK: - Computed Properties
 
@@ -50,6 +55,31 @@ struct CandlestickChartView: View {
         return .fixed(min(calculatedWidth, 4))
     }
 
+    /// Time span of the data in hours
+    private var dataTimeSpanHours: Double {
+        guard let first = candles.first?.timestamp,
+              let last = candles.last?.timestamp else { return 24 }
+        return abs(last.timeIntervalSince(first)) / 3600
+    }
+
+    /// Simple Moving Average based on close prices (covers entire chart)
+    /// Uses up to 20-period lookback, or whatever data is available for early points
+    private var movingAverage: [(index: Int, value: Double)] {
+        guard candles.count >= 2 else { return [] }
+        let maxPeriod = 20
+
+        var result: [(Int, Double)] = []
+        for i in 0..<candles.count {
+            // Use as many candles as available, up to maxPeriod
+            let period = min(i + 1, maxPeriod)
+            let startIndex = i - period + 1
+            let slice = candles[startIndex...i]
+            let avg = slice.reduce(0.0) { $0 + NSDecimalNumber(decimal: $1.close).doubleValue } / Double(period)
+            result.append((i, avg))
+        }
+        return result
+    }
+
     private var priceRange: ClosedRange<Double> {
         guard !candles.isEmpty else { return 0...100 }
 
@@ -72,8 +102,29 @@ struct CandlestickChartView: View {
                 .chartOverlay { proxy in
                     chartOverlayContent(proxy: proxy)
                 }
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 3)) { value in
+                        AxisValueLabel {
+                            if let index = value.as(Int.self),
+                               index >= 0, index < candles.count {
+                                Text(formatAxisDate(candles[index].timestamp))
+                                    .font(Typography.caption2)
+                                    .foregroundColor(.textTertiary)
+                            }
+                        }
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in
+                        AxisValueLabel {
+                            if let price = value.as(Double.self) {
+                                Text(formatAxisPrice(price))
+                                    .font(Typography.caption2)
+                                    .foregroundColor(.textTertiary)
+                            }
+                        }
+                    }
+                }
                 .chartXScale(domain: -0.5...(Double(candles.count) - 0.5))
                 .chartYScale(domain: priceRange)
                 .chartPlotStyle { plotArea in
@@ -95,12 +146,26 @@ struct CandlestickChartView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Candlestick chart showing \(candles.count) candles")
         .accessibilityHint("Drag to explore price history")
+        .onAppear {
+            impactGenerator.prepare()
+        }
     }
 
     // MARK: - Chart Content
 
     private var chartContent: some View {
         Chart {
+            // Simple Moving Average line (behind candles)
+            ForEach(movingAverage, id: \.index) { point in
+                LineMark(
+                    x: .value("Index", point.index),
+                    y: .value("SMA", point.value)
+                )
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(Color.textTertiary.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1))
+            }
+
             ForEach(indexedCandles, id: \.candle.id) { index, candle in
                 // Wick (high-low line)
                 RectangleMark(
@@ -121,13 +186,20 @@ struct CandlestickChartView: View {
                 .foregroundStyle(candle.isGreen ? Color.profitGreen : Color.lossRed)
             }
 
-            // Selection highlight
+            // Selection crosshair
             if let selected = selectedCandle,
                let selectedIndex = candles.firstIndex(where: { $0.id == selected.id }) {
+                // Vertical crosshair line
                 RuleMark(x: .value("Selected", selectedIndex))
-                    .foregroundStyle(Color.textSecondary.opacity(0.5))
+                    .foregroundStyle(Color.textSecondary.opacity(0.6))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
 
+                // Horizontal crosshair line
+                RuleMark(y: .value("Close", NSDecimalNumber(decimal: selected.close).doubleValue))
+                    .foregroundStyle(Color.textSecondary.opacity(0.6))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                // Point marker at intersection
                 PointMark(
                     x: .value("Index", selectedIndex),
                     y: .value("Close", NSDecimalNumber(decimal: selected.close).doubleValue)
@@ -157,6 +229,12 @@ struct CandlestickChartView: View {
                                 if let index: Int = proxy.value(atX: value.location.x) {
                                     let clampedIndex = max(0, min(index, candles.count - 1))
                                     let candle = candles[clampedIndex]
+
+                                    // Haptic feedback when moving to a new candle
+                                    if candle.id != selectedCandle?.id {
+                                        impactGenerator.impactOccurred()
+                                    }
+
                                     selectedCandle = candle
                                     plotFrameSize = plotFrame.size
 
@@ -206,6 +284,41 @@ struct CandlestickChartView: View {
         CandleTooltip(candle: candle)
             .frame(width: tooltipWidth)
             .position(x: clampedX, y: yPos)
+    }
+
+    // MARK: - Axis Formatting
+
+    /// Format date for X-axis labels based on time span
+    private func formatAxisDate(_ date: Date) -> String {
+        if dataTimeSpanHours <= 24 {
+            // Short ranges: show time only "2:30 PM"
+            return date.formatted(date: .omitted, time: .shortened)
+        } else if dataTimeSpanHours <= 168 { // 7 days
+            // Medium ranges: show weekday "Mon"
+            return date.formatted(.dateTime.weekday(.abbreviated))
+        } else {
+            // Longer ranges: show date "Dec 5"
+            return date.formatted(.dateTime.month(.abbreviated).day())
+        }
+    }
+
+    /// Format price for Y-axis labels (compact)
+    private func formatAxisPrice(_ value: Double) -> String {
+        let absValue = abs(value)
+
+        if absValue >= 1_000_000 {
+            return String(format: "$%.1fM", value / 1_000_000)
+        } else if absValue >= 10_000 {
+            return String(format: "$%.0fK", value / 1_000)
+        } else if absValue >= 1_000 {
+            return String(format: "$%.1fK", value / 1_000)
+        } else if absValue >= 1 {
+            return String(format: "$%.0f", value)
+        } else if absValue >= 0.01 {
+            return String(format: "$%.2f", value)
+        } else {
+            return String(format: "$%.4f", value)
+        }
     }
 
 }

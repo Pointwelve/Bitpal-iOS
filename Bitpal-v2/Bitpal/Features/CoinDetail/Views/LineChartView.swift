@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import UIKit
 
 /// Line chart view for displaying price history
 /// Liquid Glass design with gradient fill and touch interaction
@@ -22,6 +23,10 @@ struct LineChartView: View {
     @State private var selectedPoint: ChartDataPoint?
     @State private var selectedPointPosition: CGPoint = .zero
     @State private var plotFrameSize: CGSize = .zero
+
+    // MARK: - Haptic Feedback
+
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .light)
 
     // MARK: - Computed Properties
 
@@ -61,6 +66,9 @@ struct LineChartView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Interactive price chart showing \(dataPoints.count) data points")
             .accessibilityHint("Drag to explore price history. " + (isPositive ? "Price trending up" : "Price trending down"))
+            .onAppear {
+                impactGenerator.prepare()
+            }
     }
 
     // MARK: - Chart Content
@@ -78,10 +86,12 @@ struct LineChartView: View {
             }
 
             if let selected = selectedPoint {
+                // Vertical crosshair line
                 RuleMark(x: .value("Selected", selected.timestamp))
-                    .foregroundStyle(chartColor.opacity(0.5))
+                    .foregroundStyle(chartColor.opacity(0.3))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
 
+                // Point marker at intersection
                 PointMark(
                     x: .value("Time", selected.timestamp),
                     y: .value("Price", NSDecimalNumber(decimal: selected.price).doubleValue)
@@ -113,6 +123,11 @@ struct LineChartView: View {
                             .onChanged { value in
                                 if let date: Date = proxy.value(atX: value.location.x) {
                                     if let point = findNearestPoint(to: date) {
+                                        // Haptic feedback when moving to a new point
+                                        if point.id != selectedPoint?.id {
+                                            impactGenerator.impactOccurred()
+                                        }
+
                                         selectedPoint = point
                                         plotFrameSize = plotFrame.size
 
