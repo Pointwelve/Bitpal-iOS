@@ -4,15 +4,22 @@
 //
 //  Created by Claude Code via /speckit.implement on 2025-11-27.
 //  Feature: 004-portfolio-widgets
+//  Updated: 2025-12-11 for 008-widget-background-refresh
 //
 
 import WidgetKit
 import OSLog
 
 /// Timeline provider for portfolio widgets.
-/// Reads cached data from App Group and generates timeline entries.
-/// Per FR-004: Refreshes every 30 minutes (maximum WidgetKit allows).
+/// Fetches fresh prices from CoinGecko API and recalculates P&L.
+/// Per FR-001: Fetches current prices when iOS requests timeline refresh.
+/// Per FR-006: Requests refresh every 15 minutes.
 struct PortfolioTimelineProvider: TimelineProvider {
+    // MARK: - Constants
+
+    /// Refresh interval in minutes (iOS may adjust based on system conditions)
+    private static let refreshIntervalMinutes: Double = 15
+
     // MARK: - Dependencies
 
     private let storage = AppGroupStorage.shared
@@ -41,33 +48,80 @@ struct PortfolioTimelineProvider: TimelineProvider {
     }
 
     /// Provides timeline entries for the widget.
-    /// Creates multiple entries at 15-minute intervals so widget appears to refresh when viewed.
+    /// Per FR-001: Fetches fresh prices from API.
+    /// Per FR-004: Falls back to cached data on failure.
+    /// Per FR-006: Single entry with 15-minute refresh policy.
     func getTimeline(in context: Context, completion: @escaping (Timeline<PortfolioEntry>) -> Void) {
-        Logger.widget.info("Generating timeline")
+        Logger.widget.info("Generating timeline - starting fresh price fetch")
 
-        let currentDate = Date()
-        let data = storage.readPortfolioData()
+        Task {
+            let portfolioData: WidgetPortfolioData
 
-        // Create entries for the next 2 hours at 15-minute intervals
-        // This allows widget to "update" when viewed if time has passed
-        var entries: [PortfolioEntry] = []
-        for minuteOffset in stride(from: 0, through: 120, by: 15) {
-            let entryDate = currentDate.addingTimeInterval(Double(minuteOffset) * 60)
-            let entry: PortfolioEntry
-            if let data = data {
-                entry = .entry(data: data, at: entryDate)
-            } else {
-                entry = PortfolioEntry(date: entryDate, data: .empty)
+            // T009: Read refresh data (quantities for recalculation)
+            guard let refreshData = storage.readRefreshData() else {
+                // T018 (US3): No refresh data = empty portfolio
+                Logger.widget.info("No refresh data available, showing empty state")
+                let entry = PortfolioEntry(date: Date(), data: .empty)
+                let refreshDate = Date().addingTimeInterval(Self.refreshIntervalMinutes * 60)
+                completion(Timeline(entries: [entry], policy: .after(refreshDate)))
+                return
             }
-            entries.append(entry)
+
+            // T018 (US3): Empty holdings
+            guard !refreshData.isEmpty else {
+                Logger.widget.info("Refresh data has no holdings, showing empty state")
+                let entry = PortfolioEntry(date: Date(), data: .empty)
+                let refreshDate = Date().addingTimeInterval(Self.refreshIntervalMinutes * 60)
+                completion(Timeline(entries: [entry], policy: .after(refreshDate)))
+                return
+            }
+
+            // T010 (US1): Try to fetch fresh prices
+            do {
+                Logger.widget.info("Fetching fresh prices for \(refreshData.holdings.count) coins")
+                let prices = try await WidgetAPIClient.fetchPrices(coinIds: refreshData.coinIds)
+
+                // T011 (US1): Recalculate with fresh prices
+                portfolioData = PortfolioRecalculator.recalculate(
+                    refreshData: refreshData,
+                    prices: prices
+                )
+
+                // Write updated data for widget views (so cached data is fresh)
+                do {
+                    try storage.writePortfolioData(portfolioData)
+                    Logger.widget.info("Updated portfolio data written to storage")
+                } catch {
+                    Logger.widget.error("Failed to write updated portfolio data: \(error.localizedDescription)")
+                    // Continue anyway - we have the fresh data in memory
+                }
+
+                Logger.widget.info("Fresh data recalculated successfully: \(portfolioData.holdings.count) holdings")
+            } catch {
+                // T015 (US2): Fall back to cached data on network failure
+                Logger.widget.warning("Price fetch failed, falling back to cached data: \(error.localizedDescription)")
+
+                if let cachedData = storage.readPortfolioData() {
+                    portfolioData = cachedData
+                    Logger.widget.info("Using cached data from \(cachedData.lastUpdated)")
+                } else {
+                    // No cached data available - show empty state
+                    Logger.widget.warning("No cached data available, showing empty state")
+                    let entry = PortfolioEntry(date: Date(), data: .empty)
+                    let refreshDate = Date().addingTimeInterval(Self.refreshIntervalMinutes * 60)
+                    completion(Timeline(entries: [entry], policy: .after(refreshDate)))
+                    return
+                }
+            }
+
+            // T012 (US1): Create timeline with single entry and 15-minute refresh policy
+            let entry = PortfolioEntry(date: Date(), data: portfolioData)
+            let refreshDate = Date().addingTimeInterval(Self.refreshIntervalMinutes * 60)
+            let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
+
+            Logger.widget.info("Timeline created, next refresh at \(refreshDate)")
+            completion(timeline)
         }
-
-        // Request refresh after last entry (2 hours)
-        let refreshDate = currentDate.addingTimeInterval(2 * 60 * 60)
-        let timeline = Timeline(entries: entries, policy: .after(refreshDate))
-
-        Logger.widget.info("Timeline created with \(entries.count) entries, next refresh at \(refreshDate)")
-        completion(timeline)
     }
 
     // MARK: - Private Methods

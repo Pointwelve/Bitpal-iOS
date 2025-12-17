@@ -31,6 +31,7 @@ final class WidgetDataProvider {
 
     /// Updates widget data with current portfolio state.
     /// Should be called after portfolio load/refresh and transaction changes.
+    /// Also writes refresh data so widget can recalculate P&L with fresh prices.
     /// - Parameters:
     ///   - summary: Current portfolio summary
     ///   - holdings: Current holdings list
@@ -38,6 +39,7 @@ final class WidgetDataProvider {
         summary: PortfolioSummary,
         holdings: [Holding]
     ) {
+        // Prepare and write display data
         let widgetData = prepareWidgetData(summary: summary, holdings: holdings)
 
         do {
@@ -46,6 +48,41 @@ final class WidgetDataProvider {
         } catch {
             Logger.widget.error("Failed to update widget data: \(error.localizedDescription)")
         }
+
+        // Prepare and write refresh data (quantities for recalculation)
+        let refreshData = prepareRefreshData(summary: summary, holdings: holdings)
+
+        do {
+            try storage.writeRefreshData(refreshData)
+            Logger.widget.info("Refresh data updated: \(refreshData.holdings.count) holdings")
+        } catch {
+            Logger.widget.error("Failed to update refresh data: \(error.localizedDescription)")
+        }
+    }
+
+    /// Prepares refresh data for widget to recalculate P&L with fresh prices.
+    /// - Parameters:
+    ///   - summary: Current portfolio summary (for realized P&L)
+    ///   - holdings: Current holdings list
+    /// - Returns: WidgetRefreshData with quantities and costs
+    private func prepareRefreshData(
+        summary: PortfolioSummary,
+        holdings: [Holding]
+    ) -> WidgetRefreshData {
+        let refreshableHoldings = holdings.map { holding in
+            WidgetRefreshData.RefreshableHolding(
+                coinId: holding.id,
+                symbol: holding.coin.symbol,
+                name: holding.coin.name,
+                quantity: holding.totalAmount,
+                avgCost: holding.avgCost
+            )
+        }
+
+        return WidgetRefreshData(
+            holdings: refreshableHoldings,
+            realizedPnL: summary.realizedPnL
+        )
     }
 
     /// Triggers a reload of all widget timelines.
@@ -72,7 +109,7 @@ final class WidgetDataProvider {
     /// Called when user clears all portfolio data.
     func clearWidgetData() {
         do {
-            try storage.clearPortfolioData()
+            try storage.clearAllWidgetData()
             reloadWidgetTimelines()
             Logger.widget.info("Widget data cleared and timelines reloaded")
         } catch {

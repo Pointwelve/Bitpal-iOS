@@ -25,6 +25,9 @@ final class AppGroupStorage: Sendable {
     /// Filename for widget portfolio data
     private static let portfolioFilename = "portfolio.json"
 
+    /// Filename for widget refresh data (quantities for recalculation)
+    private static let refreshDataFilename = "refresh_data.json"
+
     /// Directory for widget data within App Group container
     private static let widgetDataDirectory = "WidgetData"
 
@@ -60,6 +63,11 @@ final class AppGroupStorage: Sendable {
         widgetDataDirectoryURL?.appendingPathComponent(Self.portfolioFilename)
     }
 
+    /// Returns the URL for the refresh data JSON file
+    private var refreshDataFileURL: URL? {
+        widgetDataDirectoryURL?.appendingPathComponent(Self.refreshDataFilename)
+    }
+
     // MARK: - Write Operations
 
     /// Writes portfolio data to the App Group container.
@@ -90,6 +98,35 @@ final class AppGroupStorage: Sendable {
         try jsonData.write(to: fileURL, options: .atomic)
 
         Logger.widget.info("Widget data written successfully: \(data.holdings.count) holdings")
+    }
+
+    /// Writes refresh data (quantities for recalculation) to the App Group container.
+    /// Called by main app after portfolio updates.
+    /// - Parameter data: The refresh data to persist
+    /// - Throws: AppGroupStorageError if write fails
+    func writeRefreshData(_ data: WidgetRefreshData) throws {
+        guard let directoryURL = widgetDataDirectoryURL,
+              let fileURL = refreshDataFileURL else {
+            Logger.widget.error("Failed to get App Group container URL for refresh data")
+            throw AppGroupStorageError.containerNotAvailable
+        }
+
+        // Create directory if needed
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+
+        // Encode to JSON
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+        let jsonData = try encoder.encode(data)
+
+        // Write atomically to prevent corruption
+        try jsonData.write(to: fileURL, options: .atomic)
+
+        Logger.widget.info("Refresh data written successfully: \(data.holdings.count) holdings")
     }
 
     // MARK: - Read Operations
@@ -123,6 +160,34 @@ final class AppGroupStorage: Sendable {
         }
     }
 
+    /// Reads refresh data (quantities for recalculation) from the App Group container.
+    /// Called by widget during timeline generation to get holdings for price recalculation.
+    /// - Returns: The cached refresh data, or nil if not available
+    func readRefreshData() -> WidgetRefreshData? {
+        guard let fileURL = refreshDataFileURL else {
+            Logger.widget.warning("Failed to get refresh data file URL")
+            return nil
+        }
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            Logger.widget.info("No cached refresh data found")
+            return nil
+        }
+
+        do {
+            let jsonData = try Data(contentsOf: fileURL)
+
+            let decoder = JSONDecoder()
+
+            let data = try decoder.decode(WidgetRefreshData.self, from: jsonData)
+            Logger.widget.info("Refresh data read successfully: \(data.holdings.count) holdings")
+            return data
+        } catch {
+            Logger.widget.error("Failed to read refresh data: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
     // MARK: - Cleanup
 
     /// Removes cached portfolio data from the App Group container.
@@ -138,6 +203,29 @@ final class AppGroupStorage: Sendable {
 
         try FileManager.default.removeItem(at: fileURL)
         Logger.widget.info("Widget data cleared")
+    }
+
+    /// Removes cached refresh data from the App Group container.
+    /// Called when user clears all data or signs out.
+    func clearRefreshData() throws {
+        guard let fileURL = refreshDataFileURL else {
+            return // Nothing to clear
+        }
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            return // File doesn't exist
+        }
+
+        try FileManager.default.removeItem(at: fileURL)
+        Logger.widget.info("Refresh data cleared")
+    }
+
+    /// Clears all widget-related data (portfolio and refresh data).
+    /// Called when user clears all data or signs out.
+    func clearAllWidgetData() throws {
+        try clearPortfolioData()
+        try clearRefreshData()
+        Logger.widget.info("All widget data cleared")
     }
 }
 

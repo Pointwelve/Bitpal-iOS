@@ -78,10 +78,13 @@
 		1A8C20E02ED841490041111F /* Exceptions for "Bitpal" folder in "BitpalWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Shared/Models/CoinMarketData.swift,
 				Shared/Models/WidgetHolding.swift,
 				Shared/Models/WidgetPortfolioData.swift,
 				"Shared/Models/WidgetPortfolioData+Sample.swift",
+				Shared/Models/WidgetRefreshData.swift,
 				Shared/Services/AppGroupStorage.swift,
+				Shared/Services/PortfolioRecalculator.swift,
 				Utilities/Logger.swift,
 			);
 			target = 1A8C20AE2ED840100041111F /* BitpalWidgetExtension */;
